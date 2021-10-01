@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+
+<section class="oferta" id="oferta">
+<!-- 		<div class="title white">
+			<h2 class="titleText"> <span>M</span>oje tuzy<span>.</span></h2>
+			<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
+		</div> -->
+			<div class="content" >
+				<div>
+					<h3>Zawody wójta gminy Nieporęt</h3>
+				</div>
+			</div>
+			<div class="content">
+				<div class="box">
+					<table class="content-table">
+						<tr><td class="league_table"><b>Zawody</b></td>
+							<td class="league_table"><b>Zawodnik</b></td>
+							<td class="league_table"><b>Wynik</b></td>
+
+						</tr>
+						{% for osoba in wyniki %}
+						<tr>
+							<td class="league_table">{{osoba.zawody}}</td>
+							<td class="league_table">{{osoba.zawodnik}}</td>
+							<td class="league_table">{{osoba.wynik1}}</td>
+
+						</tr>
+						{% endfor %}
+					</table>
+				</div>
+			</div>
+
+		
+	</section>
+
+
+
+
+
+
+{% endblock %}
+
+
