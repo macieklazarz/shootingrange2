@@ -17,7 +17,7 @@ from django.contrib import admin
 from django.urls import path
 from mainapp.views import (home_screen_view,)
 from account.views import (registration_form, logout_view, login_view)
-from wyniki.views import (wyniki_edycja, savestudent,wyniki)
+from wyniki.views import (wyniki_edycja, savestudent, wyniki, rejestracja_na_zawody)
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -28,4 +28,5 @@ urlpatterns = [
     path('wyniki_edycja/', wyniki_edycja, name="wyniki_edycja"),
     path('wyniki/', wyniki, name="wyniki"),
     path('savestudent/', savestudent, name="savestudent"),
+    path('rejestracja_na_zawody/', rejestracja_na_zawody, name="rejestracja_na_zawody"),
 ]

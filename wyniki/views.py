@@ -2,6 +2,7 @@ from django.shortcuts import render
 from wyniki.models import Wyniki
 from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse
+from . import forms
 # Create your views here.
 
 @csrf_exempt
@@ -62,3 +63,39 @@ def savestudent(request):
 	# wyniki1 = Wyniki.objects.filter(zawody = 1)
 	return JsonResponse({"success":"Updated"})
 	# return render(request, 'wyniki/wyniki.html', {'wyniki': wyniki1})
+
+
+# @login_required(login_url="/accounts/login/")
+def rejestracja_na_zawody(request):
+	# if request.method == 'POST':
+	# 	wybrane_zawody = request.POST.getlist('zawody')
+	# 	print("dupa")
+	# 	print(wybrane_zawody)
+	# 	form1 = forms.DodajZawodnika1(request.POST, request.FILES)
+	# 	form2 = forms.DodajZawodnika2(request.POST, request.FILES)
+	# 	if form1.is_valid():
+	# 		print("dupa1")
+	# 		if "zawodnik1" in wybrane_zawody:
+	# 			instance1 = form1.save()
+	# 		if "zawodnik2" in wybrane_zawody:
+	# 			instance2 = form2.save()
+	# 		return redirect('home')
+	# else:
+	# 	form = forms.DodajZawodnika1()
+	# 	# print("dupa2")
+
+	# # form = forms.DodajZawodnika()
+	# dodawanie_zawodnika = Ustawienia.objects.filter(nazwa='Rejestracja').values_list("ustawienie")
+	# # dodawanie_zawodnika = Ustawienia.objects.values_list()
+	# # print(dodawanie_zawodnika)
+	# for i in dodawanie_zawodnika:
+	# 	opcja = i[0]
+	# # qry = "select ustawienie from mainapp_ustawienia where nazwa = 'Rejestracja';"
+	# # # cursor=connection.cursor()
+	# # # wynik = cursor.execute(qry)
+	# # wynik = Ustawienia.objects.raw(qry)
+	# # for wyn in wynik:
+	# # 	wynik = wyn.ustawienie
+	# print(request.user)
+	form = forms.DodajZawodnika()
+	return render(request, 'wyniki/rejestracja_na_zawody.html', {'form':form})
