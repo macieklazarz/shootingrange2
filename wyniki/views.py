@@ -1,4 +1,4 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from wyniki.models import Wyniki
 from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse
@@ -67,22 +67,29 @@ def savestudent(request):
 
 # @login_required(login_url="/accounts/login/")
 def rejestracja_na_zawody(request):
-	# if request.method == 'POST':
-	# 	wybrane_zawody = request.POST.getlist('zawody')
-	# 	print("dupa")
-	# 	print(wybrane_zawody)
-	# 	form1 = forms.DodajZawodnika1(request.POST, request.FILES)
-	# 	form2 = forms.DodajZawodnika2(request.POST, request.FILES)
-	# 	if form1.is_valid():
-	# 		print("dupa1")
-	# 		if "zawodnik1" in wybrane_zawody:
-	# 			instance1 = form1.save()
-	# 		if "zawodnik2" in wybrane_zawody:
-	# 			instance2 = form2.save()
-	# 		return redirect('home')
-	# else:
-	# 	form = forms.DodajZawodnika1()
-	# 	# print("dupa2")
+	if request.method == 'POST':
+		# wybrane_zawody = request.POST.getlist('zawody')[0]
+		wybrane_zawody = request.POST['zawody']
+		# wybrane_zawody = request.POST
+		# print("dupa")
+		# request.POST.getlist('zawody')=wybrane_zawody
+		# print(f'selected {wybrane_zawody}')
+		form = forms.DodajZawodnika(request.POST)
+		# form2 = forms.DodajZawodnika2(request.POST, request.FILES)
+		# zaw = request.POST.get('zawodnik')
+		# form.fields['zawodnik'].choices = [(zaw, zaw)]
+		if form.is_valid():
+			# print("dupa1")
+			instance1 = form.save()
+			return redirect('home')
+	else:
+		user = request.user.id
+		# print(f'user to {user}')
+		def_data = {
+		'zawodnik' : user
+		}
+		# form = forms.DodajZawodnika(initial=def_data)
+		form = forms.DodajZawodnika()
 
 	# # form = forms.DodajZawodnika()
 	# dodawanie_zawodnika = Ustawienia.objects.filter(nazwa='Rejestracja').values_list("ustawienie")
@@ -97,5 +104,6 @@ def rejestracja_na_zawody(request):
 	# # for wyn in wynik:
 	# # 	wynik = wyn.ustawienie
 	# print(request.user)
-	form = forms.DodajZawodnika()
+
+
 	return render(request, 'wyniki/rejestracja_na_zawody.html', {'form':form})

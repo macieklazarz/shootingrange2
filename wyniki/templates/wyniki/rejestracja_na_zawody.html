@@ -9,16 +9,6 @@
 			<form class="site-form" id="dodajzawodnikaform" action="{% url 'rejestracja_na_zawody'%}" method="post" enctype="multipart/form-data">
 				{% csrf_token %}
 				{{form}}
-			<div>
-				<div>
-		 			 <input class="form-check-input" type="checkbox" id="Zawodnik1" value="zawodnik1" name="zawody" checked>
-		  			<label for="scales">Zawody 1</label>
-				</div>
-				<div>
-		  			<input class="form-check-input" type="checkbox" id="Zawodnik2" value="zawodnik2" name="zawody" checked>
-		  			<label for="horns">Zawiody 2</label>
-				</div>
-			</div>
 				<input type="submit" value="Create">
 			</form>
 		</div>
