@@ -8,9 +8,17 @@
 			<h2 class="titleText"> <span>M</span>oje tuzy<span>.</span></h2>
 			<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
 		</div> -->
+
+{% for encjawyniki in wyniki %}
+	
 			<div class="content" >
 				<div>
-					<h3>Zawody wójta gminy Nieporęt</h3>
+					{% for i in zawody_nazwa %}
+						{% if forloop.counter == forloop.parentloop.counter %}
+						<h3>{{ i }}</h3>
+						{% endif %}
+					{% endfor %}
+
 				</div>
 			</div>
 			<div class="content">
@@ -30,7 +38,7 @@
 							<td class="league_table"><b>1</b></td>
 							<td class="league_table"><b>Suma</b></td>
 						</tr>
-						{% for osoba in wyniki %}
+						{% for osoba in encjawyniki %}
 						<tr>
 							<td class="league_table">{{osoba.zawodnik}}</td>
 							<td class="league_table">{{osoba.X}}</td>
@@ -50,52 +58,8 @@
 					</table>
 				</div>
 			</div>
-			<div class="content" >
-				<div>
-					<h3>Zawody wójta gminy Serock</h3>
-				</div>
-			</div>
-			<div class="content">
-				<div class="box">
-					<table class="content-table">
-						<tr><td class="league_table"><b>Imię</b></td>
-							<td class="league_table"><b>Nazwisko</b></td>
-							<td class="league_table"><b>Licencja</b></td>
-							<td class="league_table"><b>X</b></td>
-							<td class="league_table"><b>/</b></td>
-							<td class="league_table"><b>9</b></td>
-							<td class="league_table"><b>8</b></td>
-							<td class="league_table"><b>7</b></td>
-							<td class="league_table"><b>6</b></td>
-							<td class="league_table"><b>5</b></td>
-							<td class="league_table"><b>4</b></td>
-							<td class="league_table"><b>3</b></td>
-							<td class="league_table"><b>2</b></td>
-							<td class="league_table"><b>1</b></td>
-							<td class="league_table"><b>Suma</b></td>
-						</tr>
-						{% for osoba in wyniki2 %}
-						<tr>
-							<td class="league_table">{{osoba.imie}}</td>
-							<td class="league_table">{{osoba.nazwisko}}</td>
-							<td class="league_table">{{osoba.licencja}}</td>
-							<td class="league_table">{{osoba.X}}</td>
-							<td class="league_table">{{osoba.Xx}}</td>
-							<td class="league_table">{{osoba.dziewiec}}</td>
-							<td class="league_table">{{osoba.osiem}}</td>
-							<td class="league_table">{{osoba.siedem}}</td>
-							<td class="league_table">{{osoba.szesc}}</td>
-							<td class="league_table">{{osoba.piec}}</td>
-							<td class="league_table">{{osoba.cztery}}</td>
-							<td class="league_table">{{osoba.trzy}}</td>
-							<td class="league_table">{{osoba.dwa}}</td>
-							<td class="league_table">{{osoba.jeden}}</td>
-							<td class="league_table">{{osoba.wynik}}</td>
-						</tr>
-						{% endfor %}
-					</table>
-				</div>
-			</div>
+{% endfor %}
+
 			<div class="content" >
 				<div>
 					<h3>Klasyfikacja generalna</h3>
@@ -104,9 +68,7 @@
 			<div class="content">
 				<div class="box">
 					<table class="content-table">
-						<tr><td class="league_table"><b>Imię</b></td>
-							<td class="league_table"><b>Nazwisko</b></td>
-							<td class="league_table"><b>Licencja</b></td>
+							<td class="league_table"><b>Zawodnik</b></td>
 							<td class="league_table"><b>X</b></td>
 							<td class="league_table"><b>/</b></td>
 							<td class="league_table"><b>9</b></td>
@@ -120,11 +82,9 @@
 							<td class="league_table"><b>1</b></td>
 							<td class="league_table"><b>Suma</b></td>
 						</tr>
-						{% for osoba in wyniki3 %}
+						{% for osoba in klasyfikacja_generalna %}
 						<tr>
-							<td class="league_table">{{osoba.imie}}</td>
-							<td class="league_table">{{osoba.nazwisko}}</td>
-							<td class="league_table">{{osoba.licencja}}</td>
+							<td class="league_table">{{osoba.zawodnik}}</td>
 							<td class="league_table">{{osoba.X}}</td>
 							<td class="league_table">{{osoba.Xx}}</td>
 							<td class="league_table">{{osoba.dziewiec}}</td>
@@ -142,10 +102,10 @@
 					</table>
 				</div>
 			</div>
-	
 
-		
+
 	</section>
+
 
 
 

@@ -3,7 +3,7 @@
 {% block content %}
 
 
-
+{% if dodawanie_zawodnika == 1 %}
 	<section class="oferta" id="oferta">
 		<div class="content" id="contentlogin">
 			<form class="site-form" id="dodajzawodnikaform" action="{% url 'rejestracja_na_zawody'%}" method="post" enctype="multipart/form-data">
@@ -14,7 +14,15 @@
 		</div>
 
 	</section>
-
+{% else %}
+		<section class="oferta" id="oferta">
+			<div class="content" id="contentlogin">
+					<div class="text">
+						<h3>Rejestracja zamknięta</h3>
+					</div>
+			</div>
+		</section>
+{% endif %}
 
 {% endblock %}
 

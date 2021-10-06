@@ -18,4 +18,15 @@ class Wyniki(models.Model):
 	jeden		=models.IntegerField(blank=True, null=False, default=0, verbose_name='1')
 	wynik 		=models.IntegerField(blank=True, default=0)
 	komunikat	=models.CharField(blank=True, max_length=100)
+
+	class Meta:
+		verbose_name_plural = "Wyniki"
 # Create your models here.
+
+
+class Ustawienia(models.Model):
+	nazwa = models.TextField()
+	ustawienie = models.BooleanField(verbose_name='On/Off')
+
+	class Meta:
+		verbose_name_plural = "Ustawienia"

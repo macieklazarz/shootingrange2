@@ -2,7 +2,7 @@
 
 {% block content %}
 
-
+{% for wynikiencja in wyniki %}
 <section class="oferta" id="oferta">
 <!-- 		<div class="title white">
 			<h2 class="titleText"> <span>M</span>oje tuzy<span>.</span></h2>
@@ -10,7 +10,12 @@
 		</div> -->
 			<div class="content" >
 				<div>
-					<h3>Zawody wójta gminy Nieporęt</h3>
+					{% for i in zawody_nazwa %}
+						{% if forloop.counter == forloop.parentloop.counter %}
+						<h3>{{ i }}</h3>
+						{% endif %}
+					{% endfor %}
+
 				</div>
 			</div>
 			<div class="content">
@@ -31,7 +36,7 @@
 							<td class="league_table"><b>Suma</b></td>
 							<td class="league_table"><b></b></td>
 						</tr>
-						{% for osoba in wyniki %}
+						{% for osoba in wynikiencja %}
 						<tr>
 							<td class="league_table">{{osoba.zawodnik}}</td>
 							<td class="editable" data-id="{{ osoba.id }}" data-type="X">{{osoba.X}}</td>
@@ -55,6 +60,7 @@
 
 		
 	</section>
+{% endfor %}
 
 <script>
 	$(document).ready(function(){

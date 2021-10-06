@@ -1,4 +1,4 @@
-from zawody.models import Zawody
+from zawody.models import Zawody, Sedzia
 from django.contrib import admin
 
 # Register your models here.
@@ -6,3 +6,9 @@ from django.contrib import admin
 class ZawodyAdmin(admin.ModelAdmin):
 	list_display = ('nazwa',)
 	search_fields = ('nazwa',)
+
+@admin.register(Sedzia)
+class SedziaAdmin(admin.ModelAdmin):
+	list_display = ('zawody','sedzia')
+	search_fields = ('nazwa','sedzia')
+

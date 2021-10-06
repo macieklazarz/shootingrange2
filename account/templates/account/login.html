@@ -1,28 +1,62 @@
 {% extends 'base.html' %}
 
 {% block content %}
+<style type="text/css">
+.form-signin {
+  width: 100%;
+  max-width: 330px;
+  padding: 15px;
+  margin: auto;
+  color: black;
+}
 
-<h2>Login</h2>
-<form method="post">{% csrf_token %}
+.form-signin .checkbox {
+  font-weight: 400;
+}
+
+.form-signin .form-floating:focus-within {
+  z-index: 2;
+}
+
+.form-signin input[type="email"] {
+  margin-bottom: -1px;
+  border-bottom-right-radius: 0;
+  border-bottom-left-radius: 0;
+  /*color: black;*/
+}
+
+.form-signin input[type="password"] {
+  margin-bottom: 10px;
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
+}
+.form-signin .form-floating input::placeholder{
+	color: black;
+	opacity: 1;
+};
+
+</style>
+
+<form class="form-signin" method="post">{% csrf_token %}
+
+    <h1 class="h3 mb-3 fw-normal">Login</h1>
+    <div class="form-floating">
+      <input type="email" name="email" class="form-control" id="floatingInput" placeholder="Podaj mail">
+
+    </div>
+    <div class="form-floating">
+      <input type="password" name="password" class="form-control" id="floatingPassword" placeholder="Podaj hasło">
+
+    </div>
+
 
 	{% for field in login_form %}
-		<p>
-			{{field.label_tag}}
-			{{field}}
-
-			{% if field.help_text %}
-				<small style="color: grey;">{{field.help_text}}</small>
-			{% endif %}
-
-		</p>
-	{% endfor %}
-	{% for field in login_form %}
+	<p>
 		{% for error in field.errors %}
 			<p style="color: red;">{{error}}</p>
 		{% endfor %}
+	</p>
 	{% endfor %}
-
-
 
 	{% if login_form.non_field_errors %}
 		<div style="color: red;">
@@ -30,8 +64,11 @@
 		</div>
 	{% endif %}
 
-	<button type="submit">Log in</button>
-	
-</form>
+
+
+    <button class="w-100 btn btn-lg btn-primary" type="submit">Log in</button>
+
+ </form>
+
 
 {% endblock content%}

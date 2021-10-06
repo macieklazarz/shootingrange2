@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
+# from zawody.models import Zawody
 # Create your models here.
 
 class MyAccountManager(BaseUserManager):
@@ -33,7 +34,7 @@ class MyAccountManager(BaseUserManager):
 
 
 class Account(AbstractBaseUser):
-	email 					= models.EmailField(verbose_name="email", max_length=60, unique=True)
+	email 					= models.EmailField(verbose_name="email", max_length=60, unique=True, null=False)
 	username 				= models.CharField(max_length=30, unique=True)
 	imie					=models.TextField(max_length=60, null=False)
 	nazwisko				=models.TextField(max_length=60, null=False)	
@@ -49,7 +50,7 @@ class Account(AbstractBaseUser):
 	# first_name
 
 	USERNAME_FIELD = 'email'
-	REQUIRED_FIELDS = ['username']
+	REQUIRED_FIELDS = ['username',]
 
 	objects = MyAccountManager();
 
@@ -61,3 +62,4 @@ class Account(AbstractBaseUser):
 
 	def has_module_perms(self, app_label):
 		return True
+

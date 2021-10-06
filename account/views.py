@@ -9,7 +9,9 @@ def registration_form(request):
 		if form.is_valid():
 			form.save()
 			email = form.cleaned_data.get('email')
+			# email = form.cleaned_data.get('inputemail')
 			raw_password = form.cleaned_data.get('password1')
+			# raw_password = form.cleaned_data.get('inputPassword1')
 			account = authenticate(email=email, password=raw_password)
 			login(request, account)
 			return redirect('home')
