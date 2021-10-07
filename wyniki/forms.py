@@ -5,6 +5,15 @@ from account.models import Account
 from wyniki.models import Wyniki
 from django.core.exceptions import ValidationError
 
+class Wyniki_edit(forms.ModelForm):
+    class Meta:
+        model = models.Wyniki
+        fields = ['zawodnik', 'X', 'Xx', 'dziewiec', 'osiem', 'siedem', 'szesc', 'piec', 'cztery', 'trzy', 'dwa', 'jeden']
+
+    def __init__(self, *args, **kwargs):
+        super(Wyniki_edit, self).__init__(*args, **kwargs)
+        self.fields['zawodnik'].disabled = True
+
 class DodajZawodnika(forms.ModelForm):
     # zawody=forms.ModelChoiceField(queryset=Zawody.objects.all())
     # zawodnik=forms.ModelChoiceField(queryset=Account.objects.all())

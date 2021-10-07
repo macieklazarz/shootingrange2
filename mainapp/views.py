@@ -13,5 +13,5 @@ def home_screen_view(request):
 	for i in sedziowie:
 		sedziowie_lista.append(i)
 	context['sedziowie_lista'] = sedziowie_lista
-	print(f'powioazne zawody to {sedziowie_lista}')
+	# print(f'powioazne zawody to {sedziowie_lista}')
 	return render(request, "mainapp/home.html", context)

@@ -3,13 +3,14 @@
 
 {% block content %}
     <div class="pricing-header p-3 pb-md-4 mx-auto text-center">
-      <h1 class="display-4 fw-normal">Pricing</h1>
-      <p class="fs-5 text-muted">Quickly build an effective pricing table for your potential customers with this Bootstrap example. It’s built with default Bootstrap components and utilities with little customization.</p>
+      <h1 class="display-4 fw-normal">Witaj</h1>
+      {% if request.user.is_authenticated %}
+      <p class="fs-5 text-muted">Teraz możesz zapisać się na zawody lub sprawdzić wyniki</p>
+      {% else %}
+      <p class="fs-5 text-muted">Zaloguj się lub zarejestruj żeby przejść dalej</p>
+      {% endif %}
     </div>
-<h3> Registerted users</h3>
-	{% for account in accounts %}
-		<p>{{account}}</p>
-	{% endfor %}
+
 
 
 {% endblock content %}
