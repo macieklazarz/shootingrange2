@@ -57,7 +57,7 @@ class DodajZawodnika(forms.ModelForm):
         for i in zawodnicy_przypisani_do_zawodow:
             # print(f' wybrane zawody {i}')
             zawodnicy_przypisani_do_zawodow_lista.append(i)                                                                                                          #robię listę z wsyztskich zawodników przypisanych do danych zawodow
-        print(f'zawodnicy przypisani do zawodow to {zawodnicy_przypisani_do_zawodow_lista}')
+        # print(f'zawodnicy przypisani do zawodow to {zawodnicy_przypisani_do_zawodow_lista}')
         zawodnicy_przypisani_do_zawodow_email = Account.objects.filter(pk__in=zawodnicy_przypisani_do_zawodow_lista).values_list('email', flat=True).distinct()      #sprawdzam mail zawodnikow wybranych do zawodow
         zawodnicy_przypisani_do_zawodow_email_lista = []
         for i in zawodnicy_przypisani_do_zawodow_email:
@@ -71,5 +71,5 @@ class DodajZawodnika(forms.ModelForm):
         # print(f'zawodniczek to {zaw} typ {type(zaw)} {lista} typ {type(lista)}')
         if (wybrany_zawodnik in zawodnicy_przypisani_do_zawodow_email_lista):                                                                               #sprawdzam czy wybrany zawodnik jest na liscie z mailami uczestnikow wybranych zawodow
             # print('powinno wywalic')
-            raise ValidationError("juz jest")
+            raise ValidationError("Jesteś już zarejestrowany na te zawody")
 
