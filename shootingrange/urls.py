@@ -17,8 +17,9 @@ from django.contrib import admin
 from django.conf.urls import url
 from django.urls import path
 from mainapp.views import (home_screen_view,)
+from zawody.views import (ZawodyCreateView,SedziaCreateView, SedziaListView, SedziaDeleteView, ZawodyListView, ZawodyDeleteView )
 from account.views import (registration_form, logout_view, login_view)
-from wyniki.views import (wyniki_edycja,  wyniki, rejestracja_na_zawody, wyniki_edit, exportexcel)
+from wyniki.views import (wyniki_edycja,  wyniki, rejestracja_na_zawody, wyniki_edit, exportexcel, WynikUpdateView)
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -32,6 +33,13 @@ urlpatterns = [
     path('rejestracja_na_zawody/', rejestracja_na_zawody, name="rejestracja_na_zawody"),
     # path('wyniki_edit/', wyniki_edit, name="wyniki_edit"),
     # url(r'^(?P<slug>[-\w]+)/$', wyniki_edit, name="wyniki_edit"),
-    url(r'^(?P<slug>[-\w]+)/'r'(?P<nr_zawodow>[-\w]+)/$', wyniki_edit, name="wyniki_edit"),
+    # url(r'^(?P<slug>[-\w]+)/'r'(?P<nr_zawodow>[-\w]+)/$', wyniki_edit, name="wyniki_edit"),
+    path('<int:pk>/wyniki_edit/', WynikUpdateView.as_view(), name="wyniki_edit"),
     path('exportexcel', exportexcel, name="exportexcel"),
+    path('dodaj_zawody', ZawodyCreateView.as_view(), name="dodaj_zawody"),
+    path('dodaj_sedziego', SedziaCreateView.as_view(), name="dodaj_sedziego"),
+    path('sedzia_lista', SedziaListView.as_view(), name="sedzia_lista"),
+    path('zawody_lista', ZawodyListView.as_view(), name="zawody_lista"),
+    path('<int:pk>/zawody_delete/', ZawodyDeleteView.as_view(), name="zawody_delete"),
+    path('<int:pk>/delete/',SedziaDeleteView.as_view(), name="sedzia_delete"),
 ]

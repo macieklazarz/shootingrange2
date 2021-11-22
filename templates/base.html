@@ -6,7 +6,7 @@
 		<title>Zawody strzeleckie</title>
 	    <meta charset="utf-8">
 	    <meta name="viewport" content="width=device-width, initial-scale=1">
-
+	    <link href="https://unpkg.com/tailwindcss@^2/dist/tailwind.min.css" rel="stylesheet">
 		{% include 'snippets/header.html' %}
 
 	</head>
@@ -25,11 +25,11 @@
 				min-height: 100%;
 			}
 		</style>
-
+		<div class="max-w-4xl mx-auto bg-gray-100">
 		{% block content %}
 		
 		{% endblock content %}
-
+		</div>
 		{% include 'snippets/footer.html' %}
 	</body>
 

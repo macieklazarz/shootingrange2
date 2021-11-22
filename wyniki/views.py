@@ -1,4 +1,4 @@
-from django.shortcuts import render, redirect, get_object_or_404
+from django.shortcuts import render, redirect, get_object_or_404, reverse
 from wyniki.models import Wyniki, Ustawienia
 from zawody.models import Sedzia, Zawody
 from django.views.decorators.csrf import csrf_exempt
@@ -9,6 +9,11 @@ from django.contrib.auth.decorators import login_required
 import datetime
 import xlwt
 from django.db.models.functions import Concat
+from django.views.generic import TemplateView, ListView, DetailView, CreateView, UpdateView, DeleteView
+from .forms import WynikiModelForm
+from zawody.models import Sedzia
+# from django.contrib.auth.mixins import LoginRequiredMixin
+# from agents.mixins import OrganisorAndLoginRequiredMixin
 # from django.utils import simplejson
 # Create your views here.
 
@@ -49,6 +54,7 @@ def wyniki_edycja(request):
 
 @login_required(login_url="/login/")
 def wyniki(request):
+	context = {}
 	zawody = Zawody.objects.all().values_list('id', flat=True).order_by('id')
 	zawody_lista = []
 	for i in zawody:
@@ -86,7 +92,17 @@ def wyniki(request):
 	# query = Wyniki.objects.all().query
 	# query.group_by = ['zawodnik']
 	# klasyfikacja_generalna = QuerySet(query=query, model=Wyniki)
-	return render(request, 'wyniki/wyniki.html', {'wyniki': wyniki, 'zawody_nazwa':zawody_nazwa, 'sedziowie':sedziowie, 'klasyfikacja_generalna': klasyfikacja_generalna})
+	sedziowie = Sedzia.objects.all().values_list('sedzia', flat=True).distinct()
+	sedziowie_lista = []
+	for i in sedziowie:
+		sedziowie_lista.append(i)
+	context['sedziowie_lista'] = sedziowie_lista
+	context['wyniki'] = wyniki
+	context['zawody_nazwa'] = zawody_nazwa
+	context['klasyfikacja_generalna'] = klasyfikacja_generalna
+
+	# return render(request, 'wyniki/wyniki.html', {'wyniki': wyniki, 'zawody_nazwa':zawody_nazwa, 'sedziowie':sedziowie, 'klasyfikacja_generalna': klasyfikacja_generalna})
+	return render(request, 'wyniki/wyniki.html', context)
 
 # @csrf_exempt
 # def savestudent(request):
@@ -210,10 +226,36 @@ def wyniki_edit(request, slug, nr_zawodow):
 		return redirect('home')
 
 
+class WynikUpdateView(UpdateView):
+	template_name = "wyniki/wyniki_edit.html"
+	form_class = WynikiModelForm
+	# user_id = self.request.user.id 
+	def get_queryset(self):
+		user_id=self.request.user.id
+		dopasowane = Sedzia.objects.filter(sedzia__id = user_id).values_list('zawody', flat=True)
+		queryset = Wyniki.objects.filter(zawody__id = dopasowane)
+		return queryset
+		# return Wyniki.objects.all()
+
+	def get_success_url(self):
+		return reverse("wyniki_edycja")
+		
+	# def form_valid(self, request):
+	# 	print('wywolanie WynikUpdateView')
+	# 	user_id = self.request.user.id 	
+	# 	sedziowie = Sedzia.objects.all().values_list('id', flat=True)			
+	# 	sedziowie_lista = []																				
+	# 	for i in sedziowie:
+	# 		sedziowie_lista.append(i)
+	# 	print(sedziowie_lista)
+	# 	print(user_id)
+	# 	if user_id not in sedziowie_lista:
+	# 		print('to nie sedzia')
+		
+	# 	def get_success_url(self):
+	# 		return reverse("wyniki_edycja")
 
 
-	# form = forms.Wyniki()
-	# return render(request, 'wyniki/wyniki_edit.html', {'form':form})
 
 @login_required(login_url="/login/")
 def exportexcel(request):

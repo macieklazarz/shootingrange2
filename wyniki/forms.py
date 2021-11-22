@@ -73,3 +73,7 @@ class DodajZawodnika(forms.ModelForm):
             # print('powinno wywalic')
             raise ValidationError("Jesteś już zarejestrowany na te zawody")
 
+class WynikiModelForm(forms.ModelForm):
+    class Meta:
+        model = Wyniki
+        fields = ['X', 'Xx', 'dziewiec', 'osiem', 'siedem', 'szesc', 'piec', 'cztery', 'trzy', 'dwa', 'jeden']

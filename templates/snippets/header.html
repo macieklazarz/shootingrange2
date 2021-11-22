@@ -102,12 +102,15 @@
 		        <a href="{% url 'home' %}">Strona domowa</a>
 		        <a href="{% url 'logout'%}">Wylogowanie</a>
 		        <a href="{% url 'wyniki'%}">Wyniki</a>
+	        	<a href="{% url 'zawody_lista' %}">Zarządzaj konkurencjami</a>
+	        	<a href="{% url 'sedzia_lista' %}">Zarządzaj sędziami</a>
 		        {% if request.user.id in sedziowie_lista %}
 		        <a  href="{% url 'wyniki_edycja'%}">Edytuj Wyniki</a>
 		        {% endif %}
 		        <a href="{% url 'rejestracja_na_zawody'%}">Rejestracja na zawody</a>
 	        {% else %}
 	        	<a href="{% url 'home' %}">Strona domowa</a>
+
 		        <a href="{% url 'register'%}">Zarejestruj się</a>
 		        <a href="{% url 'login'%}">Logowanie</a>
 		    {% endif %}

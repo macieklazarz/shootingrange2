@@ -4,6 +4,7 @@ from account.models import Account
 
 class Zawody(models.Model):
 	nazwa = models.CharField(max_length=30)
+	liczba_strzalow = models.IntegerField(default=10)
 
 	def __str__(self):
 		return self.nazwa
@@ -15,6 +16,7 @@ class Zawody(models.Model):
 class Sedzia(models.Model):
 	zawody 		= models.ForeignKey(Zawody, on_delete=models.CASCADE)
 	sedzia 		= models.ForeignKey(Account, on_delete=models.CASCADE)
+
 
 	class Meta:
 		verbose_name_plural = "Sędziowie"
