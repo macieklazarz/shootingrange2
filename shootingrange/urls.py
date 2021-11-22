@@ -19,7 +19,7 @@ from django.urls import path
 from mainapp.views import (home_screen_view,)
 from zawody.views import (ZawodyCreateView,SedziaCreateView, SedziaListView, SedziaDeleteView, ZawodyListView, ZawodyDeleteView )
 from account.views import (registration_form, logout_view, login_view)
-from wyniki.views import (wyniki_edycja,  wyniki, rejestracja_na_zawody, wyniki_edit, exportexcel, WynikUpdateView)
+from wyniki.views import (wyniki_edycja,  wyniki, rejestracja_na_zawody, wyniki_edit, exportexcel, WynikUpdateView, not_authorized, RejestracjaNaZawodyView)
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -30,7 +30,8 @@ urlpatterns = [
     path('wyniki_edycja/', wyniki_edycja, name="wyniki_edycja"),
     path('wyniki/', wyniki, name="wyniki"),
     # path('savestudent/', savestudent, name="savestudent"),
-    path('rejestracja_na_zawody/', rejestracja_na_zawody, name="rejestracja_na_zawody"),
+    # path('rejestracja_na_zawody/', rejestracja_na_zawody, name="rejestracja_na_zawody"),
+    path('rejestracja_na_zawody/', RejestracjaNaZawodyView.as_view(), name="rejestracja_na_zawody"),
     # path('wyniki_edit/', wyniki_edit, name="wyniki_edit"),
     # url(r'^(?P<slug>[-\w]+)/$', wyniki_edit, name="wyniki_edit"),
     # url(r'^(?P<slug>[-\w]+)/'r'(?P<nr_zawodow>[-\w]+)/$', wyniki_edit, name="wyniki_edit"),
@@ -42,4 +43,5 @@ urlpatterns = [
     path('zawody_lista', ZawodyListView.as_view(), name="zawody_lista"),
     path('<int:pk>/zawody_delete/', ZawodyDeleteView.as_view(), name="zawody_delete"),
     path('<int:pk>/delete/',SedziaDeleteView.as_view(), name="sedzia_delete"),
+    path('not_authorized/',not_authorized, name="not_authorized"),
 ]

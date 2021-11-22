@@ -10,16 +10,25 @@ import datetime
 import xlwt
 from django.db.models.functions import Concat
 from django.views.generic import TemplateView, ListView, DetailView, CreateView, UpdateView, DeleteView
-from .forms import WynikiModelForm
+from .forms import WynikiModelForm, RejestracjaModelForm
 from zawody.models import Sedzia
 # from django.contrib.auth.mixins import LoginRequiredMixin
 # from agents.mixins import OrganisorAndLoginRequiredMixin
 # from django.utils import simplejson
 # Create your views here.
 
+def sedziowie_lista():
+	sedziowie = Sedzia.objects.all().values_list('sedzia', flat=True).distinct()
+	sedziowie_lista = []
+	for i in sedziowie:
+		sedziowie_lista.append(i)
+	return sedziowie_lista
+
 @csrf_exempt
 @login_required(login_url="/login/")
 def wyniki_edycja(request):
+	context = {}
+	context['sedziowie_lista'] = sedziowie_lista()
 	# print(f'req user {request.user.id}')
 	user_id = request.user.id 																				#sprawdzamy użytkownika ktory jest zalogowany
 	powiazane_zawody = Sedzia.objects.filter(sedzia__id = user_id).values_list('zawody', flat=True)			#sprawdzamy do jakich zawodow jest przyporzadkowany sedzua
@@ -50,11 +59,14 @@ def wyniki_edycja(request):
 	# print(f'wyniki cale to {wyniki}')
 	print(f'zawody nazwa to {zawody_nazwa}')
 	# print(f'wyniki1 to {wyniki1}')
-	return render(request, 'wyniki/edytuj_wyniki.html', {'wyniki': wyniki, 'zawody_nazwa': zawody_nazwa})
+	context['wyniki'] = wyniki
+	context['zawody_nazwa'] = zawody_nazwa
+	return render(request, 'wyniki/edytuj_wyniki.html', context)
 
 @login_required(login_url="/login/")
 def wyniki(request):
 	context = {}
+	context['sedziowie_lista'] = sedziowie_lista()
 	zawody = Zawody.objects.all().values_list('id', flat=True).order_by('id')
 	zawody_lista = []
 	for i in zawody:
@@ -92,11 +104,6 @@ def wyniki(request):
 	# query = Wyniki.objects.all().query
 	# query.group_by = ['zawodnik']
 	# klasyfikacja_generalna = QuerySet(query=query, model=Wyniki)
-	sedziowie = Sedzia.objects.all().values_list('sedzia', flat=True).distinct()
-	sedziowie_lista = []
-	for i in sedziowie:
-		sedziowie_lista.append(i)
-	context['sedziowie_lista'] = sedziowie_lista
 	context['wyniki'] = wyniki
 	context['zawody_nazwa'] = zawody_nazwa
 	context['klasyfikacja_generalna'] = klasyfikacja_generalna
@@ -149,19 +156,11 @@ def wyniki(request):
 # @login_required(login_url="/accounts/login/")
 @login_required(login_url="/login/")
 def rejestracja_na_zawody(request):
+	context = {}
 	if request.method == 'POST':
-		# wybrane_zawody = request.POST.getlist('zawody')[0]
 		wybrane_zawody = request.POST['zawody']
-		# wybrane_zawody = request.POST
-		# print("dupa")
-		# request.POST.getlist('zawody')=wybrane_zawody
-		# print(f'selected {wybrane_zawody}')
 		form = forms.DodajZawodnika(request.POST)
-		# form2 = forms.DodajZawodnika2(request.POST, request.FILES)
-		# zaw = request.POST.get('zawodnik')
-		# form.fields['zawodnik'].choices = [(zaw, zaw)]
 		if form.is_valid():
-			# print("dupa1")
 			instance1 = form.save()
 			return redirect('home')
 	else:
@@ -174,26 +173,37 @@ def rejestracja_na_zawody(request):
 		# form = forms.DodajZawodnika()
 		print(user)
 		form = forms.DodajZawodnika(initial={'zawodnik': user})
+		context['form'] = form
+	context['sedziowie_lista'] = sedziowie_lista()
 	dodawanie_zawodnika = Ustawienia.objects.filter(nazwa='Rejestracja').values_list("ustawienie")
 	for i in dodawanie_zawodnika:
 		opcja = i[0]
-	# # form = forms.DodajZawodnika()
-	# dodawanie_zawodnika = Ustawienia.objects.filter(nazwa='Rejestracja').values_list("ustawienie")
-	# # dodawanie_zawodnika = Ustawienia.objects.values_list()
-	# # print(dodawanie_zawodnika)
-	# for i in dodawanie_zawodnika:
-	# 	opcja = i[0]
-	# # qry = "select ustawienie from mainapp_ustawienia where nazwa = 'Rejestracja';"
-	# # # cursor=connection.cursor()
-	# # # wynik = cursor.execute(qry)
-	# # wynik = Ustawienia.objects.raw(qry)
-	# # for wyn in wynik:
-	# # 	wynik = wyn.ustawienie
-	# print(request.user)
+	context['dodawanie_zawodnika'] = opcja
+	return render(request, 'wyniki/rejestracja_na_zawody.html', context)
 
+class RejestracjaNaZawodyView(CreateView):
+	template_name = "wyniki/rejestracja.html"
+	form_class = RejestracjaModelForm
 
-	return render(request, 'wyniki/rejestracja_na_zawody.html', {'form':form, 'dodawanie_zawodnika':opcja})
+	def get_context_data(self, **kwargs):
+		context = super().get_context_data(**kwargs)
+		context['sedziowie_lista'] = sedziowie_lista()
+		return context
 
+	def get_success_url(self):
+		return reverse("home")
+		return super(RejestracjaNaZawodyView, self).form_valid(form)
+
+	# def get_form_kwargs(self):
+	# 	kwargs = super(RejestracjaNaZawodyView, self).get_form_kwargs()
+	# 	kwargs.update({'user': self.request.user})
+	# 	return kwargs
+
+	def get_initial(self, *args, **kwargs):
+		initial = super(RejestracjaNaZawodyView, self).get_initial()
+		initial = initial.copy()
+		initial['zawodnik'] = self.request.user
+		return initial
 
 
 @login_required(login_url="/login/")
@@ -229,33 +239,45 @@ def wyniki_edit(request, slug, nr_zawodow):
 class WynikUpdateView(UpdateView):
 	template_name = "wyniki/wyniki_edit.html"
 	form_class = WynikiModelForm
-	# user_id = self.request.user.id 
+	def get_context_data(self, **kwargs):
+		context = super().get_context_data(**kwargs)
+		context['sedziowie_lista'] = sedziowie_lista()
+		return context
+
 	def get_queryset(self):
-		user_id=self.request.user.id
-		dopasowane = Sedzia.objects.filter(sedzia__id = user_id).values_list('zawody', flat=True)
-		queryset = Wyniki.objects.filter(zawody__id = dopasowane)
-		return queryset
-		# return Wyniki.objects.all()
+		return Wyniki.objects.all()
 
 	def get_success_url(self):
 		return reverse("wyniki_edycja")
 		
-	# def form_valid(self, request):
-	# 	print('wywolanie WynikUpdateView')
-	# 	user_id = self.request.user.id 	
-	# 	sedziowie = Sedzia.objects.all().values_list('id', flat=True)			
-	# 	sedziowie_lista = []																				
-	# 	for i in sedziowie:
-	# 		sedziowie_lista.append(i)
-	# 	print(sedziowie_lista)
-	# 	print(user_id)
-	# 	if user_id not in sedziowie_lista:
-	# 		print('to nie sedzia')
-		
-	# 	def get_success_url(self):
-	# 		return reverse("wyniki_edycja")
+	def form_valid(self, form):
+		return super(WynikUpdateView,self).form_valid(form)
+
+	def dispatch(self, request, *args, **kwargs):
+		wynik_pk = self.kwargs.get('pk')
+		zawody_pk = Wyniki.objects.filter(id = wynik_pk).values_list('zawody__id', flat=True)
+		zawody_pk_lista = []
+		for i in zawody_pk:
+			zawody_pk_lista.append(i)
+		zawody_pk_lista = zawody_pk_lista[0]
+		sedzia_pk = Sedzia.objects.filter(zawody__id = zawody_pk_lista).values_list('sedzia__id', flat=True)
+		sedzia_pk_lista = []
+		for i in sedzia_pk:
+			sedzia_pk_lista.append(i)
+		print(f'zawody: {zawody_pk_lista}')
+		print(f'sedzia_id: {sedzia_pk_lista}')
+		user_id=self.request.user.id
+		print(f'user_id: {user_id}')
+		if user_id in sedzia_pk_lista:
+			print('sedzia jest')
+			return super(WynikUpdateView, self).dispatch(request, *args, **kwargs)
+		else:
+			print('sedzia nie ma')
+			return redirect('not_authorized')
 
 
+def not_authorized(request):
+	return render(request, 'wyniki/not_authorized.html')
 
 @login_required(login_url="/login/")
 def exportexcel(request):

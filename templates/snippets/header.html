@@ -102,8 +102,10 @@
 		        <a href="{% url 'home' %}">Strona domowa</a>
 		        <a href="{% url 'logout'%}">Wylogowanie</a>
 		        <a href="{% url 'wyniki'%}">Wyniki</a>
+		        {% if user.is_superuser %} 
 	        	<a href="{% url 'zawody_lista' %}">Zarządzaj konkurencjami</a>
 	        	<a href="{% url 'sedzia_lista' %}">Zarządzaj sędziami</a>
+	        	{% endif %}
 		        {% if request.user.id in sedziowie_lista %}
 		        <a  href="{% url 'wyniki_edycja'%}">Edytuj Wyniki</a>
 		        {% endif %}

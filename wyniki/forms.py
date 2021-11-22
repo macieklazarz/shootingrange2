@@ -4,6 +4,8 @@ from zawody.models import Zawody
 from account.models import Account
 from wyniki.models import Wyniki
 from django.core.exceptions import ValidationError
+from django.forms.widgets import CheckboxSelectMultiple
+from django.forms.models import ModelMultipleChoiceField
 
 class Wyniki_edit(forms.ModelForm):
     class Meta:
@@ -72,8 +74,52 @@ class DodajZawodnika(forms.ModelForm):
         if (wybrany_zawodnik in zawodnicy_przypisani_do_zawodow_email_lista):                                                                               #sprawdzam czy wybrany zawodnik jest na liscie z mailami uczestnikow wybranych zawodow
             # print('powinno wywalic')
             raise ValidationError("Jesteś już zarejestrowany na te zawody")
+            # self.fields['zawodnik'] =
 
 class WynikiModelForm(forms.ModelForm):
     class Meta:
         model = Wyniki
         fields = ['X', 'Xx', 'dziewiec', 'osiem', 'siedem', 'szesc', 'piec', 'cztery', 'trzy', 'dwa', 'jeden']
+
+class RejestracjaModelForm(forms.ModelForm):
+    class Meta:
+        model = Wyniki
+        fields = (
+            'zawody',
+            'zawodnik',
+            )
+
+
+
+
+    def clean(self):
+        cleaned_data = super().clean()
+        wybrane_zawody = cleaned_data.get('zawody')                                                                                                                #sprawdzam jakie wybrano zawody
+        wybrany_zawodnik = cleaned_data.get('zawodnik').id                                                                                                       #sprawdzam jakiego wybrano zawodnika (tu zostanie przypisany mail)
+
+        print(f'zawody to {wybrane_zawody}')
+        # print(f'zawodnik to {wybrany_zawodnik}')
+
+        zawodnicy_przypisani_do_zawodow = Wyniki.objects.filter(zawody__id=wybrane_zawody).values_list('zawodnik', flat=True).distinct()                          #wybieram wszystkich zawodników którzy są przypisani do wybranych zawodów (zmienna wybrane_zawody)
+        zawodnicy_przypisani_do_zawodow_lista = []
+        for i in zawodnicy_przypisani_do_zawodow:
+            # print(f' wybrane zawody {i}')
+            zawodnicy_przypisani_do_zawodow_lista.append(i)                                                                                                          #robię listę z wsyztskich zawodników przypisanych do danych zawodow
+        print(f'zawodnicy przypisani do zawodow to {zawodnicy_przypisani_do_zawodow_lista}')
+        if (wybrany_zawodnik in zawodnicy_przypisani_do_zawodow_lista):                                                                               #sprawdzam czy wybrany zawodnik jest na liscie z mailami uczestnikow wybranych zawodow
+            raise ValidationError("Jesteś już zarejestrowany na te zawody")
+            self.fields['zawodnik'] =wybrany_zawodnik
+
+    def __init__(self, *args, **kwargs):
+        from django.forms.widgets import HiddenInput
+        super(RejestracjaModelForm, self).__init__(*args, **kwargs)
+        # self.fields['zawodnik'] = forms.ModelChoiceField(queryset=Account.objects.all())
+        # self.fields['zawodnik'].widget = HiddenInput()
+        zmienna = self.fields['zawodnik']
+        # print(f'zmienna: {zmienna.id}')
+        # self.fields['zawody'] = forms.ModelChoiceField(queryset=Zawody.objects.all())
+        # self.fields['zawody'] = 'admin@admin.com'
+        self.fields['zawody'] = forms.MultipleChoiceField(
+            widget=forms.CheckboxSelectMultiple,
+            queryset=Zawody.objects.all(),
+        ) 
