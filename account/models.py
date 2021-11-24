@@ -38,8 +38,8 @@ class Account(AbstractBaseUser):
 	username 				= models.CharField(max_length=30, unique=True)
 	imie					=models.TextField(max_length=60, null=False)
 	nazwisko				=models.TextField(max_length=60, null=False)	
-	licencja				=models.TextField(max_length=60, verbose_name='Numer licencji', blank=True)
-	klub					=models.TextField(max_length=60, blank=True)
+	licencja				=models.TextField(max_length=60, verbose_name='Numer licencji', blank=True, null=True)
+	klub					=models.TextField(max_length=60, blank=True, null=True)
 	date_joined				= models.DateTimeField(verbose_name='date joined', auto_now_add=True)
 	last_login				= models.DateTimeField(verbose_name='last login', auto_now=True)
 	is_admin				= models.BooleanField(default=False)
@@ -63,3 +63,10 @@ class Account(AbstractBaseUser):
 	def has_module_perms(self, app_label):
 		return True
 
+
+class Rts(models.Model):
+	user 		= models.OneToOneField(Account, on_delete=models.CASCADE)
+
+
+	def __str__(self):
+		return (self.user.imie+' '+self.user.nazwisko)

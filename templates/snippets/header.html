@@ -87,29 +87,39 @@
 
 
 	<div class="centered">
-
-
       
       <div class="topnav">
 	      {% if request.user.is_authenticated %}
 		      <!-- <nav class="d-inline-flex mt-2 mt-md-0 ms-md-auto"> -->
 		     <span class="badge badge-light badge-secondary">
         		
-        		<h4>Witaj! Jesteś zalogowany jako	{{request.user.username}}</h4>
+        		<h4>Witaj! Jesteś zalogowany jako	{{request.user}}</h4>
         		
     		</span>
 		      <div class="topnav-right">
 		        <a href="{% url 'home' %}">Strona domowa</a>
 		        <a href="{% url 'logout'%}">Wylogowanie</a>
+		        <a href="{% url 'rejestracja_na_zawody'%}">Zapisy do konkurencji</a>
 		        <a href="{% url 'wyniki'%}">Wyniki</a>
-		        {% if user.is_superuser %} 
+		        {% with '1 2 3' as list%}
+		        {% for i in list.split %}
+		        <a href="{% url 'zawody_lista' %}">i = {{i}}</a>
+		        <a href="{% url 'zawody_lista' %}">r = {{request.user.id}}</a>
+		        {% if request.user.id == i%} 
 	        	<a href="{% url 'zawody_lista' %}">Zarządzaj konkurencjami</a>
 	        	<a href="{% url 'sedzia_lista' %}">Zarządzaj sędziami</a>
+	        	<a href="{% url 'users_rts'%}">RTS</a>
 	        	{% endif %}
-		        {% if request.user.id in sedziowie_lista %}
+	        	{% endfor %}
+	        	{% endwith %}
+	        	{% if user.is_superuser or request.user.id in rts_lista%} 
+	        	<a href="{% url 'users' %}">Zarządzaj użytkownikami</a>
+	        	<a href="{% url 'ustawienia'%}">Ustawienia</a>
+	        	{% endif %}
+		        {% if request.user.id in sedziowie_lista or user.is_superuser or request.user.id in rts_lista%}
 		        <a  href="{% url 'wyniki_edycja'%}">Edytuj Wyniki</a>
 		        {% endif %}
-		        <a href="{% url 'rejestracja_na_zawody'%}">Rejestracja na zawody</a>
+		        
 	        {% else %}
 	        	<a href="{% url 'home' %}">Strona domowa</a>
 

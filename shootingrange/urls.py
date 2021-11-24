@@ -18,13 +18,16 @@ from django.conf.urls import url
 from django.urls import path
 from mainapp.views import (home_screen_view,)
 from zawody.views import (ZawodyCreateView,SedziaCreateView, SedziaListView, SedziaDeleteView, ZawodyListView, ZawodyDeleteView )
-from account.views import (registration_form, logout_view, login_view)
-from wyniki.views import (wyniki_edycja,  wyniki, rejestracja_na_zawody, wyniki_edit, exportexcel, WynikUpdateView, not_authorized, RejestracjaNaZawodyView)
+from account.views import (registration_form, registration_form_no_login, logout_view, login_view, AccountListView, AccountUpdateView, AccountDeleteView, RtsListView, RtsDeleteView, RtsCreateView)
+from wyniki.views import (wyniki_edycja,  wyniki, rejestracja_na_zawody, wyniki_edit, exportexcel, WynikUpdateView, not_authorized, RejestracjaNaZawodyView, KonkurencjaDeleteView, UstawieniaListView, UstawieniaUpdateView)
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', home_screen_view, name="home"),
     path('register/', registration_form, name="register"),
+    path('register_no_login/', registration_form_no_login, name="register_no_login"),
+    path('users/', AccountListView.as_view(), name="users"),
+    path('users_rts/', RtsListView.as_view(), name="users_rts"),
     path('logout/', logout_view, name="logout"),
     path('login/', login_view, name="login"),
     path('wyniki_edycja/', wyniki_edycja, name="wyniki_edycja"),
@@ -36,6 +39,10 @@ urlpatterns = [
     # url(r'^(?P<slug>[-\w]+)/$', wyniki_edit, name="wyniki_edit"),
     # url(r'^(?P<slug>[-\w]+)/'r'(?P<nr_zawodow>[-\w]+)/$', wyniki_edit, name="wyniki_edit"),
     path('<int:pk>/wyniki_edit/', WynikUpdateView.as_view(), name="wyniki_edit"),
+    path('<int:pk>/account_edit/', AccountUpdateView.as_view(), name="account_edit"),
+    path('<int:pk>/account_delete/',AccountDeleteView.as_view(), name="account_delete"),
+    path('<int:pk>/rts_delete/',RtsDeleteView.as_view(), name="rts_delete"),
+    path('<int:pk>/konkurencja_delete/',KonkurencjaDeleteView.as_view(), name="konkurencja_delete"),
     path('exportexcel', exportexcel, name="exportexcel"),
     path('dodaj_zawody', ZawodyCreateView.as_view(), name="dodaj_zawody"),
     path('dodaj_sedziego', SedziaCreateView.as_view(), name="dodaj_sedziego"),
@@ -44,4 +51,7 @@ urlpatterns = [
     path('<int:pk>/zawody_delete/', ZawodyDeleteView.as_view(), name="zawody_delete"),
     path('<int:pk>/delete/',SedziaDeleteView.as_view(), name="sedzia_delete"),
     path('not_authorized/',not_authorized, name="not_authorized"),
+    path('ustawienia/',UstawieniaListView.as_view(), name="ustawienia"),
+    path('<int:pk>/ustawienia_edit/', UstawieniaUpdateView.as_view(), name="ustawienia_update"),
+    path('/rts_add/', RtsCreateView.as_view(), name="rts_add"),
 ]

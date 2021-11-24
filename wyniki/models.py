@@ -26,13 +26,15 @@ class Wyniki(models.Model):
 # Create your models here.
 	def save(self, *args, **kwargs):
 		self.wynik = self.X*10 + self.Xx*10 + self.dziewiec*9 + self.osiem*8 + self.siedem*7 + self.szesc*6+ self.piec*5+ self.cztery*4+ self.trzy*3+ self.dwa*2+ self.jeden*1
-		self.slug = (self.zawodnik.username + str(self.zawody.id))
+		# self.slug = (self.zawodnik.username + str(self.zawody.id))
 		liczba_strzalow = self.X*10 + self.Xx*10 + self.dziewiec+ self.osiem + self.siedem + self.szesc+ self.piec+ self.cztery+ self.trzy+ self.dwa+ self.jeden
-		if liczba_strzalow < 10:
-			self.komunikat = ""
+		# if liczba_strzalow < 10:
+		# 	self.komunikat = ""
 		super(Wyniki, self).save(*args, **kwargs)
 
 	def clean(self):
+		# print(f'liczba strzalow {self.zawody.liczba_strzalow}')
+		liczba_strzalow = self.zawody.liczba_strzalow
 		mozliwe_wyniki = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
 		if (self.X not in mozliwe_wyniki):
 			raise ValidationError({'X': "Uzupełnij  pole wartością od 0 do 10"})
@@ -56,8 +58,8 @@ class Wyniki(models.Model):
 			raise ValidationError({'dwa': "Uzupełnij pole wartością od 0 do 10"})
 		elif (self.jeden not in mozliwe_wyniki):
 			raise ValidationError({'jeden': "Uzupełnij pole wartością od 0 do 10"})
-		elif self.X+self.Xx+self.dziewiec+self.osiem+self.siedem+self.szesc+self.piec+self.cztery+self.trzy+self.dwa+self.jeden >10:
-			raise ValidationError({'X': "Wiecej niz 10 strzalow"})
+		elif self.X+self.Xx+self.dziewiec+self.osiem+self.siedem+self.szesc+self.piec+self.cztery+self.trzy+self.dwa+self.jeden > liczba_strzalow:
+			raise ValidationError({'X': f'Maksymalna liczba strzałów w tej konkurencji to {liczba_strzalow}'})
 
 
 class Ustawienia(models.Model):

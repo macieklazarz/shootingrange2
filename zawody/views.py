@@ -5,6 +5,7 @@ from .forms import ZawodyModelForm, SedziaModelForm
 from .models import Sedzia, Zawody
 from wyniki.views import sedziowie_lista
 from django.shortcuts import redirect
+from account.views import rts_lista, sedziowie_lista
 
 # Create your views here.
 
@@ -14,6 +15,7 @@ class ZawodyListView(ListView):
 	def get_context_data(self, **kwargs):
 		context = super().get_context_data(**kwargs)
 		context['sedziowie_lista'] = sedziowie_lista()
+		context['rts_lista'] = rts_lista()
 		return context
 
 	def get_queryset(self):
@@ -32,6 +34,7 @@ class ZawodyCreateView(CreateView):
 	def get_context_data(self, **kwargs):
 		context = super().get_context_data(**kwargs)
 		context['sedziowie_lista'] = sedziowie_lista()
+		context['rts_lista'] = rts_lista()
 		return context
 
 	def get_success_url(self):
@@ -51,6 +54,7 @@ class ZawodyDeleteView(DeleteView):
 	def get_context_data(self, **kwargs):
 		context = super().get_context_data(**kwargs)
 		context['sedziowie_lista'] = sedziowie_lista()
+		context['rts_lista'] = rts_lista()
 		return context
 
 	def get_queryset(self):
@@ -74,6 +78,7 @@ class SedziaCreateView(CreateView):
 	def get_context_data(self, **kwargs):
 		context = super().get_context_data(**kwargs)
 		context['sedziowie_lista'] = sedziowie_lista()
+		context['rts_lista'] = rts_lista()
 		return context
 
 	def get_success_url(self):
@@ -92,6 +97,7 @@ class SedziaListView(ListView):
 	def get_context_data(self, **kwargs):
 		context = super().get_context_data(**kwargs)
 		context['sedziowie_lista'] = sedziowie_lista()
+		context['rts_lista'] = rts_lista()
 		return context
 
 	def get_queryset(self):
@@ -99,6 +105,7 @@ class SedziaListView(ListView):
 
 	def dispatch(self, request, *args, **kwargs):
 		if request.user.is_admin:
+			print(request.user.id)
 			return super(SedziaListView, self).dispatch(request, *args, **kwargs)
 		else:
 			return redirect('not_authorized')
@@ -110,6 +117,7 @@ class SedziaDeleteView(DeleteView):
 	def get_context_data(self, **kwargs):
 		context = super().get_context_data(**kwargs)
 		context['sedziowie_lista'] = sedziowie_lista()
+		context['rts_lista'] = rts_lista()
 		return context
 
 	def get_queryset(self):

@@ -2,7 +2,7 @@ from django import forms
 from . import models
 from zawody.models import Zawody
 from account.models import Account
-from wyniki.models import Wyniki
+from wyniki.models import Wyniki, Ustawienia
 from django.core.exceptions import ValidationError
 from django.forms.widgets import CheckboxSelectMultiple
 from django.forms.models import ModelMultipleChoiceField
@@ -94,7 +94,7 @@ class RejestracjaModelForm(forms.ModelForm):
 
     def clean(self):
         cleaned_data = super().clean()
-        wybrane_zawody = cleaned_data.get('zawody')                                                                                                                #sprawdzam jakie wybrano zawody
+        wybrane_zawody = cleaned_data.get('zawody').id                                                                                                           #sprawdzam jakie wybrano zawody
         wybrany_zawodnik = cleaned_data.get('zawodnik').id                                                                                                       #sprawdzam jakiego wybrano zawodnika (tu zostanie przypisany mail)
 
         print(f'zawody to {wybrane_zawody}')
@@ -112,14 +112,27 @@ class RejestracjaModelForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         from django.forms.widgets import HiddenInput
+        user = kwargs.pop('user', None)
         super(RejestracjaModelForm, self).__init__(*args, **kwargs)
+        print(f'user admin to {user}')
         # self.fields['zawodnik'] = forms.ModelChoiceField(queryset=Account.objects.all())
-        # self.fields['zawodnik'].widget = HiddenInput()
-        zmienna = self.fields['zawodnik']
+        if not user:
+            self.fields['zawodnik'].widget = HiddenInput()
+        # zmienna = self.fields['zawodnik']
         # print(f'zmienna: {zmienna.id}')
         # self.fields['zawody'] = forms.ModelChoiceField(queryset=Zawody.objects.all())
         # self.fields['zawody'] = 'admin@admin.com'
-        self.fields['zawody'] = forms.MultipleChoiceField(
-            widget=forms.CheckboxSelectMultiple,
-            queryset=Zawody.objects.all(),
-        ) 
+        # self.fields['zawody'] = forms.MultipleChoiceField(
+        #     widget=forms.CheckboxSelectMultiple,
+        #     queryset=Zawody.objects.all(),
+        # ) 
+
+
+
+class UstawieniaModelForm(forms.ModelForm):
+    class Meta:
+        model = Ustawienia
+        fields = (
+            'nazwa',
+            'ustawienie',
+            )

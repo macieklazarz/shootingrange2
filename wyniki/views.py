@@ -10,25 +10,22 @@ import datetime
 import xlwt
 from django.db.models.functions import Concat
 from django.views.generic import TemplateView, ListView, DetailView, CreateView, UpdateView, DeleteView
-from .forms import WynikiModelForm, RejestracjaModelForm
+from .forms import WynikiModelForm, RejestracjaModelForm, UstawieniaModelForm
 from zawody.models import Sedzia
+from account.views import rts_lista, sedziowie_lista
 # from django.contrib.auth.mixins import LoginRequiredMixin
 # from agents.mixins import OrganisorAndLoginRequiredMixin
 # from django.utils import simplejson
 # Create your views here.
 
-def sedziowie_lista():
-	sedziowie = Sedzia.objects.all().values_list('sedzia', flat=True).distinct()
-	sedziowie_lista = []
-	for i in sedziowie:
-		sedziowie_lista.append(i)
-	return sedziowie_lista
+
 
 @csrf_exempt
 @login_required(login_url="/login/")
 def wyniki_edycja(request):
 	context = {}
 	context['sedziowie_lista'] = sedziowie_lista()
+	context['rts_lista'] = rts_lista()
 	# print(f'req user {request.user.id}')
 	user_id = request.user.id 																				#sprawdzamy użytkownika ktory jest zalogowany
 	powiazane_zawody = Sedzia.objects.filter(sedzia__id = user_id).values_list('zawody', flat=True)			#sprawdzamy do jakich zawodow jest przyporzadkowany sedzua
@@ -67,6 +64,7 @@ def wyniki_edycja(request):
 def wyniki(request):
 	context = {}
 	context['sedziowie_lista'] = sedziowie_lista()
+	context['rts_lista'] = rts_lista()
 	zawody = Zawody.objects.all().values_list('id', flat=True).order_by('id')
 	zawody_lista = []
 	for i in zawody:
@@ -82,6 +80,7 @@ def wyniki(request):
 	sedziowie_queryset = []																						#robimy liste ktorej elementami beda wyniki poszczegolnych zawodow
 	sedziowie = []
 	for i in zawody_lista:
+		# wyniki.append(Wyniki.objects.filter(zawody = i).order_by('-wynik', '-X', '-Xx', '-dziewiec', '-osiem', '-siedem'))
 		wyniki.append(Wyniki.objects.filter(zawody = i).order_by('-wynik', '-X', '-Xx', '-dziewiec', '-osiem', '-siedem'))
 		# sedziowie_queryset.append(Sedzia.objects.filter(zawody = i).values_list(Concat('sedzia__imie', V(' '), 'sedzia__nazwisko'), output_field=CharField(), Flat = True))
 		# sedziowie_queryset.append(Sedzia.objects.filter(zawody = i).values_list('sedzia__imie', flat = True))
@@ -111,47 +110,6 @@ def wyniki(request):
 	# return render(request, 'wyniki/wyniki.html', {'wyniki': wyniki, 'zawody_nazwa':zawody_nazwa, 'sedziowie':sedziowie, 'klasyfikacja_generalna': klasyfikacja_generalna})
 	return render(request, 'wyniki/wyniki.html', context)
 
-# @csrf_exempt
-# def savestudent(request):
-# 	id=request.POST.get('id', '')
-# 	type=request.POST.get('type','')
-# 	value=request.POST.get('value','')
-# 	student=Wyniki.objects.get(id=id)
-# 	if type=="X":
-# 		student.X=value
-# 	if type=="Xx":
-# 		student.Xx=value
-# 	if type=="dziewiec":
-# 		student.dziewiec=value
-# 	if type=="osiem":
-# 		student.osiem=value
-# 	if type=="siedem":
-# 		student.siedem=value
-# 	if type=="szesc":
-# 		student.szesc=value
-# 	if type=="piec":
-# 		student.piec=value
-# 	if type=="cztery":
-# 		student.cztery=value
-# 	if type=="trzy":
-# 		student.trzy=value
-# 	if type=="dwa":
-# 		student.dwa=value
-# 	if type=="jeden":
-# 		student.jeden=value
-# 	if type=="komunikat":
-# 		student.komunikat=value
-
-		
-# 	# student.wynik=student.Xx+student.X
-# 	result=int(student.X)*10+int(student.Xx)*10+int(student.dziewiec)*9+int(student.osiem)*8+int(student.siedem)*7+int(student.szesc)*6+int(student.piec)*5+int(student.cztery)*4+int(student.trzy)*3+int(student.dwa)*2+int(student.jeden)*1
-# 	# print(f"wynik wynosi {result}")
-# 	student.wynik=result
-# 	student.save()
-# 	# wyniki1 = Wyniki.objects.filter(zawody = 1)
-# 	return JsonResponse({"success":"Updated"})
-# 	# return render(request, 'wyniki/wyniki.html', {'wyniki': wyniki1})
-
 
 # @login_required(login_url="/accounts/login/")
 @login_required(login_url="/login/")
@@ -175,6 +133,7 @@ def rejestracja_na_zawody(request):
 		form = forms.DodajZawodnika(initial={'zawodnik': user})
 		context['form'] = form
 	context['sedziowie_lista'] = sedziowie_lista()
+	context['rts_lista'] = rts_lista()
 	dodawanie_zawodnika = Ustawienia.objects.filter(nazwa='Rejestracja').values_list("ustawienie")
 	for i in dodawanie_zawodnika:
 		opcja = i[0]
@@ -184,20 +143,27 @@ def rejestracja_na_zawody(request):
 class RejestracjaNaZawodyView(CreateView):
 	template_name = "wyniki/rejestracja.html"
 	form_class = RejestracjaModelForm
+	# user_id = request.user.id
 
 	def get_context_data(self, **kwargs):
 		context = super().get_context_data(**kwargs)
 		context['sedziowie_lista'] = sedziowie_lista()
+		context['rts_lista'] = rts_lista()
+		dodawanie_zawodnika = Ustawienia.objects.filter(nazwa='Rejestracja').values_list("ustawienie")
+		for i in dodawanie_zawodnika:
+			opcja = i[0]
+		context['dodawanie_zawodnika'] = opcja
 		return context
 
 	def get_success_url(self):
 		return reverse("home")
 		return super(RejestracjaNaZawodyView, self).form_valid(form)
 
-	# def get_form_kwargs(self):
-	# 	kwargs = super(RejestracjaNaZawodyView, self).get_form_kwargs()
-	# 	kwargs.update({'user': self.request.user})
-	# 	return kwargs
+	def get_form_kwargs(self):
+		kwargs = super(RejestracjaNaZawodyView, self).get_form_kwargs()
+		kwargs.update({'user': self.request.user.is_admin})
+		# kwargs.update({'user': request.user.id})
+		return kwargs
 
 	def get_initial(self, *args, **kwargs):
 		initial = super(RejestracjaNaZawodyView, self).get_initial()
@@ -241,6 +207,7 @@ class WynikUpdateView(UpdateView):
 	form_class = WynikiModelForm
 	def get_context_data(self, **kwargs):
 		context = super().get_context_data(**kwargs)
+		context['rts_lista'] = rts_lista()
 		context['sedziowie_lista'] = sedziowie_lista()
 		return context
 
@@ -332,3 +299,66 @@ def exportexcel(request):
 
 	else:
 		return redirect('home')
+
+
+
+
+class KonkurencjaDeleteView(DeleteView):
+	template_name = "wyniki/konkurencja_delete.html"
+	context_object_name = 'zawodnik'
+
+	def get_context_data(self, **kwargs):
+		context = super().get_context_data(**kwargs)
+		context['sedziowie_lista'] = sedziowie_lista()
+		context['rts_lista'] = rts_lista()
+		return context
+
+	def get_queryset(self):
+		return Wyniki.objects.all()
+
+	def get_success_url(self):
+		return reverse("wyniki")
+
+	def dispatch(self, request, *args, **kwargs):
+		if request.user.is_admin:
+			return super(KonkurencjaDeleteView, self).dispatch(request, *args, **kwargs)
+		else:
+			return redirect('not_authorized')
+
+
+class UstawieniaListView(ListView):
+	template_name = "wyniki/ustawienia_list.html"
+
+	def get_context_data(self, **kwargs):
+		context = super().get_context_data(**kwargs)
+		context['sedziowie_lista'] = sedziowie_lista()
+		context['rts_lista'] = rts_lista()
+		return context
+
+	def get_queryset(self):
+		return Ustawienia.objects.all()
+
+	def dispatch(self, request, *args, **kwargs):
+		if request.user.is_admin:
+			return super(UstawieniaListView, self).dispatch(request, *args, **kwargs)
+		else:
+			return redirect('not_authorized')
+	
+class UstawieniaUpdateView(UpdateView):
+	template_name = "wyniki/ustawienia_edit.html"
+	form_class = UstawieniaModelForm
+	def get_context_data(self, **kwargs):
+		context = super().get_context_data(**kwargs)
+		context['sedziowie_lista'] = sedziowie_lista()
+		context['rts_lista'] = rts_lista()
+		return context
+
+	def get_queryset(self):
+		return Ustawienia.objects.all()
+
+	def get_success_url(self):
+		return reverse("home")
+		
+	# def form_valid(self, form):
+	# 	return super(template_name,self).form_valid(form)
+
