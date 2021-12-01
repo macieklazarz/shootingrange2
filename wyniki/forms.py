@@ -17,23 +17,12 @@ class Wyniki_edit(forms.ModelForm):
         self.fields['zawodnik'].disabled = True
 
 class DodajZawodnika(forms.ModelForm):
-    # zawody=forms.ModelChoiceField(queryset=Zawody.objects.all())
-    # zawodnik=forms.ModelChoiceField(queryset=Account.objects.all())
-    # class Meta:
-    #     model=models.Wyniki
-    #     fields = ['zawodnik', 'zawody']
-    # def save(self, commit=True):
-    #     instance = super().cabe(commit=False)
-    #     zaw = self.cleaned_data['zawodnik']
-    #     instance.zawodnik = zaw[0]
-    #     instance.save(commit)
-    #     return instance
+
     class Meta:
         model = models.Wyniki
-        # fields = ['zawody']
-        # fields = ['zawodnik', 'zawody']
+
         fields = [ 'zawody', 'zawodnik']
-        # exclude =['zawodnik']
+
 
     def __init__(self, *args, **kwargs):
         from django.forms.widgets import HiddenInput
@@ -65,12 +54,6 @@ class DodajZawodnika(forms.ModelForm):
         for i in zawodnicy_przypisani_do_zawodow_email:
             zawodnicy_przypisani_do_zawodow_email_lista.append(i)                                                                                                      #robie liste z mailami uczestnikow wybranych zawodow
         print(f'zawodnicy email {zawodnicy_przypisani_do_zawodow_email_lista}')
-        # usser = request.user.username
-        # print(f'user to {usser}')
-        # zaw = self.fields['zawodnik']
-        # print(f' wybrane zawody {list}')
-        # lista = 'admin@admin.com'
-        # print(f'zawodniczek to {zaw} typ {type(zaw)} {lista} typ {type(lista)}')
         if (wybrany_zawodnik in zawodnicy_przypisani_do_zawodow_email_lista):                                                                               #sprawdzam czy wybrany zawodnik jest na liscie z mailami uczestnikow wybranych zawodow
             # print('powinno wywalic')
             raise ValidationError("Jesteś już zarejestrowany na te zawody")
@@ -118,14 +101,7 @@ class RejestracjaModelForm(forms.ModelForm):
         # self.fields['zawodnik'] = forms.ModelChoiceField(queryset=Account.objects.all())
         if not user:
             self.fields['zawodnik'].widget = HiddenInput()
-        # zmienna = self.fields['zawodnik']
-        # print(f'zmienna: {zmienna.id}')
-        # self.fields['zawody'] = forms.ModelChoiceField(queryset=Zawody.objects.all())
-        # self.fields['zawody'] = 'admin@admin.com'
-        # self.fields['zawody'] = forms.MultipleChoiceField(
-        #     widget=forms.CheckboxSelectMultiple,
-        #     queryset=Zawody.objects.all(),
-        # ) 
+
 
 
 

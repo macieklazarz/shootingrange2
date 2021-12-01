@@ -1,5 +1,6 @@
-	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-KyZXEAg3QhqLMpG8r+8fhAXLRk2vvoC2f3B09zVXn8CA5QIVfZOJ3BCsw2P0p/We" crossorigin="anonymous">
+	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-BmbxuPwQa2lc/FVzBcNJ7UAyJxM6wuqIj61tLrc4wSX0szH/Ev+nYRRuWlolflfl" crossorigin="anonymous">
 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/js/bootstrap.bundle.min.js" integrity="sha384-b5kHyXgcpbZJO/tY9Ul7kGkf1S0CWuKcCD38l8YkeH8z8QjE0GmW1gYU5S9FOnJ0" crossorigin="anonymous"></script>
 
 	<style type="text/css">
 		body {
@@ -80,58 +81,42 @@
 		    left: 0;
 		    transform: none;
 		  }
-
-	}
+	
 	</style>
 
 
+      <div class="container">
+        <nav class="navbar navbar-expand-sm navbar-light">
+            <a class="navbar-brand" href="#">
+                <img src="bootstrap-logo.svg" alt="Bootstrap" width="30" height="24" class="d-inline-block align-top">
+                <span class="hidden">Bootstrap</span>
+              </a>
+            <button 
+            	class="navbar-toggler" 
+            	type="button" 
+            	data-bs-toggle="collapse" 
+            	data-bs-target="#toggleMobileMenu" 
+            	aria-controls="toggleMobileMenu" 
+            	aria-expanded="false" 
+            	aria-label="Toggle navigation"
+            >
+            <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="toggleMobileMenu">
+            
+                <ul class="navbar-nav ms-auto text-center">
+                    <li>
+                        <a class="nav-link" href="#">Pricing</a>
+                    </li>
+                    <li>
+                        <a class="nav-link" href="#">Features</a>
+                    </li>
+                    <li>
+                        <a class="nav-link" href="#">Contact</a>
+                    </li>
+                </ul>
+                
 
-	<div class="centered">
-      
-      <div class="topnav">
-	      {% if request.user.is_authenticated %}
-		      <!-- <nav class="d-inline-flex mt-2 mt-md-0 ms-md-auto"> -->
-		     <span class="badge badge-light badge-secondary">
-        		
-        		<h4>Witaj! Jesteś zalogowany jako	{{request.user}}</h4>
-        		
-    		</span>
-		      <div class="topnav-right">
-		        <a href="{% url 'home' %}">Strona domowa</a>
-		        <a href="{% url 'logout'%}">Wylogowanie</a>
-		        <a href="{% url 'rejestracja_na_zawody'%}">Zapisy do konkurencji</a>
-		        <a href="{% url 'wyniki'%}">Wyniki</a>
-		        {% with '1 2 3' as list%}
-		        {% for i in list.split %}
-		        <a href="{% url 'zawody_lista' %}">i = {{i}}</a>
-		        <a href="{% url 'zawody_lista' %}">r = {{request.user.id}}</a>
-		        {% if request.user.id == i%} 
-	        	<a href="{% url 'zawody_lista' %}">Zarządzaj konkurencjami</a>
-	        	<a href="{% url 'sedzia_lista' %}">Zarządzaj sędziami</a>
-	        	<a href="{% url 'users_rts'%}">RTS</a>
-	        	{% endif %}
-	        	{% endfor %}
-	        	{% endwith %}
-	        	{% if user.is_superuser or request.user.id in rts_lista%} 
-	        	<a href="{% url 'users' %}">Zarządzaj użytkownikami</a>
-	        	<a href="{% url 'ustawienia'%}">Ustawienia</a>
-	        	{% endif %}
-		        {% if request.user.id in sedziowie_lista or user.is_superuser or request.user.id in rts_lista%}
-		        <a  href="{% url 'wyniki_edycja'%}">Edytuj Wyniki</a>
-		        {% endif %}
-		        
-	        {% else %}
-	        	<a href="{% url 'home' %}">Strona domowa</a>
-
-		        <a href="{% url 'register'%}">Zarejestruj się</a>
-		        <a href="{% url 'login'%}">Logowanie</a>
-		    {% endif %}
-	      </div>
-	    </div>
-    </div>
-
-
-
-
-
-
+            </div>
+        </nav>
+      </div>

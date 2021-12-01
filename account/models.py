@@ -47,6 +47,7 @@ class Account(AbstractBaseUser):
 	is_staff				= models.BooleanField(default=False)
 	is_superuser			= models.BooleanField(default=False)
 	paid					= models.BooleanField(default=False)
+	rts						= models.BooleanField(default=False)
 	# first_name
 
 	USERNAME_FIELD = 'email'
@@ -64,9 +65,9 @@ class Account(AbstractBaseUser):
 		return True
 
 
-class Rts(models.Model):
-	user 		= models.OneToOneField(Account, on_delete=models.CASCADE)
+# class Rts(models.Model):
+# 	user 		= models.OneToOneField(Account, on_delete=models.CASCADE)
 
 
-	def __str__(self):
-		return (self.user.imie+' '+self.user.nazwisko)
+	# def __str__(self):
+	# 	return (self.user.imie+' '+self.user.nazwisko)

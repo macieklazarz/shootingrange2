@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
-from account.models import Account, Rts
+from account.models import Account
 
 
 
@@ -16,4 +16,4 @@ class AccountAdmin(UserAdmin):
 	fieldsets = ()
 
 admin.site.register(Account, AccountAdmin)
-admin.site.register(Rts)
+# admin.site.register(Rts)

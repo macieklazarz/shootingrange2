@@ -1,8 +1,8 @@
 from django.shortcuts import render, redirect, reverse
 from django.contrib.auth import login, authenticate, logout
-from account.forms import RegistrationForm, AccountAuthenticationForm, AccountModelForm, RtsModelForm
+from account.forms import RegistrationForm, AccountAuthenticationForm, AccountModelForm
 from django.views.generic import TemplateView, ListView, DetailView, CreateView, UpdateView, DeleteView
-from .models import Account, Rts
+from .models import Account
 from zawody.models import Sedzia
 # from wyniki.views import sedziowie_lista
 
@@ -14,12 +14,12 @@ def sedziowie_lista():
 		sedziowie_lista.append(i)
 	return sedziowie_lista
 
-def rts_lista():
-	rts = Rts.objects.all().values_list('user', flat=True).distinct()
-	rts_lista = []
-	for i in rts:
-		rts_lista.append(i)
-	return rts_lista
+# def rts_lista():
+# 	rts = Rts.objects.all().values_list('user', flat=True).distinct()
+# 	rts_lista = []
+# 	for i in rts:
+# 		rts_lista.append(i)
+# 	return rts_lista
 
 def registration_form(request):
 	context={}
@@ -92,7 +92,7 @@ class AccountUpdateView(UpdateView):
 	def get_context_data(self, **kwargs):
 		context = super().get_context_data(**kwargs)
 		context['sedziowie_lista'] = sedziowie_lista()
-		context['rts_lista'] = rts_lista()
+		# context['rts_lista'] = rts_lista()
 		return context
 
 	def get_queryset(self):
@@ -110,14 +110,14 @@ class AccountListView(ListView):
 	def get_context_data(self, **kwargs):
 		context = super().get_context_data(**kwargs)
 		context['sedziowie_lista'] = sedziowie_lista()
-		context['rts_lista'] = rts_lista()
+		# context['rts_lista'] = rts_lista()
 		return context
 
 	def get_queryset(self):
 		return Account.objects.all()
 
 	def dispatch(self, request, *args, **kwargs):
-		if request.user.is_admin:
+		if request.user.rts:
 			return super(AccountListView, self).dispatch(request, *args, **kwargs)
 		else:
 			return redirect('not_authorized')
@@ -152,7 +152,7 @@ class AccountDeleteView(DeleteView):
 	def get_context_data(self, **kwargs):
 		context = super().get_context_data(**kwargs)
 		context['sedziowie_lista'] = sedziowie_lista()
-		context['rts_lista'] = rts_lista()
+		# context['rts_lista'] = rts_lista()
 		return context
 
 	def get_queryset(self):
@@ -168,65 +168,65 @@ class AccountDeleteView(DeleteView):
 			return redirect('not_authorized')
 
 
-class RtsListView(ListView):
-	template_name = "account/rts_list.html"
+# class RtsListView(ListView):
+# 	template_name = "account/rts_list.html"
 
-	def get_context_data(self, **kwargs):
-		context = super().get_context_data(**kwargs)
-		context['sedziowie_lista'] = sedziowie_lista()
-		context['rts_lista'] = rts_lista()
-		return context
+# 	def get_context_data(self, **kwargs):
+# 		context = super().get_context_data(**kwargs)
+# 		context['sedziowie_lista'] = sedziowie_lista()
+# 		context['rts_lista'] = rts_lista()
+# 		return context
 
-	def get_queryset(self):
-		return Rts.objects.all()
+# 	def get_queryset(self):
+# 		return Rts.objects.all()
 
-	def dispatch(self, request, *args, **kwargs):
-		if request.user.is_admin:
-			return super(RtsListView, self).dispatch(request, *args, **kwargs)
-		else:
-			return redirect('not_authorized')
-
-
+# 	def dispatch(self, request, *args, **kwargs):
+# 		if request.user.is_admin:
+# 			return super(RtsListView, self).dispatch(request, *args, **kwargs)
+# 		else:
+# 			return redirect('not_authorized')
 
 
-class RtsDeleteView(DeleteView):
-	template_name = "account/rts_delete.html"
-	context_object_name = 'rts'
 
-	def get_context_data(self, **kwargs):
-		context = super().get_context_data(**kwargs)
-		context['sedziowie_lista'] = sedziowie_lista()
-		context['rts_lista'] = rts_lista()
-		return context
 
-	def get_queryset(self):
-		return Rts.objects.all()
+# class RtsDeleteView(DeleteView):
+# 	template_name = "account/rts_delete.html"
+# 	context_object_name = 'rts'
 
-	def get_success_url(self):
-		return reverse("users_rts")
+# 	def get_context_data(self, **kwargs):
+# 		context = super().get_context_data(**kwargs)
+# 		context['sedziowie_lista'] = sedziowie_lista()
+# 		context['rts_lista'] = rts_lista()
+# 		return context
 
-	def dispatch(self, request, *args, **kwargs):
-		if request.user.is_admin:
-			return super(RtsDeleteView, self).dispatch(request, *args, **kwargs)
-		else:
-			return redirect('not_authorized')
+# 	def get_queryset(self):
+# 		return Rts.objects.all()
 
-class RtsCreateView(CreateView):
-	template_name = "account/rts_add.html"
-	form_class = RtsModelForm
+# 	def get_success_url(self):
+# 		return reverse("users_rts")
 
-	def get_context_data(self, **kwargs):
-		context = super().get_context_data(**kwargs)
-		context['sedziowie_lista'] = sedziowie_lista()
-		context['rts_lista'] = rts_lista()
-		return context
+# 	def dispatch(self, request, *args, **kwargs):
+# 		if request.user.is_admin:
+# 			return super(RtsDeleteView, self).dispatch(request, *args, **kwargs)
+# 		else:
+# 			return redirect('not_authorized')
 
-	def get_success_url(self):
-		return reverse("users_rts")
-		return super(RtsCreateView, self).form_valid(form)
+# class RtsCreateView(CreateView):
+# 	template_name = "account/rts_add.html"
+# 	form_class = RtsModelForm
 
-	def dispatch(self, request, *args, **kwargs):
-		if request.user.is_admin:
-			return super(RtsCreateView, self).dispatch(request, *args, **kwargs)
-		else:
-			return redirect('not_authorized')
+# 	def get_context_data(self, **kwargs):
+# 		context = super().get_context_data(**kwargs)
+# 		context['sedziowie_lista'] = sedziowie_lista()
+# 		context['rts_lista'] = rts_lista()
+# 		return context
+
+# 	def get_success_url(self):
+# 		return reverse("users_rts")
+# 		return super(RtsCreateView, self).form_valid(form)
+
+# 	def dispatch(self, request, *args, **kwargs):
+# 		if request.user.is_admin:
+# 			return super(RtsCreateView, self).dispatch(request, *args, **kwargs)
+# 		else:
+# 			return redirect('not_authorized')

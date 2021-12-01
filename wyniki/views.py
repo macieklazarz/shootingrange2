@@ -12,7 +12,7 @@ from django.db.models.functions import Concat
 from django.views.generic import TemplateView, ListView, DetailView, CreateView, UpdateView, DeleteView
 from .forms import WynikiModelForm, RejestracjaModelForm, UstawieniaModelForm
 from zawody.models import Sedzia
-from account.views import rts_lista, sedziowie_lista
+from account.views import sedziowie_lista
 # from django.contrib.auth.mixins import LoginRequiredMixin
 # from agents.mixins import OrganisorAndLoginRequiredMixin
 # from django.utils import simplejson
@@ -25,7 +25,7 @@ from account.views import rts_lista, sedziowie_lista
 def wyniki_edycja(request):
 	context = {}
 	context['sedziowie_lista'] = sedziowie_lista()
-	context['rts_lista'] = rts_lista()
+	# context['rts_lista'] = rts_lista()
 	# print(f'req user {request.user.id}')
 	user_id = request.user.id 																				#sprawdzamy użytkownika ktory jest zalogowany
 	powiazane_zawody = Sedzia.objects.filter(sedzia__id = user_id).values_list('zawody', flat=True)			#sprawdzamy do jakich zawodow jest przyporzadkowany sedzua
@@ -64,7 +64,7 @@ def wyniki_edycja(request):
 def wyniki(request):
 	context = {}
 	context['sedziowie_lista'] = sedziowie_lista()
-	context['rts_lista'] = rts_lista()
+	# context['rts_lista'] = rts_lista()
 	zawody = Zawody.objects.all().values_list('id', flat=True).order_by('id')
 	zawody_lista = []
 	for i in zawody:
@@ -89,6 +89,7 @@ def wyniki(request):
 		# sedziowie_queryset.append(Sedzia.objects.annotate(text=Concat("sedzia__imie", V("xxx_"), "sedzia__nazwisko"), output_field=CharField()).filter(zawody = i))
 	for i in sedziowie_queryset:
 		sedziowie.append(i)
+	context['sedziowie'] = sedziowie
 	# print(f'sedziowie TO {sedziowie}')
 	# wyniki1 = Wyniki.objects.filter(zawody = 1).order_by('-wynik', '-X', '-Xx')
 	# wyniki2 = Wyniki.objects.filter(zawody = 2)
@@ -133,7 +134,7 @@ def rejestracja_na_zawody(request):
 		form = forms.DodajZawodnika(initial={'zawodnik': user})
 		context['form'] = form
 	context['sedziowie_lista'] = sedziowie_lista()
-	context['rts_lista'] = rts_lista()
+	# context['rts_lista'] = rts_lista()
 	dodawanie_zawodnika = Ustawienia.objects.filter(nazwa='Rejestracja').values_list("ustawienie")
 	for i in dodawanie_zawodnika:
 		opcja = i[0]
@@ -148,7 +149,6 @@ class RejestracjaNaZawodyView(CreateView):
 	def get_context_data(self, **kwargs):
 		context = super().get_context_data(**kwargs)
 		context['sedziowie_lista'] = sedziowie_lista()
-		context['rts_lista'] = rts_lista()
 		dodawanie_zawodnika = Ustawienia.objects.filter(nazwa='Rejestracja').values_list("ustawienie")
 		for i in dodawanie_zawodnika:
 			opcja = i[0]
@@ -161,7 +161,7 @@ class RejestracjaNaZawodyView(CreateView):
 
 	def get_form_kwargs(self):
 		kwargs = super(RejestracjaNaZawodyView, self).get_form_kwargs()
-		kwargs.update({'user': self.request.user.is_admin})
+		kwargs.update({'user': self.request.user.rts})
 		# kwargs.update({'user': request.user.id})
 		return kwargs
 
@@ -207,7 +207,7 @@ class WynikUpdateView(UpdateView):
 	form_class = WynikiModelForm
 	def get_context_data(self, **kwargs):
 		context = super().get_context_data(**kwargs)
-		context['rts_lista'] = rts_lista()
+		# context['rts_lista'] = rts_lista()
 		context['sedziowie_lista'] = sedziowie_lista()
 		return context
 
@@ -310,7 +310,7 @@ class KonkurencjaDeleteView(DeleteView):
 	def get_context_data(self, **kwargs):
 		context = super().get_context_data(**kwargs)
 		context['sedziowie_lista'] = sedziowie_lista()
-		context['rts_lista'] = rts_lista()
+		# context['rts_lista'] = rts_lista()
 		return context
 
 	def get_queryset(self):
@@ -332,7 +332,7 @@ class UstawieniaListView(ListView):
 	def get_context_data(self, **kwargs):
 		context = super().get_context_data(**kwargs)
 		context['sedziowie_lista'] = sedziowie_lista()
-		context['rts_lista'] = rts_lista()
+		# context['rts_lista'] = rts_lista()
 		return context
 
 	def get_queryset(self):
@@ -350,7 +350,7 @@ class UstawieniaUpdateView(UpdateView):
 	def get_context_data(self, **kwargs):
 		context = super().get_context_data(**kwargs)
 		context['sedziowie_lista'] = sedziowie_lista()
-		context['rts_lista'] = rts_lista()
+		# context['rts_lista'] = rts_lista()
 		return context
 
 	def get_queryset(self):

@@ -2,7 +2,7 @@ from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth import authenticate
 
-from account.models import Account, Rts
+from account.models import Account
 
 class RegistrationForm(UserCreationForm):
 	email = forms.EmailField(max_length=60, help_text='Required. Add a valid email address')
@@ -44,7 +44,8 @@ class AccountModelForm(forms.ModelForm):
             'nazwisko',
             'licencja',
             'klub',
-            'paid'
+            'paid',
+            'rts'
             # 'password1',
             # 'password2',
             )
@@ -54,11 +55,11 @@ class AccountModelForm(forms.ModelForm):
 
 
     
-class RtsModelForm(forms.ModelForm):
-    class Meta:
-        model = Rts
-        fields = (
-            'user',
-            # 'password1',
-            # 'password2',
-            )
+# class RtsModelForm(forms.ModelForm):
+#     class Meta:
+#         model = Rts
+#         fields = (
+#             'user',
+#             # 'password1',
+#             # 'password2',
+#             )

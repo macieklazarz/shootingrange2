@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from account.models import Account
 from zawody.models import Sedzia
-from account.views import rts_lista, sedziowie_lista
+from account.views import sedziowie_lista
 
 # Create your views here.
 def home_screen_view(request):
@@ -14,6 +14,6 @@ def home_screen_view(request):
 	for i in sedziowie:
 		sedziowie_lista.append(i)
 	context['sedziowie_lista'] = sedziowie_lista
-	context['rts_lista'] = rts_lista()
+	# context['rts_lista'] = rts_lista()
 	# print(f'powioazne zawody to {sedziowie_lista}')
 	return render(request, "mainapp/home.html", context)

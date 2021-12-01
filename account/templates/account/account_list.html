@@ -17,6 +17,7 @@
 				<td class="league_table"><b>Licencja</b></td>
 				<td class="league_table"><b>Klub</b></td>
 				<td class="league_table"><b>Opłata</b></td>
+				<td class="league_table"><b>RTS</b></td>
 				<td class="league_table"><b>Edycja</b></td>
 				<td class="league_table"><b>Usuń</b></td>
 			</tr>
@@ -32,6 +33,11 @@
 	        	<td class="league_table">
 	        		<label class="inline-flex items-center">
 	        			<input type="checkbox" {% if osoba.paid == 1 %} checked="checked" {% endif %} onclick="return false">
+	        		</label>
+	        	</td>
+	        	<td class="league_table">
+	        		<label class="inline-flex items-center">
+	        			<input type="checkbox" {% if osoba.rts == 1 %} checked="checked" {% endif %} onclick="return false">
 	        		</label>
 	        	</td>
 				<td><a href="{% url 'account_edit' osoba.id %}" class="btn btn-secondary btn-sm active" role="button" aria-pressed="true">Edytuj użytkownika</a></td>
