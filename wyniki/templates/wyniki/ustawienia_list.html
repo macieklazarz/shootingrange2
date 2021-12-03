@@ -1,28 +1,28 @@
 {% extends "base.html" %}
 
 {% block content %}
-<section class="text-gray-600 body-font">
-  <div class="container px-5 py-24 mx-auto">
-    <div class="flex flex-col text-center w-full mb-20">
+
+  <div class="container">
+    <div class="d-flex justify-content-center pb-5 pt-5">
       <h1 class="sm:text-4xl text-3xl font-medium title-font mb-2 text-gray-900">Ustawienia</h1>
     </div>
     <div class="lg:w-2/3 w-full mx-auto overflow-auto">
-      <table class="table table-hover table-bordered table-responsive mx-auto w-auto align-middle md:text-center">
+      <table class="table table-hover table-responsive table-bordered mx-auto w-auto align-middle md:text-center table-condensed">
         	{% for ustawienie in object_list %}
         	<tr>
-	            <td class="league_table">{{ ustawienie.nazwa }}</td>
-	        	<td class="league_table">
+	            <td class="m">{{ ustawienie.nazwa }}</td>
+	        	<td class="m">
 	        		<label class="inline-flex items-center">
 	        			<input type="checkbox" {% if ustawienie.ustawienie == 1 %} checked="checked" {% endif %} onclick="return false">
 	        		</label>
 	        	</td>
-	        	<td class="league_table"><a href="{% url 'ustawienia_update' ustawienie.pk %}" class="btn btn-primary btn-lg active" role="button" aria-pressed="true">Edytuj</a></td>
+	        	<td class="m"><a href="{% url 'ustawienia_update' ustawienie.pk %}" class="btn btn-primary btn-lg active" role="button" aria-pressed="true"><p class="m m-0 p-0">Edytuj</p></a></td>
 			</tr>	
         	{% endfor %}
       </table>
     </div>
   </div>
-</section>
+
 
 
 

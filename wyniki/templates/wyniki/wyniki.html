@@ -3,14 +3,14 @@
 {% block content %}
 
 
-<section class="oferta" id="oferta">
+
 <!-- 		<div class="title white">
 			<h2 class="titleText"> <span>M</span>oje tuzy<span>.</span></h2>
 			<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
 		</div> -->
-
+		<div class="container pt-5">
 {% for encjawyniki in wyniki %}
-	
+		
 			<div class="d-flex justify-content-center" >
 				<div>
 					{% for i in zawody_nazwa %}
@@ -23,44 +23,44 @@
 			<div class="row justify-content-center">
 				<div class="col-auto">
 					<div class="table-responsive">
-						<table class="table table-hover table-bordered table-responsive mx-auto w-auto align-middle md:text-center">
+						<table class="table table-hover table-responsive table-bordered mx-auto w-auto align-middle md:text-center table-condensed">
 							<thead class="table-secondary">
 								<tr>
-									<td class="league_table"><b>Zawodnik</b></td>
-									<td class="league_table"><b>X</b></td>
-									<td class="league_table"><b>/</b></td>
-									<td class="league_table"><b>9</b></td>
-									<td class="league_table"><b>8</b></td>
-									<td class="league_table"><b>7</b></td>
-									<td class="league_table"><b>6</b></td>
-									<td class="league_table"><b>5</b></td>
-									<td class="league_table"><b>4</b></td>
-									<td class="league_table"><b>3</b></td>
-									<td class="league_table"><b>2</b></td>
-									<td class="league_table"><b>1</b></td>
-									<td class="league_table"><b>Suma</b></td>
+									<td class="m"><b>Zawodnik</b></td>
+									<td class="m"><b>X</b></td>
+									<td class="m"><b>/</b></td>
+									<td class="m"><b>9</b></td>
+									<td class="m"><b>8</b></td>
+									<td class="m"><b>7</b></td>
+									<td class="m"><b>6</b></td>
+									<td class="m"><b>5</b></td>
+									<td class="m"><b>4</b></td>
+									<td class="m"><b>3</b></td>
+									<td class="m"><b>2</b></td>
+									<td class="m"><b>1</b></td>
+									<td class="m"><b>Suma</b></td>
 									{% if user.is_superuser %}
-									<td class="league_table"><b>Usuń z konkurencji</b></td>
+									<td class="m"><b>Usuń z konkurencji</b></td>
 									{% endif %}
 								</tr>
 							</thead>
 							{% for osoba in encjawyniki %}
 							<tr>
-								<td class="league_table">{{osoba.zawodnik}}</td>
-								<td class="league_table">{{osoba.X}}</td>
-								<td class="league_table">{{osoba.Xx}}</td>
-								<td class="league_table">{{osoba.dziewiec}}</td>
-								<td class="league_table">{{osoba.osiem}}</td>
-								<td class="league_table">{{osoba.siedem}}</td>
-								<td class="league_table">{{osoba.szesc}}</td>
-								<td class="league_table">{{osoba.piec}}</td>
-								<td class="league_table">{{osoba.cztery}}</td>
-								<td class="league_table">{{osoba.trzy}}</td>
-								<td class="league_table">{{osoba.dwa}}</td>
-								<td class="league_table">{{osoba.jeden}}</td>
-								<td class="league_table">{{osoba.wynik}}</td>
+								<td class="m">{{osoba.zawodnik}}</td>
+								<td class="m">{{osoba.X}}</td>
+								<td class="m">{{osoba.Xx}}</td>
+								<td class="m">{{osoba.dziewiec}}</td>
+								<td class="m">{{osoba.osiem}}</td>
+								<td class="m">{{osoba.siedem}}</td>
+								<td class="m">{{osoba.szesc}}</td>
+								<td class="m">{{osoba.piec}}</td>
+								<td class="m">{{osoba.cztery}}</td>
+								<td class="m">{{osoba.trzy}}</td>
+								<td class="m">{{osoba.dwa}}</td>
+								<td class="m">{{osoba.jeden}}</td>
+								<td class="m">{{osoba.wynik}}</td>
 								{% if user.is_superuser %}
-								<td> <a href="{% url 'konkurencja_delete' osoba.id %}" class="btn btn-secondary btn-sm active" role="button" aria-pressed="true">Usuń zawodnika</a></td>
+								<td class="m p-0 m-0"> <a href="{% url 'konkurencja_delete' osoba.id %}" class="btn btn-sm btn-secondary active" role="button" aria-pressed="true"><p class="m m-0 p-0">Usuń zawodnika</p></a></td>
 								{% endif %}
 							</tr>
 							{% endfor %}
@@ -72,7 +72,7 @@
 				<div>
 					{% for j in sedziowie %}
 						{% if forloop.counter == forloop.parentloop.counter %}
-								<p>Sędziowie: {% for k in j %} {{k.0}} {{k.1}} {% if not forloop.last%},{% endif %} {% endfor %}</p>			
+								<p class="m">Sędziowie: {% for k in j %} {{k.0}} {{k.1}} {% if not forloop.last%},{% endif %} {% endfor %}</p>			
 						{% endif %}
 					{% endfor %}
 				</div>
@@ -91,36 +91,36 @@
 						<table class="table table-hover table-bordered table-responsive mx-auto w-auto align-middle md:text-center">
 							<thead class="table-secondary">
 								<tr>
-									<td class="league_table"><b>Zawodnik</b></td>
-									<td class="league_table"><b>X</b></td>
-									<td class="league_table"><b>/</b></td>
-									<td class="league_table"><b>9</b></td>
-									<td class="league_table"><b>8</b></td>
-									<td class="league_table"><b>7</b></td>
-									<td class="league_table"><b>6</b></td>
-									<td class="league_table"><b>5</b></td>
-									<td class="league_table"><b>4</b></td>
-									<td class="league_table"><b>3</b></td>
-									<td class="league_table"><b>2</b></td>
-									<td class="league_table"><b>1</b></td>
-									<td class="league_table"><b>Suma</b></td>
+									<td class="m"><b>Zawodnik</b></td>
+									<td class="m"><b>X</b></td>
+									<td class="m"><b>/</b></td>
+									<td class="m"><b>9</b></td>
+									<td class="m"><b>8</b></td>
+									<td class="m"><b>7</b></td>
+									<td class="m"><b>6</b></td>
+									<td class="m"><b>5</b></td>
+									<td class="m"><b>4</b></td>
+									<td class="m"><b>3</b></td>
+									<td class="m"><b>2</b></td>
+									<td class="m"><b>1</b></td>
+									<td class="m"><b>Suma</b></td>
 								</tr>
 							</thead>
 							{% for osoba in klasyfikacja_generalna %}
 							<tr>
-								<td class="league_table">{{osoba.zawodnik}}</td>
-								<td class="league_table">{{osoba.X}}</td>
-								<td class="league_table">{{osoba.Xx}}</td>
-								<td class="league_table">{{osoba.dziewiec}}</td>
-								<td class="league_table">{{osoba.osiem}}</td>
-								<td class="league_table">{{osoba.siedem}}</td>
-								<td class="league_table">{{osoba.szesc}}</td>
-								<td class="league_table">{{osoba.piec}}</td>
-								<td class="league_table">{{osoba.cztery}}</td>
-								<td class="league_table">{{osoba.trzy}}</td>
-								<td class="league_table">{{osoba.dwa}}</td>
-								<td class="league_table">{{osoba.jeden}}</td>
-								<td class="league_table">{{osoba.wynik}}</td>
+								<td class="m">{{osoba.zawodnik}}</td>
+								<td class="m">{{osoba.X}}</td>
+								<td class="m">{{osoba.Xx}}</td>
+								<td class="m">{{osoba.dziewiec}}</td>
+								<td class="m">{{osoba.osiem}}</td>
+								<td class="m">{{osoba.siedem}}</td>
+								<td class="m">{{osoba.szesc}}</td>
+								<td class="m">{{osoba.piec}}</td>
+								<td class="m">{{osoba.cztery}}</td>
+								<td class="m">{{osoba.trzy}}</td>
+								<td class="m">{{osoba.dwa}}</td>
+								<td class="m">{{osoba.jeden}}</td>
+								<td class="m">{{osoba.wynik}}</td>
 							</tr>
 							{% endfor %}
 						</table>
@@ -137,7 +137,8 @@
 				</div>
 			</div>
 		{% endif %}
-	</section>
+		</div>
+
 
 
 

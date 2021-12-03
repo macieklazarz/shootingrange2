@@ -1,36 +1,36 @@
 {% extends "base.html" %}
 
 {% block content %}
-<section class="text-gray-600 body-font">
-  <div class="container px-5 py-24 mx-auto">
-    <div class="flex flex-col text-center w-full mb-20">
+
+  <div class="container">
+    <div class="d-flex justify-content-center pt-5 pb-5">
       <h1 class="sm:text-4xl text-3xl font-medium title-font mb-2 text-gray-900">Sędziowie</h1>
     </div>
     <div class="lg:w-2/3 w-full mx-auto overflow-auto">
       <table class="table table-hover table-bordered table-responsive mx-auto w-auto align-middle md:text-center">
       	<thead class="table-secondary">
         	<tr>
-				<td class="league_table"><b>Zawody</b></td>
-				<td class="league_table"><b>Sędzia</b></td>
-				<td class="league_table"><b>Usuwanie</b></td>
+				<td class="m"><b>Zawody</b></td>
+				<td class="m"><b>Sędzia</b></td>
+				<td class="m"><b>Usuwanie</b></td>
 			</tr>
 		</thead>
         	{% for osoba in object_list %}
         	<tr>
-	            <td class="league_table">{{ osoba.zawody }}</td>
-	        	<td class="league_table">{{ osoba.sedzia }}</td>
-				<td><a href="{% url 'sedzia_delete' osoba.pk %}" class="btn btn-secondary btn-sm active" role="button" aria-pressed="true">Usuń sędziego</a></td>
+	            <td class="m">{{ osoba.zawody }}</td>
+	        	<td class="m">{{ osoba.sedzia }}</td>
+				<td><a href="{% url 'sedzia_delete' osoba.pk %}" class="btn btn-secondary btn-sm active" role="button" aria-pressed="true"><p class="m m-0 p-0">Usuń sędziego</p></a></td>
 			</tr>	
         	{% endfor %}
       </table>
     </div>
 	<div class="d-flex justify-content-center" >
 		<div>
-			<a href="{% url 'dodaj_sedziego' %}" class="btn btn-primary btn-lg active" role="button" aria-pressed="true">Dodaj sędziego</a>
+			<a href="{% url 'dodaj_sedziego' %}" class="btn btn-primary btn-lg active" role="button" aria-pressed="true"<p class="m m-0 p-0">Dodaj sędziego</a></a>
 		</div>
 	</div>
   </div>
-</section>
+
 
 
 

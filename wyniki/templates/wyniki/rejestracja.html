@@ -2,9 +2,9 @@
 {% load tailwind_filters %}
 {% block content %}
 
-<div class="max-w-lg mx-auto">
+<div class="container">
 	{% if dodawanie_zawodnika == 1 %}
-	<div class="py-5 border-t border-gray-200">
+	<div class="d-flex justify-content-center pt-5 pb-5">
 		<h1 class="text-4xl text-gray-800">Rejestracja na zawody</h1>
 	</div>
 	<form method="post" class="mt-0">
@@ -13,7 +13,7 @@
 		<button type='submit' class="w-full text-white bg-blue-500 hover:bg-blue-600 px-3 py-1 rounded-md">Dodaj</button>
 	</form>
 	{% else %}
-	<div class="py-5 border-t border-gray-200">
+	<div class="d-flex justify-content-center">
 		<h1 class="text-4xl text-gray-800">Rejestracja zamknięta</h1>
 	</div>
 	{% endif %}
