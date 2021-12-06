@@ -50,8 +50,12 @@ class AccountModelForm(forms.ModelForm):
 			'paid',
 			'rts'
 			)
-		def clean_licencja(self):
-			return self.cleaned_data['licencja'] or None
+	def clean(self):
+		cleaned_data = super().clean()
+		nazwisko = cleaned_data.get('nazwisko') 
+		nazwisko = nazwisko.upper() 
+		self.cleaned_data['nazwisko'] = nazwisko
+
     # def __init__(self, *args, **kwargs):
     #     super(SedziaModelForm, self).__init__(*args, **kwargs)
     #     self.fields['sedzia'].label = 'Sędzia'
