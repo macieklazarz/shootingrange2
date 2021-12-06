@@ -1,3 +1,4 @@
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views.generic import TemplateView, ListView, DetailView, CreateView, UpdateView, DeleteView
 from django.views import generic
 from django.shortcuts import render, reverse
@@ -9,7 +10,8 @@ from account.views import sedziowie_lista
 
 # Create your views here.
 
-class ZawodyListView(ListView):
+class ZawodyListView(LoginRequiredMixin, ListView):
+	login_url = '/login/'
 	template_name = "zawody/zawody_lista.html"
 
 	def get_context_data(self, **kwargs):
@@ -22,12 +24,16 @@ class ZawodyListView(ListView):
 		return Zawody.objects.all()
 
 	def dispatch(self, request, *args, **kwargs):
-		if request.user.is_admin:
-			return super(ZawodyListView, self).dispatch(request, *args, **kwargs)
-		else:
+		try:
+			if request.user.is_admin:
+				return super(ZawodyListView, self).dispatch(request, *args, **kwargs)
+			else:
+				return redirect('not_authorized')
+		except:
 			return redirect('not_authorized')
 
-class ZawodyCreateView(CreateView):
+class ZawodyCreateView(LoginRequiredMixin, CreateView):
+	login_url = '/login/'
 	template_name = "zawody/zawody_create.html"
 	form_class = ZawodyModelForm
 
@@ -42,12 +48,16 @@ class ZawodyCreateView(CreateView):
 		return super(ZawodyCreateView, self).form_valid(form)
 
 	def dispatch(self, request, *args, **kwargs):
-		if request.user.is_admin:
-			return super(ZawodyCreateView, self).dispatch(request, *args, **kwargs)
-		else:
+		try:
+			if request.user.is_admin:
+				return super(ZawodyCreateView, self).dispatch(request, *args, **kwargs)
+			else:
+				return redirect('not_authorized')
+		except:
 			return redirect('not_authorized')
 
-class ZawodyDeleteView(DeleteView):
+class ZawodyDeleteView(LoginRequiredMixin, DeleteView):
+	login_url = '/login/'
 	template_name = "zawody/zawody_delete.html"
 	context_object_name = 'zawody'
 
@@ -64,14 +74,19 @@ class ZawodyDeleteView(DeleteView):
 		return reverse("zawody_lista")
 
 	def dispatch(self, request, *args, **kwargs):
-		if request.user.is_admin:
-			return super(ZawodyDeleteView, self).dispatch(request, *args, **kwargs)
-		else:
+		try:
+			if request.user.is_admin:
+				return super(ZawodyDeleteView, self).dispatch(request, *args, **kwargs)
+			else:
+				return redirect('not_authorized')
+		except:
 			return redirect('not_authorized')
 
 
 
-class SedziaCreateView(CreateView):
+
+class SedziaCreateView(LoginRequiredMixin, CreateView):
+	login_url = '/login/'
 	template_name = "zawody/sedzia_create.html"
 	form_class = SedziaModelForm
 
@@ -91,7 +106,8 @@ class SedziaCreateView(CreateView):
 		else:
 			return redirect('not_authorized')
 
-class SedziaListView(ListView):
+class SedziaListView(LoginRequiredMixin, ListView):
+	login_url = '/login/'
 	template_name = "zawody/sedzia_lista.html"
 
 	def get_context_data(self, **kwargs):
@@ -104,13 +120,18 @@ class SedziaListView(ListView):
 		return Sedzia.objects.all().order_by('zawody')
 
 	def dispatch(self, request, *args, **kwargs):
-		if request.user.is_admin:
-			print(request.user.id)
-			return super(SedziaListView, self).dispatch(request, *args, **kwargs)
-		else:
+		try:
+			if request.user.is_admin:
+				print(request.user.id)
+				return super(SedziaListView, self).dispatch(request, *args, **kwargs)
+			else:
+				return redirect('not_authorized')
+		except:
 			return redirect('not_authorized')
 
-class SedziaDeleteView(DeleteView):
+
+class SedziaDeleteView(LoginRequiredMixin, DeleteView):
+	login_url = '/login/'
 	template_name = "zawody/sedzia_delete.html"
 	context_object_name = 'sedzia'
 
@@ -127,9 +148,12 @@ class SedziaDeleteView(DeleteView):
 		return reverse("sedzia_lista")
 
 	def dispatch(self, request, *args, **kwargs):
-		if request.user.is_admin:
-			return super(SedziaDeleteView, self).dispatch(request, *args, **kwargs)
-		else:
+		try:
+			if request.user.is_admin:
+				return super(SedziaDeleteView, self).dispatch(request, *args, **kwargs)
+			else:
+				return redirect('not_authorized')
+		except:
 			return redirect('not_authorized')
 
 

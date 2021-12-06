@@ -60,6 +60,30 @@ class DodajZawodnika(forms.ModelForm):
             # self.fields['zawodnik'] =
 
 class WynikiModelForm(forms.ModelForm):
+    CHOICE= [
+        ('0', '0'),
+        ('1', '1'),
+        ('2', '2'),
+        ('3', '3'),
+        ('4', '4'),
+        ('5', '5'),
+        ('6', '6'),
+        ('7', '7'),
+        ('8', '8'),
+        ('9', '9'),
+        ('10', '10')
+    ]
+    X = forms.CharField(widget=forms.Select(choices=CHOICE))
+    Xx = forms.CharField(widget=forms.Select(choices=CHOICE))
+    dziewiec = forms.CharField(widget=forms.Select(choices=CHOICE))
+    osiem = forms.CharField(widget=forms.Select(choices=CHOICE))
+    siedem = forms.CharField(widget=forms.Select(choices=CHOICE))
+    szesc = forms.CharField(widget=forms.Select(choices=CHOICE))
+    piec = forms.CharField(widget=forms.Select(choices=CHOICE))
+    cztery = forms.CharField(widget=forms.Select(choices=CHOICE))
+    trzy = forms.CharField(widget=forms.Select(choices=CHOICE))
+    dwa = forms.CharField(widget=forms.Select(choices=CHOICE))
+    jeden = forms.CharField(widget=forms.Select(choices=CHOICE))
     class Meta:
         model = Wyniki
         fields = ['X', 'Xx', 'dziewiec', 'osiem', 'siedem', 'szesc', 'piec', 'cztery', 'trzy', 'dwa', 'jeden']
@@ -112,3 +136,8 @@ class UstawieniaModelForm(forms.ModelForm):
             'nazwa',
             'ustawienie',
             )
+
+    def __init__(self, *args, **kwargs):
+        from django.forms.widgets import HiddenInput
+        super(UstawieniaModelForm, self).__init__(*args, **kwargs)
+        self.fields['nazwa'].widget = HiddenInput()

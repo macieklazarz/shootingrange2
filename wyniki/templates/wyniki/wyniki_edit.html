@@ -3,14 +3,22 @@
 {% load tailwind_filters %}
 
 <section class="text-gray-600 body-font overflow-hidden">
-  <div class="container px-5 py-24 mx-auto">
-    <div class="lg:w-4/5 mx-auto flex flex-wrap">
-      <div class="lg:w-1/2 w-full lg:pr-10 lg:py-6 mb-6 lg:mb-0">
-		<form method="post">
-			{% csrf_token %}
-			{{form|crispy}}
-			<button type="submit" class="mt-5 w-full text-white bg-blue-500 hover:bg-blue-600 px-3 py-1 rounded-md">Submit</button>
-		</form>
+  <div class="container px-5 py-4 mx-auto">
+  	<div class="row justify-content-center">
+  		<div class="col-auto">
+  			<div class="table-responsive">
+  				<p>Edytujesz wynik konkurencji {{ cont.zawody }} dla {{ cont.zawodnik }}</p>
+					<form method="post">
+						<table class="table table-hover table-responsive table-bordered mx-auto w-auto align-middle md:text-center table-condensed my-1">
+						{% csrf_token %}
+						{{form.as_table}}
+
+						</table>
+						<button type="submit" class="mt-1 w-full text-white bg-blue-500 hover:bg-blue-600 px-3 py-1 rounded-md">Submit</button>
+					</form>
+				</div>
+			</div>
+		</div>
   </div>
 </section>
 

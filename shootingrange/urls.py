@@ -19,7 +19,7 @@ from django.urls import path
 from mainapp.views import (home_screen_view,)
 from zawody.views import (ZawodyCreateView,SedziaCreateView, SedziaListView, SedziaDeleteView, ZawodyListView, ZawodyDeleteView )
 from account.views import (registration_form, registration_form_no_login, logout_view, login_view, AccountListView, AccountUpdateView, AccountDeleteView)
-from wyniki.views import (wyniki_edycja,  wyniki, rejestracja_na_zawody, wyniki_edit, exportexcel, WynikUpdateView, not_authorized, RejestracjaNaZawodyView, KonkurencjaDeleteView, UstawieniaListView, UstawieniaUpdateView)
+from wyniki.views import (wyniki_edycja,  wyniki, rejestracja_na_zawody,  exportexcel, WynikUpdateView, not_authorized, RejestracjaNaZawodyView, KonkurencjaDeleteView, UstawieniaListView, UstawieniaUpdateView)
 
 urlpatterns = [
     path('admin/', admin.site.urls),

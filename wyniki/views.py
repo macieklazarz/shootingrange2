@@ -1,3 +1,4 @@
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import render, redirect, get_object_or_404, reverse
 from wyniki.models import Wyniki, Ustawienia
 from zawody.models import Sedzia, Zawody
@@ -141,7 +142,9 @@ def rejestracja_na_zawody(request):
 	context['dodawanie_zawodnika'] = opcja
 	return render(request, 'wyniki/rejestracja_na_zawody.html', context)
 
-class RejestracjaNaZawodyView(CreateView):
+
+class RejestracjaNaZawodyView(LoginRequiredMixin, CreateView):
+	login_url = '/login/'
 	template_name = "wyniki/rejestracja.html"
 	form_class = RejestracjaModelForm
 	# user_id = request.user.id
@@ -156,7 +159,7 @@ class RejestracjaNaZawodyView(CreateView):
 		return context
 
 	def get_success_url(self):
-		return reverse("home")
+		return reverse("rejestracja_na_zawody")
 		return super(RejestracjaNaZawodyView, self).form_valid(form)
 
 	def get_form_kwargs(self):
@@ -172,39 +175,41 @@ class RejestracjaNaZawodyView(CreateView):
 		return initial
 
 
-@login_required(login_url="/login/")
-def wyniki_edit(request, slug, nr_zawodow):
-	user_id = request.user.id 																				#sprawdzamy użytkownika ktory jest zalogowany
-	powiazane_zawody = Sedzia.objects.filter(sedzia__id = user_id).values_list('zawody', flat=True)			#sprawdzamy do jakich zawodow jest przyporzadkowany sedzua
-	powiazane_zawody_lista = []																				#robimy liste powiazanych zawodow
-	for i in powiazane_zawody:
-		powiazane_zawody_lista.append(i)
-	# print(f'powiozane zawody: {powiazane_zawody_lista} typ: {type(powiazane_zawody_lista)}')
-	# print(f'nr zawodow to {nr_zawodow} typ: {type(nr_zawodow)}')
-	if int(nr_zawodow) in powiazane_zawody_lista:
-		print('Success!')
-		post = get_object_or_404(Wyniki, slug=slug)
-		# print(f'slug  = {slug}')
-		if request.method == 'POST':
-			form = forms.Wyniki_edit(request.POST, instance=post)
-			if form.is_valid():
-				post = form.save(commit=False)
-				post.save()
-				print('zapisano')
-				return redirect('wyniki_edycja')
-		else:
-			form = forms.Wyniki_edit(instance=post)
-			print('niezapisano')
-		template = 'wyniki/wyniki_edit.html'
-		context = {'form': form}
-		return render(request, template, context)
-	else:
-		return redirect('home')
+# @login_required(login_url="/login/")
+# def wyniki_edit(request, slug, nr_zawodow):
+# 	user_id = request.user.id 																				#sprawdzamy użytkownika ktory jest zalogowany
+# 	powiazane_zawody = Sedzia.objects.filter(sedzia__id = user_id).values_list('zawody', flat=True)			#sprawdzamy do jakich zawodow jest przyporzadkowany sedzua
+# 	powiazane_zawody_lista = []																				#robimy liste powiazanych zawodow
+# 	for i in powiazane_zawody:
+# 		powiazane_zawody_lista.append(i)
+# 	# print(f'powiozane zawody: {powiazane_zawody_lista} typ: {type(powiazane_zawody_lista)}')
+# 	# print(f'nr zawodow to {nr_zawodow} typ: {type(nr_zawodow)}')
+# 	if int(nr_zawodow) in powiazane_zawody_lista:
+# 		print('Success!')
+# 		post = get_object_or_404(Wyniki, slug=slug)
+# 		print(f'post  = {post}')
+# 		if request.method == 'POST':
+# 			form = forms.Wyniki_edit(request.POST, instance=post)
+# 			if form.is_valid():
+# 				post = form.save(commit=False)
+# 				post.save()
+# 				print('zapisano')
+# 				return redirect('wyniki_edycja')
+# 		else:
+# 			form = forms.Wyniki_edit(instance=post)
+# 			print('niezapisano')
+# 		template = 'wyniki/wyniki_edit.html'
+# 		context = {'form': form, 'i': post}
+# 		return render(request, template, context)
+# 	else:
+# 		return redirect('home')
 
 
-class WynikUpdateView(UpdateView):
+class WynikUpdateView(LoginRequiredMixin, UpdateView):
+	login_url = '/login/'
 	template_name = "wyniki/wyniki_edit.html"
 	form_class = WynikiModelForm
+	context_object_name = 'cont'
 	def get_context_data(self, **kwargs):
 		context = super().get_context_data(**kwargs)
 		# context['rts_lista'] = rts_lista()
@@ -301,9 +306,8 @@ def exportexcel(request):
 		return redirect('home')
 
 
-
-
-class KonkurencjaDeleteView(DeleteView):
+class KonkurencjaDeleteView(LoginRequiredMixin, DeleteView):
+	login_url = '/login/'
 	template_name = "wyniki/konkurencja_delete.html"
 	context_object_name = 'zawodnik'
 
@@ -320,13 +324,17 @@ class KonkurencjaDeleteView(DeleteView):
 		return reverse("wyniki")
 
 	def dispatch(self, request, *args, **kwargs):
-		if request.user.is_admin:
-			return super(KonkurencjaDeleteView, self).dispatch(request, *args, **kwargs)
-		else:
+		try:
+			if request.user.is_admin:
+				return super(KonkurencjaDeleteView, self).dispatch(request, *args, **kwargs)
+			else:
+				return redirect('not_authorized')
+		except:
 			return redirect('not_authorized')
 
 
-class UstawieniaListView(ListView):
+class UstawieniaListView(LoginRequiredMixin, ListView):
+	login_url = '/login/'
 	template_name = "wyniki/ustawienia_list.html"
 
 	def get_context_data(self, **kwargs):
@@ -339,12 +347,16 @@ class UstawieniaListView(ListView):
 		return Ustawienia.objects.all()
 
 	def dispatch(self, request, *args, **kwargs):
-		if request.user.is_admin:
-			return super(UstawieniaListView, self).dispatch(request, *args, **kwargs)
-		else:
+		try:
+			if request.user.is_admin:
+				return super(UstawieniaListView, self).dispatch(request, *args, **kwargs)
+			else:
+				return redirect('not_authorized')
+		except:
 			return redirect('not_authorized')
 	
-class UstawieniaUpdateView(UpdateView):
+class UstawieniaUpdateView(LoginRequiredMixin,UpdateView):
+	login_url = '/login/'
 	template_name = "wyniki/ustawienia_edit.html"
 	form_class = UstawieniaModelForm
 	def get_context_data(self, **kwargs):
@@ -359,6 +371,12 @@ class UstawieniaUpdateView(UpdateView):
 	def get_success_url(self):
 		return reverse("home")
 		
-	# def form_valid(self, form):
-	# 	return super(template_name,self).form_valid(form)
+	def dispatch(self, request, *args, **kwargs):
+		try:
+			if request.user.is_admin:
+				return super(UstawieniaUpdateView, self).dispatch(request, *args, **kwargs)
+			else:
+				return redirect('not_authorized')
+		except:
+			return redirect('not_authorized')
 

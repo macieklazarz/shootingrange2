@@ -34,21 +34,24 @@ class AccountAuthenticationForm(forms.ModelForm):
 				raise forms.ValidationError("Invalid login")
 
 class AccountModelForm(forms.ModelForm):
-    class Meta:
-        model = Account
-        fields = (
-            'email',
-            # 'username',
-            'username',
-            'imie',
-            'nazwisko',
-            'licencja',
-            'klub',
-            'paid',
-            'rts'
-            # 'password1',
-            # 'password2',
-            )
+	imie	 = forms.CharField(widget=forms.TextInput())
+	nazwisko = forms.CharField(widget=forms.TextInput())
+	licencja = forms.CharField(required=False,widget=forms.TextInput())
+	klub	 = forms.CharField(required=False,widget=forms.TextInput())
+	class Meta:
+		model = Account
+		fields = (
+			'email',
+			'username',
+			'imie',
+			'nazwisko',
+			'licencja',
+			'klub',
+			'paid',
+			'rts'
+			)
+		def clean_licencja(self):
+			return self.cleaned_data['licencja'] or None
     # def __init__(self, *args, **kwargs):
     #     super(SedziaModelForm, self).__init__(*args, **kwargs)
     #     self.fields['sedzia'].label = 'Sędzia'

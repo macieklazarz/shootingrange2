@@ -1,3 +1,157 @@
+header
+{
+	position: fixed;
+	top: 0;
+	left: 0;
+	width: 100%;
+	padding: 10px 100px;
+	z-index: 10000;
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	transition: 0.5s;
+	background-color: grey;
+}
+header.sticky
+{
+	background: #fff;
+	padding: 10px 100px;
+	box-shadow: 0 5px 20px rgba(0,0,0,0.05);
+	
+}
+header .logo
+{
+	color: #fff;
+	font-weight: 700;
+	font-size: 1.5em;
+	text-decoration: none;
+}
+header.sticky .logo
+{
+	color: #111;
+}
+
+header .logo span
+{
+	color: white;
+	white-space: nowrap;
+}
+
+header.sticky .logo span
+{
+	color: #111;
+}
+
+header .navigation
+{
+	position: relative;
+	display: flex;
+}
+
+header .navigation li
+{
+	list-style: none;
+	margin-left: 30px;
+	text-align: center;
+}
+
+header .navigation li a
+{
+	text-decoration: none;
+	color: #fff;
+	font-weight: 300;
+	transition: transform 2s ease-in-out;
+}
+
+
+header.sticky .navigation li
+{
+	color: #111;
+}
+
+header.sticky .navigation li a
+{
+	color: #111;
+}
+
+header.sticky .navigation li a:hover
+{
+	/*color: #ff0157;*/
+}
+
+
+@media (max-width: 991px)
+{
+	header,
+	header.sticky{
+		padding: 10px 20px;
+	}
+	header .navigation
+	{
+		display: none;
+	}
+	header .navigation.active
+	{
+		width: 100%;
+		height: calc(100% - 9px);
+		position: fixed;
+		top: 68px;
+		left: 0;
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		flex-direction: column;
+		background: #fff;
+		padding-left: 0;
+		
+	}
+
+	header .navigation li
+	{
+		margin-left: 0;
+	}
+	header .navigation li a
+	{
+		color: #111;
+		font-size: 1.6em;
+	}
+	.MenuToggle
+	{
+		position: relative;
+		width: 40px;
+		height: 40px;
+		background: url(Menu.png);
+		/*background-color: white;*/
+		background-size: 30px;
+		background-repeat: no-repeat;
+		background-position: center;
+		cursor: pointer;
+	}
+	.MenuToggle active
+	{
+		/*background: url(././close.png);*/
+		background-size: 25px;
+		background-repeat: no-repeat;
+		background-position: center;
+	}
+	header.sticky .MenuToggle
+	{
+		filter: invert(1);
+	}
+	
+}
+
+
+
+
+
+
+###############################################
+
+
+
+
+
 .m
 {
 	font-size: 20px;
@@ -40,7 +194,7 @@
 
 /* Style the active link (or home/logo) */
 .active {
-  background-color: #04AA6D;
+  /*background-color: #04AA6D;*/
   color: white;
 }
 
@@ -50,6 +204,11 @@
 	{
 		font-size: 12px;
 		padding: 0px !important;
+	}
+
+	header .logo
+	{
+		font-size: 1em;
 	}
 
 }
@@ -64,7 +223,8 @@
 	{
 		padding: 5px !important;
 	}
-	}
+
+}
 
 @media (max-width: 370px)
 {

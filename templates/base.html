@@ -14,75 +14,48 @@
 
 	</head>
 	<body>
-		<div class="container p-0">
+	<header>
+		<a href="#" class="logo">
+			{% if request.user.is_authenticated %}
+				<span>Witaj {{request.user}}</span>
+			{% endif %}
+		</a>
+		<div class="MenuToggle" onclick="toggleMenu();"></div>
+		<ul class="navigation">
+			{% if request.user.is_authenticated %}
+				<li><a href="{% url 'home' %}" onclick="toggleMenu();">Strona główna</a></li>
+				<li><a href="{% url 'logout'%}" onclick="toggleMenu();">Wylogowanie</a></li>
+				<li><a href="{% url 'rejestracja_na_zawody'%}" onclick="toggleMenu();">Zapisy do konkurencji</a></li>
+				<li><a href="{% url 'wyniki'%}" onclick="toggleMenu();">Wyniki</a></li>
+				{% if user.is_superuser or user.rts %}
+					<li><a href="{% url 'users' %}" onclick="toggleMenu();">Zarządzaj użytkownikami</a></li>
+				{% endif %}
+				{% if user.is_superuser %}
+					<li><a href="{% url 'zawody_lista' %}" onclick="toggleMenu();">Edycja konkurencji</a></li>
+					<li><a href="{% url 'ustawienia'%}" onclick="toggleMenu();">Ustawienia</a></li>
+					<li><a href="{% url 'sedzia_lista' %}" onclick="toggleMenu();">Zarządzaj sędziami</a></li>
+				{% endif %}
+				{% if request.user.id in sedziowie_lista%}
+					<li><a href="{% url 'wyniki_edycja'%}" onclick="toggleMenu();">Edytuj Wyniki</a></li>
+				{% endif%}
+			{% else %}
+				<li><a href="{% url 'home' %}" onclick="toggleMenu();">Strona domowa</a></li>
+				<li><a href="{% url 'register'%}" onclick="toggleMenu();">Zarejestruj się</a></li>
+				<li><a href="{% url 'login'%}" onclick="toggleMenu();">Logowanie</a></li>
+			{% endif %}
 
-	        <nav class="navbar navbar-expand-sm navbar-light">
-	            <a class="navbar-brand" href="#">
-	                {% if request.user.is_authenticated %}
-	                <span>Witaj {{request.user}}</span>
-	                {% endif %}
-	              </a>
-	            <button 
-	            	class="navbar-toggler" 
-	            	type="button" 
-	            	data-bs-toggle="collapse" 
-	            	data-bs-target="#toggleMobileMenu" 
-	            	aria-controls="toggleMobileMenu" 
-	            	aria-expanded="false" 
-	            	aria-label="Toggle navigation"
-	            >
-	            <span class="navbar-toggler-icon"></span>
-	            </button>
-	            <div class="collapse navbar-collapse" id="toggleMobileMenu">
-	                <ul class="navbar-nav ms-auto text-center">
-	                	{% if request.user.is_authenticated %}
-				        <li>
-				          <a class="nav-link" href="{% url 'home' %}">Strona domowa</a>
-				        </li>
-				        <li>
-				          <a class="nav-link" href="{% url 'logout'%}">Wylogowanie</a>
-				        </li>
-				        <li>
-				          <a class="nav-link" href="{% url 'rejestracja_na_zawody'%}">Zapisy do konkurencji</a>
-				        </li>
-				        <li>
-				          <a class="nav-link" href="{% url 'wyniki'%}">Wyniki</a>
-				        </li>
-				        	{% if user.is_superuser or user.rts %}
-				        <li>
-				          <a class="nav-link" href="{% url 'users' %}">Zarządzaj użytkownikami</a>
-				        </li>
-							{% endif %}
-							{% if user.is_superuser %}
-				        <li>
-				          <a class="nav-link" href="{% url 'zawody_lista' %}">Edycja konkurencji</a>
-				        </li>
-				        <li>
-				          <a class="nav-link" href="{% url 'ustawienia'%}">Ustawienia</a>
-				        </li>
-				        <li>
-				          <a class="nav-link" href="{% url 'sedzia_lista' %}">Zarządzaj sędziami</a>
-				        </li>
-							{% endif %}
-							{% if request.user.id in sedziowie_lista%}
-				        <li>
-				          <a class="nav-link" href="{% url 'wyniki_edycja'%}">Edytuj Wyniki</a>
-				        </li>
-				        	{% endif%}
-				        {% else %}
-				        <li>
-	          				<a class="nav-link" href="{% url 'home' %}">Strona domowa</a>
-	        			</li>
-	        			<li>
-	          				<a class="nav-link" href="{% url 'register'%}">Zarejestruj się</a>
-	        			</li>
-	        			<li>
-	          				<a class="nav-link" href="{% url 'login'%}">Logowanie</a>
-	        			</li>
-	        			{% endif %}
-	                </ul>
-	            </div>
-	        </nav>
+
+
+
+
+		</ul>
+	</header>
+
+		<div class="container p-0 pt-5 mt-5">
+
+
+
+	        
 
 
 
@@ -93,6 +66,22 @@
 		{% include 'snippets/footer.html' %}
 
 	</div>
+
+<script type="text/javascript">
+		window.addEventListener('scroll', function(){
+			const header = document.querySelector('header');
+			header.classList.toggle("sticky", window.scrollY > 0);
+			});
+
+			function toggleMenu(){
+			const MenuToggle=document.querySelector('.MenuToggle');
+			const navigation = document.querySelector('.navigation');
+			MenuToggle.classList.toggle('active');
+			navigation.classList.toggle('active');
+			}
+	</script>
+
+
 	</body>
 
 

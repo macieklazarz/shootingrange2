@@ -8,7 +8,7 @@
 			<h2 class="titleText"> <span>M</span>oje tuzy<span>.</span></h2>
 			<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
 		</div> -->
-		<div class="container pt-5">
+		<div class="container pt-6">
 {% for encjawyniki in wyniki %}
 		
 			<div class="d-flex justify-content-center" >
@@ -39,7 +39,7 @@
 									<td class="m"><b>2</b></td>
 									<td class="m"><b>1</b></td>
 									<td class="m"><b>Suma</b></td>
-									{% if user.is_superuser %}
+									{% if user.rts %}
 									<td class="m"><b>Usuń z konkurencji</b></td>
 									{% endif %}
 								</tr>
@@ -59,7 +59,7 @@
 								<td class="m">{{osoba.dwa}}</td>
 								<td class="m">{{osoba.jeden}}</td>
 								<td class="m">{{osoba.wynik}}</td>
-								{% if user.is_superuser %}
+								{% if user.rts %}
 								<td class="m p-0 m-0"> <a href="{% url 'konkurencja_delete' osoba.id %}" class="btn btn-sm btn-secondary active" role="button" aria-pressed="true"><p class="m m-0 p-0">Usuń zawodnika</p></a></td>
 								{% endif %}
 							</tr>
