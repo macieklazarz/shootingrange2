@@ -10,6 +10,7 @@ class ZawodyModelForm(forms.ModelForm):
 		fields = (
 			'nazwa',
 			'liczba_strzalow',
+			'turniej',
 			)
 	def __init__(self, *args, **kwargs):
 		super(ZawodyModelForm, self).__init__(*args, **kwargs)

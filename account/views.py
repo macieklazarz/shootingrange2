@@ -62,11 +62,11 @@ def registration_form_no_login(request):
 		context['registration_form'] = form
 	return render(request, 'account/register.html', context)
 
-def logout_view(request):
+def logout_view(request, pk):
 	logout(request)
-	return redirect('home')
+	return redirect('home', pk)
 
-def login_view(request):
+def login_view(request, pk):
 	context = {}
 	user = request.user
 	if user.is_authenticated:
@@ -80,11 +80,12 @@ def login_view(request):
 
 			if user:
 				login(request, user)
-				return redirect("home")
+				return redirect("home", pk)
 	else:
 		form = AccountAuthenticationForm()
 
 	context['login_form'] = form
+	context['pk'] = pk
 	return render(request, 'account/login.html', context)
 
 class AccountUpdateView(LoginRequiredMixin, UpdateView):
@@ -94,6 +95,7 @@ class AccountUpdateView(LoginRequiredMixin, UpdateView):
 	def get_context_data(self, **kwargs):
 		context = super().get_context_data(**kwargs)
 		context['sedziowie_lista'] = sedziowie_lista()
+		context['pk'] = self.kwargs['pk']
 		# context['rts_lista'] = rts_lista()
 		return context
 
@@ -101,7 +103,7 @@ class AccountUpdateView(LoginRequiredMixin, UpdateView):
 		return Account.objects.all()
 
 	def get_success_url(self):
-		return reverse("users")
+		return reverse("users", kwargs={'pk': self.kwargs['pk_turniej']})
 		
 	def form_valid(self, form):
 		return super(AccountUpdateView,self).form_valid(form)
@@ -123,6 +125,7 @@ class AccountListView(LoginRequiredMixin, ListView):
 		context = super().get_context_data(**kwargs)
 		context['sedziowie_lista'] = sedziowie_lista()
 		# context['rts_lista'] = rts_lista()
+		context['pk'] = self.kwargs['pk']
 		return context
 
 	def get_queryset(self):
@@ -147,6 +150,7 @@ class AccountDeleteView(LoginRequiredMixin, DeleteView):
 	def get_context_data(self, **kwargs):
 		context = super().get_context_data(**kwargs)
 		context['sedziowie_lista'] = sedziowie_lista()
+		context['pk'] = self.kwargs['pk']
 		# context['rts_lista'] = rts_lista()
 		return context
 
@@ -154,7 +158,7 @@ class AccountDeleteView(LoginRequiredMixin, DeleteView):
 		return Account.objects.all()
 
 	def get_success_url(self):
-		return reverse("users")
+		return reverse("users", kwargs={'pk': self.kwargs['pk_turniej']})
 
 	def dispatch(self, request, *args, **kwargs):
 		try:
@@ -163,6 +167,7 @@ class AccountDeleteView(LoginRequiredMixin, DeleteView):
 			else:
 				return redirect('not_authorized')
 		except:
-			return redirect('not_authorized')
+			# return redirect('not_authorized')
+			pass
 
 

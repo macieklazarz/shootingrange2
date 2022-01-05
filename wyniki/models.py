@@ -5,7 +5,7 @@ from zawody.models import Zawody
 class Wyniki(models.Model):
 	# zawody = models.CharField(max_length=30)
 	slug 		= models.SlugField(default=0)
-	zawody 		= models.ForeignKey(Zawody, on_delete=models.CASCADE)
+	zawody 		= models.ForeignKey(Zawody, on_delete=models.CASCADE, verbose_name='konkurencja')
 	zawodnik 	= models.ForeignKey(Account, on_delete=models.CASCADE)
 	X			=models.IntegerField(blank=True, null=False, default=0)
 	Xx			=models.IntegerField(blank=True, null=False, default=0, verbose_name='/')

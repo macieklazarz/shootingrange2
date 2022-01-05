@@ -1,6 +1,6 @@
 from django import forms
 from . import models
-from zawody.models import Zawody
+from zawody.models import Zawody, Turniej
 from account.models import Account
 from wyniki.models import Wyniki, Ustawienia
 from django.core.exceptions import ValidationError
@@ -120,13 +120,22 @@ class RejestracjaModelForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         from django.forms.widgets import HiddenInput
         user = kwargs.pop('user', None)
+        pk = kwargs.pop('pk', None)
         super(RejestracjaModelForm, self).__init__(*args, **kwargs)
         print(f'user admin to {user}')
+        self.fields['zawody'].queryset = Zawody.objects.filter(turniej__id=pk)
         # self.fields['zawodnik'] = forms.ModelChoiceField(queryset=Account.objects.all())
         if not user:
             self.fields['zawodnik'].widget = HiddenInput()
 
 
+class TurniejModelForm(forms.ModelForm):
+    class Meta:
+        model = Turniej
+        fields = (
+            'nazwa',
+            'rejestracja',
+            )
 
 
 class UstawieniaModelForm(forms.ModelForm):

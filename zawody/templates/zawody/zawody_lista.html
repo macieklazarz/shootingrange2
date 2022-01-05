@@ -11,6 +11,7 @@
       	<thead class="table-secondary">
         	<tr>
 				<td class="m"><b>Nazwa</b></td>
+				<td class="m"><b>Turniej</b></td>
 				<td class="m"><b>Liczba strzałów</b></td>
 				<td class="m"><b>Usuwanie konkurencji</b></td>
 
@@ -19,15 +20,16 @@
         	{% for konkurencja in object_list %}
         	<tr>
 	            <td class="m">{{ konkurencja.nazwa }}</td>
+	            <td class="m">{{ konkurencja.turniej }}</td>
 	        	<td class="m">{{ konkurencja.liczba_strzalow }}</td>
-				<td class="m"><a href="{% url 'zawody_delete' konkurencja.pk %}" class="btn btn-secondary btn-sm active" role="button" aria-pressed="true">Usuń konkurencję</a></td>
+				<td class="m"><a href="{% url 'zawody_delete' konkurencja.pk pk %}" class="btn btn-secondary btn-sm active" role="button" aria-pressed="true">Usuń konkurencję</a></td>
 			</tr>	
         	{% endfor %}
       </table>
     </div>
 	<div class="d-flex justify-content-center" >
 		<div>
-			<a href="{% url 'dodaj_zawody' %}" class="btn btn-primary btn-lg active" role="button" aria-pressed="true">Dodaj konkurencję</a>
+			<a href="{% url 'dodaj_zawody' pk=1 %}" class="btn btn-primary btn-lg active" role="button" aria-pressed="true">Dodaj konkurencję</a>
 		</div>
 	</div>
   </div>

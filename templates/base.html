@@ -23,25 +23,25 @@
 		<div class="MenuToggle" onclick="toggleMenu();"></div>
 		<ul class="navigation">
 			{% if request.user.is_authenticated %}
-				<li><a href="{% url 'home' %}" onclick="toggleMenu();">Strona główna</a></li>
-				<li><a href="{% url 'logout'%}" onclick="toggleMenu();">Wylogowanie</a></li>
-				<li><a href="{% url 'rejestracja_na_zawody'%}" onclick="toggleMenu();">Zapisy do konkurencji</a></li>
-				<li><a href="{% url 'wyniki'%}" onclick="toggleMenu();">Wyniki</a></li>
+				<li><a href="{% url 'home' pk=pk %}" onclick="toggleMenu();">Strona główna</a></li>
+				<li><a href="{% url 'logout' pk=pk %}" onclick="toggleMenu();">Wylogowanie</a></li>
+				<li><a href="{% url 'rejestracja_na_zawody' pk=pk %}" onclick="toggleMenu();">Zapisy do konkurencji</a></li>
+				<li><a href="{% url 'wyniki' pk=pk %}" onclick="toggleMenu();">Wyniki</a></li>
 				{% if user.is_superuser or user.rts %}
-					<li><a href="{% url 'users' %}" onclick="toggleMenu();">Zarządzaj użytkownikami</a></li>
+					<li><a href="{% url 'users' pk=pk %}" onclick="toggleMenu();">Zarządzaj użytkownikami</a></li>
 				{% endif %}
 				{% if user.is_superuser %}
-					<li><a href="{% url 'zawody_lista' %}" onclick="toggleMenu();">Edycja konkurencji</a></li>
-					<li><a href="{% url 'ustawienia'%}" onclick="toggleMenu();">Ustawienia</a></li>
-					<li><a href="{% url 'sedzia_lista' %}" onclick="toggleMenu();">Zarządzaj sędziami</a></li>
+					<li><a href="{% url 'zawody_lista' pk=pk %}" onclick="toggleMenu();">Edycja konkurencji</a></li>
+					<li><a href="{% url 'turnieje' pk=pk%}" onclick="toggleMenu();">Turnieje</a></li>
+					<li><a href="{% url 'sedzia_lista' pk=pk %}" onclick="toggleMenu();">Zarządzaj sędziami</a></li>
 				{% endif %}
 				{% if request.user.id in sedziowie_lista%}
-					<li><a href="{% url 'wyniki_edycja'%}" onclick="toggleMenu();">Edytuj Wyniki</a></li>
+					<li><a href="{% url 'wyniki_edycja' pk=pk %}" onclick="toggleMenu();">Edytuj Wyniki</a></li>
 				{% endif%}
 			{% else %}
-				<li><a href="{% url 'home' %}" onclick="toggleMenu();">Strona domowa</a></li>
+				<li><a href="{% url 'home' pk=pk %}" onclick="toggleMenu();">Strona domowa</a></li>
 				<li><a href="{% url 'register'%}" onclick="toggleMenu();">Zarejestruj się</a></li>
-				<li><a href="{% url 'login'%}" onclick="toggleMenu();">Logowanie</a></li>
+				<li><a href="{% url 'login' pk=pk%}" onclick="toggleMenu();">Logowanie</a></li>
 			{% endif %}
 
 

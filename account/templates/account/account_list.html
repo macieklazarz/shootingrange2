@@ -42,8 +42,8 @@
 			        			<input type="checkbox" {% if osoba.rts == 1 %} checked="checked" {% endif %} onclick="return false">
 			        		</label>
 			        	</td>
-						<td><a href="{% url 'account_edit' osoba.id %}" class="btn btn-secondary btn-sm active" role="button" aria-pressed="true">Edytuj użytkownika</a></td>
-						<td><a href="{% url 'account_delete' osoba.id %}" class="btn btn-secondary btn-sm active" role="button" aria-pressed="true">Usuń użytkownika</a></td>
+						<td><a href="{% url 'account_edit' osoba.id pk %}" class="btn btn-secondary btn-sm active" role="button" aria-pressed="true">Edytuj użytkownika</a></td>
+						<td><a href="{% url 'account_delete' osoba.id pk %}" class="btn btn-secondary btn-sm active" role="button" aria-pressed="true">Usuń użytkownika</a></td>
 					</tr>	
 		        	{% endfor %}
 		      </table>

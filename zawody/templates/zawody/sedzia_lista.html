@@ -19,14 +19,14 @@
         	<tr>
 	            <td class="m">{{ osoba.zawody }}</td>
 	        	<td class="m">{{ osoba.sedzia }}</td>
-				<td><a href="{% url 'sedzia_delete' osoba.pk %}" class="btn btn-secondary btn-sm active" role="button" aria-pressed="true"><p class="m m-0 p-0">Usuń sędziego</p></a></td>
+				<td><a href="{% url 'sedzia_delete' osoba.pk pk %}" class="btn btn-secondary btn-sm active" role="button" aria-pressed="true"><p class="m m-0 p-0">Usuń sędziego</p></a></td>
 			</tr>	
         	{% endfor %}
       </table>
     </div>
 	<div class="d-flex justify-content-center" >
 		<div>
-			<a href="{% url 'dodaj_sedziego' %}" class="btn btn-primary btn-lg active" role="button" aria-pressed="true"<p class="m m-0 p-0">Dodaj sędziego</a></a>
+			<a href="{% url 'dodaj_sedziego' pk %}" class="btn btn-primary btn-lg active" role="button" aria-pressed="true"<p class="m m-0 p-0">Dodaj sędziego</a></a>
 		</div>
 	</div>
   </div>

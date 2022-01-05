@@ -18,6 +18,7 @@ class ZawodyListView(LoginRequiredMixin, ListView):
 		context = super().get_context_data(**kwargs)
 		context['sedziowie_lista'] = sedziowie_lista()
 		# context['rts_lista'] = rts_lista()
+		context['pk'] = self.kwargs['pk']
 		return context
 
 	def get_queryset(self):
@@ -40,21 +41,27 @@ class ZawodyCreateView(LoginRequiredMixin, CreateView):
 	def get_context_data(self, **kwargs):
 		context = super().get_context_data(**kwargs)
 		context['sedziowie_lista'] = sedziowie_lista()
+		context['pk'] = self.kwargs['pk']
 		# context['rts_lista'] = rts_lista()
 		return context
 
 	def get_success_url(self):
-		return reverse("zawody_lista")
+		return reverse("zawody_lista", kwargs={'pk':1})
 		return super(ZawodyCreateView, self).form_valid(form)
-
 	def dispatch(self, request, *args, **kwargs):
 		try:
 			if request.user.is_admin:
+				print('proba')
 				return super(ZawodyCreateView, self).dispatch(request, *args, **kwargs)
 			else:
+				print('try')
 				return redirect('not_authorized')
 		except:
-			return redirect('not_authorized')
+			# print('exc')
+			return redirect("not_authorized")
+			# return reverse("zawody_lista pk=self.kwargs['pk']")
+			# pass
+			
 
 class ZawodyDeleteView(LoginRequiredMixin, DeleteView):
 	login_url = '/login/'
@@ -64,6 +71,7 @@ class ZawodyDeleteView(LoginRequiredMixin, DeleteView):
 	def get_context_data(self, **kwargs):
 		context = super().get_context_data(**kwargs)
 		context['sedziowie_lista'] = sedziowie_lista()
+		context['pk'] = self.kwargs['pk']
 		# context['rts_lista'] = rts_lista()
 		return context
 
@@ -71,7 +79,7 @@ class ZawodyDeleteView(LoginRequiredMixin, DeleteView):
 		return Zawody.objects.all()
 
 	def get_success_url(self):
-		return reverse("zawody_lista")
+		return reverse("zawody_lista", kwargs={'pk': self.kwargs['pk_turniej']})
 
 	def dispatch(self, request, *args, **kwargs):
 		try:
@@ -80,7 +88,9 @@ class ZawodyDeleteView(LoginRequiredMixin, DeleteView):
 			else:
 				return redirect('not_authorized')
 		except:
-			return redirect('not_authorized')
+			# return redirect('not_authorized')
+			# return redirect('not_authorized')
+			pass
 
 
 
@@ -93,11 +103,12 @@ class SedziaCreateView(LoginRequiredMixin, CreateView):
 	def get_context_data(self, **kwargs):
 		context = super().get_context_data(**kwargs)
 		context['sedziowie_lista'] = sedziowie_lista()
+		context['pk'] = self.kwargs['pk']
 		# context['rts_lista'] = rts_lista()
 		return context
 
 	def get_success_url(self):
-		return reverse("sedzia_lista")
+		return reverse("sedzia_lista", kwargs={'pk': self.kwargs['pk']})
 		return super(SedziaCreateView, self).form_valid(form)
 
 	def dispatch(self, request, *args, **kwargs):
@@ -113,6 +124,7 @@ class SedziaListView(LoginRequiredMixin, ListView):
 	def get_context_data(self, **kwargs):
 		context = super().get_context_data(**kwargs)
 		context['sedziowie_lista'] = sedziowie_lista()
+		context['pk'] = self.kwargs['pk']
 		# context['rts_lista'] = rts_lista()
 		return context
 
@@ -138,6 +150,7 @@ class SedziaDeleteView(LoginRequiredMixin, DeleteView):
 	def get_context_data(self, **kwargs):
 		context = super().get_context_data(**kwargs)
 		context['sedziowie_lista'] = sedziowie_lista()
+		context['pk'] = self.kwargs['pk']
 		# context['rts_lista'] = rts_lista()
 		return context
 
@@ -145,7 +158,7 @@ class SedziaDeleteView(LoginRequiredMixin, DeleteView):
 		return Sedzia.objects.all()
 
 	def get_success_url(self):
-		return reverse("sedzia_lista")
+		return reverse("sedzia_lista", kwargs={'pk': self.kwargs['pk_turniej']})
 
 	def dispatch(self, request, *args, **kwargs):
 		try:
