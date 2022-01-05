@@ -47,7 +47,6 @@ class AccountModelForm(forms.ModelForm):
 			'nazwisko',
 			'licencja',
 			'klub',
-			'paid',
 			'rts'
 			)
 	def clean(self):

@@ -1,12 +1,27 @@
+from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import render, redirect, reverse
 from django.contrib.auth import login, authenticate, logout
 from account.forms import RegistrationForm, AccountAuthenticationForm, AccountModelForm
 from django.views.generic import TemplateView, ListView, DetailView, CreateView, UpdateView, DeleteView
 from .models import Account
-from zawody.models import Sedzia
+from zawody.models import Sedzia, Turniej
 # from wyniki.views import sedziowie_lista
+# from rest_auth.views import PasswordResetView, PasswordResetConfirmView, PasswordResetDoneView, PasswordResetCompleteView
+from django.contrib.auth import views as auth_views
+# from mainapp.views import nazwa_turnieju
+from shootingrange import settings
+import urllib
+import json
 
+
+def nazwa_turnieju(arg):
+	nazwa = Turniej.objects.filter(id=arg).values_list('nazwa')
+	nazwa_flat = []
+	for i in nazwa:
+		nazwa_flat.append(i)
+
+	return nazwa_flat
 
 def sedziowie_lista():
 	sedziowie = Sedzia.objects.all().values_list('sedzia', flat=True).distinct()
@@ -22,19 +37,33 @@ def sedziowie_lista():
 # 		rts_lista.append(i)
 # 	return rts_lista
 
-def registration_form(request):
+def registration_form(request, pk):
 	context={}
+	context['pk'] = pk
+	context['nazwa_turnieju'] = nazwa_turnieju(pk)
 	if request.POST:
 		form=RegistrationForm(request.POST)
 		if form.is_valid():
-			form.save()
-			email = form.cleaned_data.get('email')
-			# email = form.cleaned_data.get('inputemail')
-			raw_password = form.cleaned_data.get('password1')
-			# raw_password = form.cleaned_data.get('inputPassword1')
-			account = authenticate(email=email, password=raw_password)
-			login(request, account)
-			return redirect('home')
+			print('jest is valid')
+			recaptcha_response = request.POST.get('g-recaptcha-response')
+			url = 'https://www.google.com/recaptcha/api/siteverify'
+			values = {'secret': settings.GOOGLE_RECAPTCHA_SECRET_KEY,'response': recaptcha_response}
+			data = urllib.parse.urlencode(values).encode()
+			req =  urllib.request.Request(url, data=data)
+			response = urllib.request.urlopen(req)
+			result = json.loads(response.read().decode())
+			if result['success']:
+				print('jest success')
+				form.save()
+				messages.success(request, 'New comment added with success!')
+				email = form.cleaned_data.get('email')
+				raw_password = form.cleaned_data.get('password1')
+				account = authenticate(email=email, password=raw_password)
+				login(request, account)
+				return redirect('home', pk)
+			else:
+				print(' nie ma success')
+				messages.error(request, 'Invalid reCAPTCHA. Please try again.')
 		else:
 			context['registration_form'] = form
 	else:
@@ -44,6 +73,7 @@ def registration_form(request):
 
 def registration_form_no_login(request):
 	context={}
+	context['nazwa_turnieju'] = nazwa_turnieju(pk)
 	if request.POST:
 		form=RegistrationForm(request.POST)
 		if form.is_valid():
@@ -68,6 +98,7 @@ def logout_view(request, pk):
 
 def login_view(request, pk):
 	context = {}
+	context['nazwa_turnieju'] = nazwa_turnieju(pk)
 	user = request.user
 	if user.is_authenticated:
 		return redirect("home")
@@ -95,7 +126,8 @@ class AccountUpdateView(LoginRequiredMixin, UpdateView):
 	def get_context_data(self, **kwargs):
 		context = super().get_context_data(**kwargs)
 		context['sedziowie_lista'] = sedziowie_lista()
-		context['pk'] = self.kwargs['pk']
+		context['pk'] = self.kwargs['pk_turniej']
+		context['nazwa_turnieju'] = nazwa_turnieju(self.kwargs['pk'])
 		# context['rts_lista'] = rts_lista()
 		return context
 
@@ -126,6 +158,7 @@ class AccountListView(LoginRequiredMixin, ListView):
 		context['sedziowie_lista'] = sedziowie_lista()
 		# context['rts_lista'] = rts_lista()
 		context['pk'] = self.kwargs['pk']
+		context['nazwa_turnieju'] = nazwa_turnieju(self.kwargs['pk'])
 		return context
 
 	def get_queryset(self):
@@ -151,6 +184,7 @@ class AccountDeleteView(LoginRequiredMixin, DeleteView):
 		context = super().get_context_data(**kwargs)
 		context['sedziowie_lista'] = sedziowie_lista()
 		context['pk'] = self.kwargs['pk']
+		context['nazwa_turnieju'] = nazwa_turnieju(self.kwargs['pk'])
 		# context['rts_lista'] = rts_lista()
 		return context
 
@@ -167,7 +201,45 @@ class AccountDeleteView(LoginRequiredMixin, DeleteView):
 			else:
 				return redirect('not_authorized')
 		except:
-			# return redirect('not_authorized')
-			pass
+			return redirect('not_authorized')
+			# pass
 
 
+class PasswordResetViewNew(auth_views.PasswordResetView):
+	def get_context_data(self, **kwargs):
+		context = super().get_context_data(**kwargs)
+		context['sedziowie_lista'] = sedziowie_lista()
+		context['pk'] = self.kwargs['pk']
+		context['nazwa_turnieju'] = nazwa_turnieju(self.kwargs['pk'])
+		# context['rts_lista'] = rts_lista()
+		return context
+	def get_success_url(self):
+		return reverse("password_reset_done", kwargs={'pk': self.kwargs['pk']})
+
+
+class PasswordResetDoneViewNew(auth_views.PasswordResetDoneView):
+	def get_context_data(self, **kwargs):
+		context = super().get_context_data(**kwargs)
+		context['sedziowie_lista'] = sedziowie_lista()
+		context['pk'] = self.kwargs['pk']
+		context['nazwa_turnieju'] = nazwa_turnieju(self.kwargs['pk'])
+		# context['rts_lista'] = rts_lista()
+		return context
+
+class PasswordResetConfirmViewNew(auth_views.PasswordResetConfirmView):
+	def get_context_data(self, **kwargs):
+		context = super().get_context_data(**kwargs)
+		# context['sedziowie_lista'] = sedziowie_lista()
+		# context['pk'] = self.kwargs['pk']
+		# context['nazwa_turnieju'] = nazwa_turnieju(self.kwargs['pk'])
+		# context['rts_lista'] = rts_lista()
+		return context
+
+class PasswordResetCompleteViewNew(auth_views.PasswordResetCompleteView):
+	def get_context_data(self, **kwargs):
+		context = super().get_context_data(**kwargs)
+		context['sedziowie_lista'] = sedziowie_lista()
+		# context['pk'] = self.kwargs['pk']
+		# context['nazwa_turnieju'] = nazwa_turnieju(self.kwargs['pk'])
+		# context['rts_lista'] = rts_lista()
+		return context

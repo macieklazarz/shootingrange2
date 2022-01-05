@@ -18,14 +18,15 @@ from django.conf.urls import url
 from django.urls import path
 from mainapp.views import (home_screen_view,)
 from zawody.views import (ZawodyCreateView,SedziaCreateView, SedziaListView, SedziaDeleteView, ZawodyListView, ZawodyDeleteView )
-from account.views import (registration_form, registration_form_no_login, logout_view, login_view, AccountListView, AccountUpdateView, AccountDeleteView)
-from wyniki.views import (wyniki_edycja,  wyniki, rejestracja_na_zawody,  exportexcel, WynikUpdateView, not_authorized, RejestracjaNaZawodyView, KonkurencjaDeleteView, TurniejListView, TurniejDeleteView, TurniejEditView, TurniejCreateView)
+from account.views import (registration_form, registration_form_no_login, logout_view, login_view, AccountListView, AccountUpdateView, AccountDeleteView, PasswordResetViewNew, PasswordResetDoneViewNew, PasswordResetConfirmViewNew, PasswordResetCompleteViewNew)
+from wyniki.views import (wyniki_edycja,  wyniki, rejestracja_na_zawody,  exportexcel, WynikUpdateView, not_authorized, RejestracjaNaZawodyView, KonkurencjaDeleteView, TurniejListView, TurniejDeleteView, TurniejEditView, TurniejCreateView, OplataListView, OplataUpdateView, UczestnikDeleteView)
+from django.contrib.auth import views as auth_views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     # path('', home_screen_view, name="home"),
     path('<int:pk>/', home_screen_view, name="home"),
-    path('register/', registration_form, name="register"),
+    path('<int:pk>/register/', registration_form, name="register"),
     path('register_no_login/', registration_form_no_login, name="register_no_login"),
     # path('users/', AccountListView.as_view(), name="users"),
     path('users/<int:pk>/', AccountListView.as_view(), name="users"),
@@ -64,5 +65,22 @@ urlpatterns = [
     path('<int:pk>/turniej_edit/<int:pk_turniej>/', TurniejEditView.as_view(), name="turniej_edit"),
     path('<int:pk>/turniej_delete/<int:pk_turniej>/', TurniejDeleteView.as_view(), name="turniej_delete"),
     path('<int:pk>/turniej_add/', TurniejCreateView.as_view(), name="turniej_add"),
+    path('oplata/<int:pk>/', OplataListView.as_view(), name="oplata_list"),
+    path('<int:pk>/oplata_update/<int:pk_turniej>/', OplataUpdateView.as_view(), name="oplata_update"),
     # path('/rts_add/', RtsCreateView.as_view(), name="rts_add"),
+    path('<int:pk>/uczestnik_delete/<int:pk_turniej>/',UczestnikDeleteView.as_view(), name="uczestnik_delete"),
+
+
+    path('<int:pk>/password_reset/',
+        PasswordResetViewNew.as_view(),
+        name="password_reset"),
+    path('<int:pk>/password_reset/done/',
+        PasswordResetDoneViewNew.as_view(),
+        name='password_reset_done'),
+    path('reset/<uidb64>/<token>/',
+        PasswordResetConfirmViewNew.as_view(),
+        name='password_reset_confirm'),
+    path('/reset/done/',
+        PasswordResetCompleteViewNew.as_view(),
+        name='password_reset_complete'),
 ]

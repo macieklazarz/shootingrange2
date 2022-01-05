@@ -15,7 +15,17 @@ def home_screen_view(request, pk):
 		sedziowie_lista.append(i)
 	context['sedziowie_lista'] = sedziowie_lista
 	context['pk'] = pk
+	context['nazwa_turnieju'] = nazwa_turnieju(pk)
 	# context['rts_lista'] = rts_lista()
 	# print(f'powioazne zawody to {sedziowie_lista}')
 	# print(f'pk to {pk}')
 	return render(request, "mainapp/home.html", context)
+
+
+def nazwa_turnieju(arg):
+	nazwa = Turniej.objects.filter(id=arg).values_list('nazwa')
+	nazwa_flat = []
+	for i in nazwa:
+		nazwa_flat.append(i)
+
+	return nazwa_flat

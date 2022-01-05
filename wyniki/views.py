@@ -11,13 +11,14 @@ import datetime
 import xlwt
 from django.db.models.functions import Concat
 from django.views.generic import TemplateView, ListView, DetailView, CreateView, UpdateView, DeleteView
-from .forms import WynikiModelForm, RejestracjaModelForm, UstawieniaModelForm, TurniejModelForm
+from .forms import WynikiModelForm, RejestracjaModelForm, UstawieniaModelForm, TurniejModelForm, OplataModelForm
 from zawody.models import Sedzia, Turniej
 from account.views import sedziowie_lista
 # from django.contrib.auth.mixins import LoginRequiredMixin
 # from agents.mixins import OrganisorAndLoginRequiredMixin
 # from django.utils import simplejson
 # Create your views here.
+from mainapp.views import nazwa_turnieju
 
 
 
@@ -27,6 +28,7 @@ def wyniki_edycja(request, pk):
 	context = {}
 	context['sedziowie_lista'] = sedziowie_lista()
 	context['pk'] = pk
+	context['nazwa_turnieju'] = nazwa_turnieju(pk)
 	# context['rts_lista'] = rts_lista()
 	# print(f'req user {request.user.id}')
 	turniej = Turniej.objects.filter(id=pk).values_list('id', flat=True)
@@ -59,7 +61,7 @@ def wyniki_edycja(request, pk):
 	zawody_nazwa = []																							#robimy liste ktorej elementami beda wyniki poszczegolnych zawodow
 	for i in powiazane_zawody_lista:
 		wynik = Wyniki.objects.filter(zawody = i).order_by('zawodnik')
-		wyniki.append(wynik.filter(zawody__turniej=pk))
+		wyniki.append(wynik.filter(zawody__turniej=pk, oplata=1))
 		# wyniki.append(Wyniki.objects.filter(zawody = i).order_by('zawodnik'))
 		# zawody_nazwa.append(Zawody.objects.filter(id = i).values_list('nazwa', flat=True))
 	nazwy_zawodow = Zawody.objects.filter(id__in=powiazane_zawody_lista).values_list('nazwa', flat=True)
@@ -83,6 +85,7 @@ def wyniki_edycja(request, pk):
 def wyniki(request, pk):
 	context = {}
 	context['sedziowie_lista'] = sedziowie_lista()
+	context['nazwa_turnieju'] = nazwa_turnieju(pk)
 	# context['rts_lista'] = rts_lista()
 	zawody = Zawody.objects.filter(turniej__id=pk).values_list('id', flat=True).order_by('id')
 	# zawody = Zawody.objects.all().values_list('id', flat=True).order_by('id')
@@ -101,7 +104,7 @@ def wyniki(request, pk):
 	sedziowie = []
 	for i in zawody_lista:
 		# wyniki.append(Wyniki.objects.filter(zawody = i).order_by('-wynik', '-X', '-Xx', '-dziewiec', '-osiem', '-siedem'))
-		wyniki.append(Wyniki.objects.filter(zawody = i).order_by('-wynik', '-X', '-Xx', '-dziewiec', '-osiem', '-siedem'))
+		wyniki.append(Wyniki.objects.filter(zawody = i, oplata=1).order_by('-wynik', '-X', '-Xx', '-dziewiec', '-osiem', '-siedem'))
 		# sedziowie_queryset.append(Sedzia.objects.filter(zawody = i).values_list(Concat('sedzia__imie', V(' '), 'sedzia__nazwisko'), output_field=CharField(), Flat = True))
 		# sedziowie_queryset.append(Sedzia.objects.filter(zawody = i).values_list('sedzia__imie', flat = True))
 		sedziowie_queryset.append(Sedzia.objects.filter(zawody = i).values_list('sedzia__imie', 'sedzia__nazwisko'))
@@ -138,6 +141,7 @@ def wyniki(request, pk):
 @login_required(login_url="/login/")
 def rejestracja_na_zawody(request):
 	context = {}
+	context['nazwa_turnieju'] = nazwa_turnieju(pk)
 	if request.method == 'POST':
 		wybrane_zawody = request.POST['zawody']
 		form = forms.DodajZawodnika(request.POST)
@@ -179,6 +183,7 @@ class RejestracjaNaZawodyView(LoginRequiredMixin, CreateView):
 			opcja = i[0]
 		context['dodawanie_zawodnika'] = opcja
 		context['pk'] = self.kwargs['pk']
+		context['nazwa_turnieju'] = nazwa_turnieju(self.kwargs['pk'])
 		return context
 
 	def get_success_url(self):
@@ -238,7 +243,8 @@ class WynikUpdateView(LoginRequiredMixin, UpdateView):
 		context = super().get_context_data(**kwargs)
 		# context['rts_lista'] = rts_lista()
 		context['sedziowie_lista'] = sedziowie_lista()
-		context['pk'] = self.kwargs['pk']
+		context['pk'] = self.kwargs['pk_turniej']
+		context['nazwa_turnieju'] = nazwa_turnieju(self.kwargs['pk'])
 		return context
 
 	def get_queryset(self):
@@ -340,6 +346,7 @@ class KonkurencjaDeleteView(LoginRequiredMixin, DeleteView):
 		context = super().get_context_data(**kwargs)
 		context['sedziowie_lista'] = sedziowie_lista()
 		context['pk'] = self.kwargs['pk']
+		context['nazwa_turnieju'] = nazwa_turnieju(self.kwargs['pk'])
 		# context['rts_lista'] = rts_lista()
 		return context
 
@@ -367,6 +374,7 @@ class TurniejListView(LoginRequiredMixin, ListView):
 		context = super().get_context_data(**kwargs)
 		context['sedziowie_lista'] = sedziowie_lista()
 		context['pk'] = self.kwargs['pk']
+		context['nazwa_turnieju'] = nazwa_turnieju(self.kwargs['pk'])
 		# context['rts_lista'] = rts_lista()
 		return context
 
@@ -393,6 +401,7 @@ class TurniejDeleteView(LoginRequiredMixin, DeleteView):
 		context = super().get_context_data(**kwargs)
 		context['sedziowie_lista'] = sedziowie_lista()
 		context['pk'] = self.kwargs['pk']
+		context['nazwa_turnieju'] = nazwa_turnieju(self.kwargs['pk'])
 		# context['rts_lista'] = rts_lista()
 		return context
 
@@ -423,11 +432,12 @@ class TurniejCreateView(LoginRequiredMixin, CreateView):
 		context = super().get_context_data(**kwargs)
 		context['sedziowie_lista'] = sedziowie_lista()
 		context['pk'] = self.kwargs['pk']
+		context['nazwa_turnieju'] = nazwa_turnieju(self.kwargs['pk'])
 		# context['rts_lista'] = rts_lista()
 		return context
 
 	def get_success_url(self):
-		return reverse("turnieje", kwargs={'pk':1})
+		return reverse("turnieje", kwargs={'pk':self.kwargs['pk']})
 		return super(TurniejListView, self).form_valid(form)
 	def dispatch(self, request, *args, **kwargs):
 		try:
@@ -456,6 +466,7 @@ class TurniejEditView(LoginRequiredMixin,UpdateView):
 		context = super().get_context_data(**kwargs)
 		context['sedziowie_lista'] = sedziowie_lista()
 		context['pk'] = self.kwargs['pk']
+		context['nazwa_turnieju'] = nazwa_turnieju(self.kwargs['pk'])
 		# context['rts_lista'] = rts_lista()
 		return context
 
@@ -475,3 +486,91 @@ class TurniejEditView(LoginRequiredMixin,UpdateView):
 		except:
 			return redirect('not_authorized')
 
+
+
+class OplataListView(LoginRequiredMixin, ListView):
+	login_url = '/login/'
+	template_name = "wyniki/oplata_list.html"
+
+	def get_context_data(self, **kwargs):
+		context = super().get_context_data(**kwargs)
+		context['sedziowie_lista'] = sedziowie_lista()
+		# context['rts_lista'] = rts_lista()
+		context['pk'] = self.kwargs['pk']
+		context['nazwa_turnieju'] = nazwa_turnieju(self.kwargs['pk'])
+		context['nazwa_turnieju'] = nazwa_turnieju(self.kwargs['pk'])
+		return context
+
+	def get_queryset(self):
+		return Wyniki.objects.filter(zawody__turniej=self.kwargs['pk']).order_by('zawody__turniej','zawody__nazwa','zawodnik__nazwisko')
+
+	def dispatch(self, request, *args, **kwargs):
+		try:
+			if request.user.rts:
+				return super(OplataListView, self).dispatch(request, *args, **kwargs)
+			else:
+				return redirect('not_authorized')
+		except:
+			return redirect('not_authorized')
+
+class OplataUpdateView(LoginRequiredMixin, UpdateView):
+	login_url = '/login/'
+	template_name = "wyniki/oplata_update.html"
+	form_class = OplataModelForm
+	context_object_name = 'cont'
+	def get_context_data(self, **kwargs):
+		context = super().get_context_data(**kwargs)
+		context['sedziowie_lista'] = sedziowie_lista()
+		context['pk'] = self.kwargs['pk_turniej']
+		context['nazwa_turnieju'] = nazwa_turnieju(self.kwargs['pk_turniej'])
+		# context['rts_lista'] = rts_lista()
+		return context
+
+	def get_queryset(self):
+		return Wyniki.objects.all()
+
+	def get_success_url(self):
+		return reverse("oplata_list", kwargs={'pk': self.kwargs['pk_turniej']})
+		
+	def form_valid(self, form):
+		return super(OplataUpdateView,self).form_valid(form)
+
+	def dispatch(self, request, *args, **kwargs):
+		try:
+			if request.user.rts:
+				return super(OplataUpdateView, self).dispatch(request, *args, **kwargs)
+			else:
+				return redirect('not_authorized')
+		except:
+			return redirect('not_authorized')
+			# pass
+
+
+class UczestnikDeleteView(LoginRequiredMixin, DeleteView):
+	login_url = '/login/'
+	template_name = "wyniki/uczestnik_delete.html"
+	context_object_name = 'uczestnik'
+
+	def get_context_data(self, **kwargs):
+		context = super().get_context_data(**kwargs)
+		context['sedziowie_lista'] = sedziowie_lista()
+		context['pk'] = self.kwargs['pk_turniej']
+		context['nazwa_turnieju'] = nazwa_turnieju(self.kwargs['pk_turniej'])
+		# context['rts_lista'] = rts_lista()
+		return context
+
+	def get_queryset(self):
+		return Wyniki.objects.all()
+
+	def get_success_url(self):
+		return reverse("oplata_list", kwargs={'pk': self.kwargs['pk_turniej']})
+
+	def dispatch(self, request, *args, **kwargs):
+		try:
+			if request.user.rts:
+				return super(UczestnikDeleteView, self).dispatch(request, *args, **kwargs)
+			else:
+				return redirect('not_authorized')
+		except:
+			return redirect('not_authorized')
+			# pass

@@ -16,9 +16,17 @@
 	<body>
 	<header>
 		<a href="#" class="logo">
+				<span> 
+					{% for i in nazwa_turnieju %}
+						{% for k in i %}
+							{{k}}
+						{% endfor %}
+					{% endfor %}
+					<br>
 			{% if request.user.is_authenticated %}
-				<span>Witaj {{request.user}}</span>
+					Witaj {{request.user}}
 			{% endif %}
+				</span>
 		</a>
 		<div class="MenuToggle" onclick="toggleMenu();"></div>
 		<ul class="navigation">
@@ -29,6 +37,7 @@
 				<li><a href="{% url 'wyniki' pk=pk %}" onclick="toggleMenu();">Wyniki</a></li>
 				{% if user.is_superuser or user.rts %}
 					<li><a href="{% url 'users' pk=pk %}" onclick="toggleMenu();">Zarządzaj użytkownikami</a></li>
+					<li><a href="{% url 'oplata_list' pk=pk %}" onclick="toggleMenu();">Opłaty</a></li>
 				{% endif %}
 				{% if user.is_superuser %}
 					<li><a href="{% url 'zawody_lista' pk=pk %}" onclick="toggleMenu();">Edycja konkurencji</a></li>
@@ -40,7 +49,7 @@
 				{% endif%}
 			{% else %}
 				<li><a href="{% url 'home' pk=pk %}" onclick="toggleMenu();">Strona domowa</a></li>
-				<li><a href="{% url 'register'%}" onclick="toggleMenu();">Zarejestruj się</a></li>
+				<li><a href="{% url 'register' pk=pk %}" onclick="toggleMenu();">Zarejestruj się</a></li>
 				<li><a href="{% url 'login' pk=pk%}" onclick="toggleMenu();">Logowanie</a></li>
 			{% endif %}
 

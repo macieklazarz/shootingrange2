@@ -7,6 +7,7 @@ from .models import Sedzia, Zawody
 from wyniki.views import sedziowie_lista
 from django.shortcuts import redirect
 from account.views import sedziowie_lista
+from mainapp.views import nazwa_turnieju
 
 # Create your views here.
 
@@ -19,6 +20,7 @@ class ZawodyListView(LoginRequiredMixin, ListView):
 		context['sedziowie_lista'] = sedziowie_lista()
 		# context['rts_lista'] = rts_lista()
 		context['pk'] = self.kwargs['pk']
+		context['nazwa_turnieju'] = nazwa_turnieju(self.kwargs['pk'])
 		return context
 
 	def get_queryset(self):
@@ -42,11 +44,12 @@ class ZawodyCreateView(LoginRequiredMixin, CreateView):
 		context = super().get_context_data(**kwargs)
 		context['sedziowie_lista'] = sedziowie_lista()
 		context['pk'] = self.kwargs['pk']
+		context['nazwa_turnieju'] = nazwa_turnieju(self.kwargs['pk'])
 		# context['rts_lista'] = rts_lista()
 		return context
 
 	def get_success_url(self):
-		return reverse("zawody_lista", kwargs={'pk':1})
+		return reverse("zawody_lista", kwargs={'pk':self.kwargs['pk']})
 		return super(ZawodyCreateView, self).form_valid(form)
 	def dispatch(self, request, *args, **kwargs):
 		try:
@@ -58,9 +61,9 @@ class ZawodyCreateView(LoginRequiredMixin, CreateView):
 				return redirect('not_authorized')
 		except:
 			# print('exc')
-			return redirect("not_authorized")
+			# return redirect("not_authorized")
 			# return reverse("zawody_lista pk=self.kwargs['pk']")
-			# pass
+			pass
 			
 
 class ZawodyDeleteView(LoginRequiredMixin, DeleteView):
@@ -72,6 +75,7 @@ class ZawodyDeleteView(LoginRequiredMixin, DeleteView):
 		context = super().get_context_data(**kwargs)
 		context['sedziowie_lista'] = sedziowie_lista()
 		context['pk'] = self.kwargs['pk']
+		context['nazwa_turnieju'] = nazwa_turnieju(self.kwargs['pk_turniej'])
 		# context['rts_lista'] = rts_lista()
 		return context
 
@@ -104,6 +108,7 @@ class SedziaCreateView(LoginRequiredMixin, CreateView):
 		context = super().get_context_data(**kwargs)
 		context['sedziowie_lista'] = sedziowie_lista()
 		context['pk'] = self.kwargs['pk']
+		context['nazwa_turnieju'] = nazwa_turnieju(self.kwargs['pk'])
 		# context['rts_lista'] = rts_lista()
 		return context
 
@@ -125,6 +130,7 @@ class SedziaListView(LoginRequiredMixin, ListView):
 		context = super().get_context_data(**kwargs)
 		context['sedziowie_lista'] = sedziowie_lista()
 		context['pk'] = self.kwargs['pk']
+		context['nazwa_turnieju'] = nazwa_turnieju(self.kwargs['pk'])
 		# context['rts_lista'] = rts_lista()
 		return context
 
@@ -150,7 +156,8 @@ class SedziaDeleteView(LoginRequiredMixin, DeleteView):
 	def get_context_data(self, **kwargs):
 		context = super().get_context_data(**kwargs)
 		context['sedziowie_lista'] = sedziowie_lista()
-		context['pk'] = self.kwargs['pk']
+		context['pk'] = self.kwargs['pk_turniej']
+		context['nazwa_turnieju'] = nazwa_turnieju(self.kwargs['pk_turniej'])
 		# context['rts_lista'] = rts_lista()
 		return context
 

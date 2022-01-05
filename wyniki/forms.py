@@ -150,3 +150,17 @@ class UstawieniaModelForm(forms.ModelForm):
         from django.forms.widgets import HiddenInput
         super(UstawieniaModelForm, self).__init__(*args, **kwargs)
         self.fields['nazwa'].widget = HiddenInput()
+
+
+class OplataModelForm(forms.ModelForm):
+    class Meta:
+        model = Wyniki
+        fields = (
+            'oplata',
+            )
+
+    # def clean(self):
+    #     cleaned_data = super().clean()
+    #     nazwisko = cleaned_data.get('nazwisko') 
+    #     nazwisko = nazwisko.upper() 
+    #     self.cleaned_data['nazwisko'] = nazwisko

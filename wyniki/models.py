@@ -19,7 +19,8 @@ class Wyniki(models.Model):
 	dwa			=models.IntegerField(blank=True, null=False, default=0, verbose_name='2')
 	jeden		=models.IntegerField(blank=True, null=False, default=0, verbose_name='1')
 	wynik 		=models.IntegerField(blank=True, default=0)
-	komunikat	=models.CharField(blank=True, max_length=100)
+	oplata		= models.BooleanField(default=False)
+	# komunikat	=models.CharField(blank=True, max_length=100)
 
 	class Meta:
 		verbose_name_plural = "Wyniki"
