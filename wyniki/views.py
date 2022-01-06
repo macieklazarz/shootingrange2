@@ -123,7 +123,7 @@ def wyniki(request, pk):
 
 	# klasyfikacja_generalna = Wyniki.objects.all().order_by('-wynik', '-X', '-Xx', '-dziewiec', '-osiem', '-siedem')
 	# klasyfikacja_generalna = Wyniki.objects.raw('select id, zawodnik_id, sum(X) as X, sum(Xx) as Xx,sum(dziewiec) as dziewiec, sum(osiem) as osiem,sum(siedem) as siedem , sum(szesc) as szesc, sum(piec) as piec, sum(cztery) as cztery, sum(trzy) as trzy, sum(dwa) as dwa, sum(jeden) as jeden, sum(wynik) as wynik from wyniki_wyniki group by zawodnik_id order by wynik desc, X desc, Xx desc, dziewiec desc, osiem desc, siedem DESC')
-	klasyfikacja_generalna = Wyniki.objects.raw('select wyniki_wyniki.id, zawodnik_id, sum(X) as X, sum(Xx) as Xx,sum(dziewiec) as dziewiec, sum(osiem) as osiem,sum(siedem) as siedem , sum(szesc) as szesc, sum(piec) as piec, sum(cztery) as cztery, sum(trzy) as trzy, sum(dwa) as dwa, sum(jeden) as jeden, sum(wynik) as wynik from wyniki_wyniki inner join zawody_zawody on wyniki_wyniki.zawody_id = zawody_zawody.id where zawody_zawody.turniej_id = %s group by zawodnik_id order by wynik desc, X desc, Xx desc, dziewiec desc, osiem desc, siedem DESC', [pk])
+	klasyfikacja_generalna = Wyniki.objects.raw('select wyniki_wyniki.id, zawodnik_id, sum(X) as X, sum(Xx) as Xx,sum(dziewiec) as dziewiec, sum(osiem) as osiem,sum(siedem) as siedem , sum(szesc) as szesc, sum(piec) as piec, sum(cztery) as cztery, sum(trzy) as trzy, sum(dwa) as dwa, sum(jeden) as jeden, sum(wynik) as wynik from wyniki_wyniki inner join zawody_zawody on wyniki_wyniki.zawody_id = zawody_zawody.id where zawody_zawody.turniej_id = %s and oplata=1 group by zawodnik_id order by wynik desc, X desc, Xx desc, dziewiec desc, osiem desc, siedem DESC', [pk])
 	# print(klasyfikacja_generalna.values_list())
 	# query = Wyniki.objects.all().query
 	# query.group_by = ['zawodnik']
@@ -283,13 +283,13 @@ def not_authorized(request):
 	return render(request, 'wyniki/not_authorized.html')
 
 @login_required(login_url="/login/")
-def exportexcel(request):
+def exportexcel(request, pk):
 	if request.user.username == 'admin':
 		response=HttpResponse(content_type='application/ms-excel')
 		response['Content-Disposition'] = 'attachment; filename=Wyniki_' + str(datetime.datetime.now())+'.xls'
 		wb = xlwt.Workbook(encoding='utf-8')
 
-		zawody = Zawody.objects.all().values_list('nazwa', flat=True).order_by('id')
+		zawody = Zawody.objects.filter(turniej__id=pk).values_list('nazwa', flat=True).order_by('id')
 		ws = []
 		for i in zawody:
 			ws.append(wb.add_sheet(i))
@@ -301,7 +301,7 @@ def exportexcel(request):
 		font_style = xlwt.XFStyle()
 		font_style.font.bold=True
 
-		columns = ['Imię', 'Nazwisko', 'Email', 'X', '/', '9', '8', '7','6','5','4','3','2','1', 'Wynik']
+		columns = ['Nazwisko','Imię', 'Klub', 'X', '10', '9', '8', '7','6','5','4','3','2','1', 'Suma', 'Kara']
 
 		for col_num in range(len(columns)):
 			for i in ws:
@@ -311,7 +311,7 @@ def exportexcel(request):
 			# ws3.write(row_num, col_num, columns[col_num], font_style)
 
 		font_style = xlwt.XFStyle()
-		zawody_id = Zawody.objects.all().values_list('id', flat=True).order_by('id')
+		zawody_id = Zawody.objects.filter(turniej__id=pk).values_list('id', flat=True).order_by('id')
 		zawody_id_lista = []
 		for i in zawody_id:
 			zawody_id_lista.append(i)
@@ -319,9 +319,11 @@ def exportexcel(request):
 		# print(f'zawody;ista to {zawody_id_lista}')
 		rows = []
 		for i in zawody_id_lista:
-			rows.append(Wyniki.objects.filter(zawody__id = i).values_list('zawodnik__imie','zawodnik__nazwisko', 'zawodnik__email', 'X', 'Xx', 'dziewiec', 'osiem', 'siedem', 'szesc', 'piec', 'cztery', 'trzy', 'dwa', 'jeden', 'wynik').order_by('-wynik', '-X', '-Xx', '-dziewiec', '-osiem', '-siedem', '-szesc', '-piec', '-cztery', '-trzy', '-dwa', '-jeden'))
+			rows.append(Wyniki.objects.filter(zawody__id = i, oplata = 1).values_list('zawodnik__nazwisko','zawodnik__imie', 'zawodnik__klub', 'X', 'Xx', 'dziewiec', 'osiem', 'siedem', 'szesc', 'piec', 'cztery', 'trzy', 'dwa', 'jeden', 'wynik', 'kara').order_by('-wynik', '-X', '-Xx', '-dziewiec', '-osiem', '-siedem', '-szesc', '-piec', '-cztery', '-trzy', '-dwa', '-jeden'))
+			# rows.append(Wyniki.objects.filter(zawody__id = i, kara__in = ['DNF','DNS','DSQ','PK']).values_list('zawodnik__nazwisko','zawodnik__imie', 'zawodnik__klub', 'X', 'Xx', 'dziewiec', 'osiem', 'siedem', 'szesc', 'piec', 'cztery', 'trzy', 'dwa', 'jeden', 'result'))
 		# print(f'rows1 to {rows[3]}')
-
+		# rows.append(Wyniki.objects.filter(zawody__id = i, kara__in = ['DNF','DNS','DSQ','PK','BRAK']).values_list('zawodnik__nazwisko','zawodnik__imie', 'zawodnik__klub', 'X', 'Xx', 'dziewiec', 'osiem', 'siedem', 'szesc', 'piec', 'cztery', 'trzy', 'dwa', 'jeden', 'wynik'))
+		# print(rows.append(Wyniki.objects.filter(zawody__id = i, kara = 'BRAK').values_list('zawodnik__nazwisko','zawodnik__imie', 'zawodnik__klub', 'X', 'Xx', 'dziewiec', 'osiem', 'siedem', 'szesc', 'piec', 'cztery', 'trzy', 'dwa', 'jeden', 'wynik')))
 		for x,y in enumerate(ws):
 			row_num = 0
 			for row in rows[x]:

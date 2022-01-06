@@ -5,7 +5,7 @@ from wyniki.models import Wyniki, Ustawienia
 # Register your models here.
 @admin.register(Wyniki)
 class WynikiAdmin(admin.ModelAdmin):
-	list_display = ('slug', 'zawody', 'zawodnik','oplata', 'X', 'Xx', 'dziewiec', 'osiem', 'siedem', 'szesc', 'piec', 'cztery', 'trzy', 'dwa', 'jeden', 'wynik')
+	list_display = ('slug', 'zawody', 'zawodnik','oplata', 'X', 'Xx', 'dziewiec', 'osiem', 'siedem', 'szesc', 'piec', 'cztery', 'trzy', 'dwa', 'jeden', 'wynik','result')
 	search_fields = ('zawody', 'zawodnik')
 
 # admin.site.register(Account, WynikiAdmin)

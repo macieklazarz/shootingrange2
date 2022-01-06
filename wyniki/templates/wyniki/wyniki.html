@@ -38,7 +38,8 @@
 									<td class="m"><b>3</b></td>
 									<td class="m"><b>2</b></td>
 									<td class="m"><b>1</b></td>
-									<td class="m"><b>Suma</b></td>
+									<!-- <td class="m"><b>Suma</b></td> -->
+									<td class="m"><b>Wynik</b></td>
 									{% if user.rts %}
 									<td class="m"><b>Usuń z konkurencji</b></td>
 									{% endif %}
@@ -58,7 +59,8 @@
 								<td class="m">{{osoba.trzy}}</td>
 								<td class="m">{{osoba.dwa}}</td>
 								<td class="m">{{osoba.jeden}}</td>
-								<td class="m">{{osoba.wynik}}</td>
+								<!-- <td class="m">{{osoba.wynik}}</td> -->
+								<td class="m">{{osoba.result}}</td>
 								{% if user.rts %}
 								<td class="m p-0 m-0"> <a href="{% url 'konkurencja_delete' osoba.id pk %}" class="btn btn-sm btn-secondary active" role="button" aria-pressed="true"><p class="m m-0 p-0">Usuń zawodnika</p></a></td>
 								{% endif %}
@@ -93,7 +95,7 @@
 								<tr>
 									<td class="m"><b>Zawodnik</b></td>
 									<td class="m"><b>X</b></td>
-									<td class="m"><b>/</b></td>
+									<td class="m"><b>10</b></td>
 									<td class="m"><b>9</b></td>
 									<td class="m"><b>8</b></td>
 									<td class="m"><b>7</b></td>
@@ -131,7 +133,7 @@
 		{% if request.user.username == 'admin' %}
 			<div class="d-flex justify-content-center" >
 				<div>
-					<a href="{% url 'exportexcel' %}" class="btn btn-primary btn-lg active" role="button" aria-pressed="true">
+					<a href="{% url 'exportexcel' pk%}" class="btn btn-primary btn-lg active" role="button" aria-pressed="true">
 						Eksport excel
 					</a>
 				</div>

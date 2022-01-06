@@ -74,7 +74,7 @@ class WynikiModelForm(forms.ModelForm):
         ('10', '10')
     ]
     X = forms.CharField(widget=forms.Select(choices=CHOICE))
-    Xx = forms.CharField(widget=forms.Select(choices=CHOICE))
+    Xx = forms.CharField(widget=forms.Select(choices=CHOICE), label='10')
     dziewiec = forms.CharField(widget=forms.Select(choices=CHOICE))
     osiem = forms.CharField(widget=forms.Select(choices=CHOICE))
     siedem = forms.CharField(widget=forms.Select(choices=CHOICE))
@@ -86,7 +86,7 @@ class WynikiModelForm(forms.ModelForm):
     jeden = forms.CharField(widget=forms.Select(choices=CHOICE))
     class Meta:
         model = Wyniki
-        fields = ['X', 'Xx', 'dziewiec', 'osiem', 'siedem', 'szesc', 'piec', 'cztery', 'trzy', 'dwa', 'jeden']
+        fields = ['X', 'Xx', 'dziewiec', 'osiem', 'siedem', 'szesc', 'piec', 'cztery', 'trzy', 'dwa', 'jeden','kara']
 
 class RejestracjaModelForm(forms.ModelForm):
     class Meta:
