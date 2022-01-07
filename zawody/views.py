@@ -63,7 +63,7 @@ class ZawodyListView(LoginRequiredMixin, ListView):
 
 
 class ZawodyCreateView(LoginRequiredMixin, CreateView):
-	login_url = '/login/'
+	login_url = 'start'
 	template_name = "zawody/zawody_create.html"
 	form_class = ZawodyModelForm
 
@@ -88,13 +88,13 @@ class ZawodyCreateView(LoginRequiredMixin, CreateView):
 				return redirect('not_authorized')
 		except:
 			# print('exc')
-			# return redirect("not_authorized")
+			return redirect("not_authorized")
 			# return reverse("zawody_lista pk=self.kwargs['pk']")
-			pass
+			# pass
 			
 
 class ZawodyDeleteView(LoginRequiredMixin, DeleteView):
-	login_url = '/login/'
+	login_url = 'start'
 	template_name = "zawody/zawody_delete.html"
 	context_object_name = 'zawody'
 
@@ -120,14 +120,14 @@ class ZawodyDeleteView(LoginRequiredMixin, DeleteView):
 				return redirect('not_authorized')
 		except:
 			# return redirect('not_authorized')
-			# return redirect('not_authorized')
-			pass
+			return redirect('not_authorized')
+			# pass
 
 
 
 
 class SedziaCreateView(LoginRequiredMixin, CreateView):
-	login_url = '/login/'
+	login_url = 'start'
 	template_name = "zawody/sedzia_create.html"
 	form_class = SedziaModelForm
 
@@ -144,13 +144,16 @@ class SedziaCreateView(LoginRequiredMixin, CreateView):
 		return super(SedziaCreateView, self).form_valid(form)
 
 	def dispatch(self, request, *args, **kwargs):
-		if request.user.is_admin:
-			return super(SedziaCreateView, self).dispatch(request, *args, **kwargs)
-		else:
+		try:
+			if request.user.is_admin:
+				return super(SedziaCreateView, self).dispatch(request, *args, **kwargs)
+			else:
+				return redirect('not_authorized')
+		except:
 			return redirect('not_authorized')
 
 class SedziaListView(LoginRequiredMixin, ListView):
-	login_url = '/login/'
+	login_url = 'start'
 	template_name = "zawody/sedzia_lista.html"
 
 	def get_context_data(self, **kwargs):
@@ -176,7 +179,7 @@ class SedziaListView(LoginRequiredMixin, ListView):
 
 
 class SedziaDeleteView(LoginRequiredMixin, DeleteView):
-	login_url = '/login/'
+	login_url = 'start'
 	template_name = "zawody/sedzia_delete.html"
 	context_object_name = 'sedzia'
 

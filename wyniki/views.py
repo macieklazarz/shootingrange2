@@ -80,9 +80,12 @@ def wyniki_edycja(request, pk):
 	# print(f'wyniki1 to {wyniki1}')
 	context['wyniki'] = wyniki
 	context['zawody_nazwa'] = zawody_nazwa
-	return render(request, 'wyniki/edytuj_wyniki.html', context)
+	if request.user.id in sedziowie_lista():
+		return render(request, 'wyniki/edytuj_wyniki.html', context)
+	else:
+		return redirect('not_authorized')
 
-@login_required(login_url="/login/")
+@login_required(login_url="/start/")
 def wyniki(request, pk):
 	context = {}
 	context['sedziowie_lista'] = sedziowie_lista()
@@ -139,7 +142,7 @@ def wyniki(request, pk):
 
 
 # @login_required(login_url="/accounts/login/")
-@login_required(login_url="/login/")
+@login_required(login_url="/start/")
 def rejestracja_na_zawody(request):
 	context = {}
 	context['nazwa_turnieju'] = nazwa_turnieju(pk)
@@ -170,7 +173,7 @@ def rejestracja_na_zawody(request):
 
 
 class RejestracjaNaZawodyView(LoginRequiredMixin, CreateView):
-	login_url = '/not_authorized'
+	login_url = 'start'
 	template_name = "wyniki/rejestracja.html"
 	form_class = RejestracjaModelForm
 	# user_id = request.user.id
@@ -236,7 +239,7 @@ class RejestracjaNaZawodyView(LoginRequiredMixin, CreateView):
 
 
 class WynikUpdateView(LoginRequiredMixin, UpdateView):
-	login_url = '/login/'
+	login_url = 'start'
 	template_name = "wyniki/wyniki_edit.html"
 	form_class = WynikiModelForm
 	context_object_name = 'cont'
@@ -283,7 +286,7 @@ class WynikUpdateView(LoginRequiredMixin, UpdateView):
 def not_authorized(request):
 	return render(request, 'wyniki/not_authorized.html')
 
-@login_required(login_url="/login/")
+@login_required(login_url="/start/")
 def exportexcel(request, pk):
 	if request.user.username == 'admin':
 		response=HttpResponse(content_type='application/ms-excel')
@@ -341,7 +344,7 @@ def exportexcel(request, pk):
 
 
 class KonkurencjaDeleteView(LoginRequiredMixin, DeleteView):
-	login_url = '/login/'
+	login_url = 'start'
 	template_name = "wyniki/konkurencja_delete.html"
 	context_object_name = 'zawodnik'
 
@@ -370,7 +373,7 @@ class KonkurencjaDeleteView(LoginRequiredMixin, DeleteView):
 
 
 class TurniejListView(LoginRequiredMixin, ListView):
-	login_url = '/login/'
+	login_url = 'start'
 	template_name = "wyniki/turniej_list.html"
 
 	def get_context_data(self, **kwargs):
@@ -396,7 +399,7 @@ class TurniejListView(LoginRequiredMixin, ListView):
 
 
 class TurniejDeleteView(LoginRequiredMixin, DeleteView):
-	login_url = '/login/'
+	login_url = 'start'
 	template_name = "wyniki/turniej_delete.html"
 	context_object_name = 'turniej'
 
@@ -427,7 +430,7 @@ class TurniejDeleteView(LoginRequiredMixin, DeleteView):
 
 
 class TurniejCreateView(LoginRequiredMixin, CreateView):
-	login_url = '/login/'
+	login_url = 'start'
 	template_name = "wyniki/turniej_create.html"
 	form_class = TurniejModelForm
 
@@ -462,7 +465,7 @@ class TurniejCreateView(LoginRequiredMixin, CreateView):
 
 	
 class TurniejEditView(LoginRequiredMixin,UpdateView):
-	login_url = '/login/'
+	login_url = 'start'
 	template_name = "wyniki/turniej_edit.html"
 	form_class = TurniejModelForm
 	def get_context_data(self, **kwargs):
@@ -492,7 +495,7 @@ class TurniejEditView(LoginRequiredMixin,UpdateView):
 
 
 class OplataListView(LoginRequiredMixin, ListView):
-	login_url = '/login/'
+	login_url = 'start'
 	template_name = "wyniki/oplata_list.html"
 
 	def get_context_data(self, **kwargs):
@@ -517,7 +520,7 @@ class OplataListView(LoginRequiredMixin, ListView):
 			return redirect('not_authorized')
 
 class OplataUpdateView(LoginRequiredMixin, UpdateView):
-	login_url = '/login/'
+	login_url = 'start'
 	template_name = "wyniki/oplata_update.html"
 	form_class = OplataModelForm
 	context_object_name = 'cont'
@@ -550,7 +553,7 @@ class OplataUpdateView(LoginRequiredMixin, UpdateView):
 
 
 class UczestnikDeleteView(LoginRequiredMixin, DeleteView):
-	login_url = '/login/'
+	login_url = 'start'
 	template_name = "wyniki/uczestnik_delete.html"
 	context_object_name = 'uczestnik'
 

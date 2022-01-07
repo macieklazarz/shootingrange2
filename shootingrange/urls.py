@@ -24,7 +24,7 @@ from django.contrib.auth import views as auth_views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', StronaStartowaListView.as_view(), name="turniej_list"),
+    path('start/', StronaStartowaListView.as_view(), name="start"),
     # path('', home_screen_view, name="home"),
     path('<int:pk>/', home_screen_view, name="home"),
     path('<int:pk>/register/', registration_form, name="register"),

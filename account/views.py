@@ -1,4 +1,5 @@
 from django.contrib import messages
+from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import render, redirect, reverse
 from django.contrib.auth import login, authenticate, logout
@@ -104,7 +105,7 @@ def registration_form_sedzia(request, pk):
 		form = RegistrationFormSedzia()
 		context['registration_form'] = form
 	return render(request, 'account/register_sedzia.html', context)
-
+@login_required(login_url="/start/")
 def registration_form_no_login(request,pk):
 	context={}
 	context['pk'] = pk
@@ -159,7 +160,7 @@ def login_info(request, pk):
 
 
 class AccountUpdateView(LoginRequiredMixin, UpdateView):
-	login_url = '/login/'
+	login_url = 'start'
 	template_name = "account/account_update.html"
 	form_class = AccountModelForm
 	def get_context_data(self, **kwargs):
@@ -189,7 +190,7 @@ class AccountUpdateView(LoginRequiredMixin, UpdateView):
 			return redirect('not_authorized')
 
 class AccountListView(LoginRequiredMixin, ListView):
-	login_url = '/login/'
+	login_url = 'start'
 	template_name = "account/account_list.html"
 
 	def get_context_data(self, **kwargs):
@@ -215,7 +216,7 @@ class AccountListView(LoginRequiredMixin, ListView):
 
 
 class AccountDeleteView(LoginRequiredMixin, DeleteView):
-	login_url = '/login/'
+	login_url = 'start'
 	template_name = "account/account_delete.html"
 	context_object_name = 'zawodnik'
 
