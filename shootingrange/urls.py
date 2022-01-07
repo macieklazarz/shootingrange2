@@ -17,22 +17,25 @@ from django.contrib import admin
 from django.conf.urls import url
 from django.urls import path
 from mainapp.views import (home_screen_view,)
-from zawody.views import (ZawodyCreateView,SedziaCreateView, SedziaListView, SedziaDeleteView, ZawodyListView, ZawodyDeleteView )
-from account.views import (registration_form, registration_form_no_login, logout_view, login_view, AccountListView, AccountUpdateView, AccountDeleteView, PasswordResetViewNew, PasswordResetDoneViewNew, PasswordResetConfirmViewNew, PasswordResetCompleteViewNew)
+from zawody.views import (ZawodyCreateView,SedziaCreateView, SedziaListView, SedziaDeleteView, ZawodyListView, ZawodyDeleteView, StronaStartowaListView )
+from account.views import (registration_form, registration_form_sedzia, registration_form_no_login, logout_view, login_view, login_info, AccountListView, AccountUpdateView, AccountDeleteView, PasswordResetViewNew, PasswordResetDoneViewNew, PasswordResetConfirmViewNew, PasswordResetCompleteViewNew)
 from wyniki.views import (wyniki_edycja,  wyniki, rejestracja_na_zawody,  exportexcel, WynikUpdateView, not_authorized, RejestracjaNaZawodyView, KonkurencjaDeleteView, TurniejListView, TurniejDeleteView, TurniejEditView, TurniejCreateView, OplataListView, OplataUpdateView, UczestnikDeleteView)
 from django.contrib.auth import views as auth_views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('', StronaStartowaListView.as_view(), name="turniej_list"),
     # path('', home_screen_view, name="home"),
     path('<int:pk>/', home_screen_view, name="home"),
     path('<int:pk>/register/', registration_form, name="register"),
-    path('register_no_login/', registration_form_no_login, name="register_no_login"),
+    path('<int:pk>/register_sedzia/', registration_form_sedzia, name="register_sedzia"),
+    path('<int:pk>/register_no_login/', registration_form_no_login, name="register_no_login"),
     # path('users/', AccountListView.as_view(), name="users"),
     path('users/<int:pk>/', AccountListView.as_view(), name="users"),
     # path('users_rts/', RtsListView.as_view(), name="users_rts"),
     path('logout/<int:pk>', logout_view, name="logout"),
     path('login/<int:pk>/', login_view, name="login"),
+    path('login/', login_info, name="login_info"),
     path('<int:pk>/wyniki_edycja/', wyniki_edycja, name="wyniki_edycja"),
     # path('wyniki/', wyniki, name="wyniki"),
     path('wyniki/<int:pk>/', wyniki, name="wyniki"),
@@ -80,7 +83,7 @@ urlpatterns = [
     path('reset/<uidb64>/<token>/',
         PasswordResetConfirmViewNew.as_view(),
         name='password_reset_confirm'),
-    path('/reset/done/',
+    path('reset/done/',
         PasswordResetCompleteViewNew.as_view(),
         name='password_reset_complete'),
 ]

@@ -18,6 +18,21 @@ class RegistrationForm(UserCreationForm):
 		print(f'nzaiwsko o 17 to: {nazwisko}')
 		self.cleaned_data['nazwisko'] = nazwisko
 
+class RegistrationFormSedzia(UserCreationForm):
+	email = forms.EmailField(max_length=60, help_text='Required. Add a valid email address')
+
+	class Meta:
+		model = Account
+		fields = ("email", "username", "imie", "nazwisko", "klasa_sedziego", "licencja_sedziego","is_sedzia", "password1", "password2")
+
+	def clean(self):
+		cleaned_data = super().clean()
+		nazwisko = cleaned_data.get('nazwisko') 
+		nazwisko = nazwisko.upper() 
+		print(f'nzaiwsko o 17 to: {nazwisko}')
+		self.cleaned_data['nazwisko'] = nazwisko
+		self.cleaned_data['is_sedzia'] = 1
+
 
 class AccountAuthenticationForm(forms.ModelForm):
 	password = forms.CharField(label='Password', widget=forms.PasswordInput)

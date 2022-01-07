@@ -47,6 +47,8 @@ INSTALLED_APPS = [
     # 'agents',
 ]
 
+CRISPY_TEMPLATE_PACK = 'bootstrap4'
+
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -113,7 +115,7 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/3.2/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'pl-pl'
 
 TIME_ZONE = 'UTC'
 
@@ -123,9 +125,21 @@ USE_L10N = True
 
 USE_TZ = True
 
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+# EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.2/howto/static-files/
+DEFAULT_FROM_EMAIL = 'zawodyreset@mail.com'
+SERVER_EMAIL = 'tuzownia@gmail.com'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_HOST_USER = 'tuzownia@gmail.com'
+EMAIL_HOST_PASSWORD = 'Tuzownia123!@#'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+
+
+
+
 
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [
@@ -139,3 +153,7 @@ CRISPY_TEMPLATE_PACK = 'tailwind'
 CRISPY_ALLOWED_TEMPLATE_PACKS = "tailwind"
 
 GOOGLE_RECAPTCHA_SECRET_KEY = '6LdlCvIdAAAAABtzVOjjqYa3KLiFX_4b6zYSsNtr'
+
+
+LOGIN_URL='start/'
+LOGIN_REDIRECT_URL='start/'

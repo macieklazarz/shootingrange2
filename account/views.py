@@ -2,7 +2,7 @@ from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import render, redirect, reverse
 from django.contrib.auth import login, authenticate, logout
-from account.forms import RegistrationForm, AccountAuthenticationForm, AccountModelForm
+from account.forms import RegistrationForm, RegistrationFormSedzia, AccountAuthenticationForm, AccountModelForm
 from django.views.generic import TemplateView, ListView, DetailView, CreateView, UpdateView, DeleteView
 from .models import Account
 from zawody.models import Sedzia, Turniej
@@ -71,8 +71,43 @@ def registration_form(request, pk):
 		context['registration_form'] = form
 	return render(request, 'account/register.html', context)
 
-def registration_form_no_login(request):
+def registration_form_sedzia(request, pk):
 	context={}
+	context['pk'] = pk
+	context['nazwa_turnieju'] = nazwa_turnieju(pk)
+	if request.POST:
+		form=RegistrationFormSedzia(request.POST)
+		if form.is_valid():
+			print('jest is valid')
+			recaptcha_response = request.POST.get('g-recaptcha-response')
+			url = 'https://www.google.com/recaptcha/api/siteverify'
+			values = {'secret': settings.GOOGLE_RECAPTCHA_SECRET_KEY,'response': recaptcha_response}
+			data = urllib.parse.urlencode(values).encode()
+			req =  urllib.request.Request(url, data=data)
+			response = urllib.request.urlopen(req)
+			result = json.loads(response.read().decode())
+			if result['success']:
+				# print('jest success')
+				form.save()
+				messages.success(request, 'New comment added with success!')
+				email = form.cleaned_data.get('email')
+				raw_password = form.cleaned_data.get('password1')
+				account = authenticate(email=email, password=raw_password)
+				login(request, account)
+				return redirect('home', pk)
+			else:
+				# print(' nie ma success')
+				messages.error(request, 'Invalid reCAPTCHA. Please try again.')
+		else:
+			context['registration_form'] = form
+	else:
+		form = RegistrationFormSedzia()
+		context['registration_form'] = form
+	return render(request, 'account/register_sedzia.html', context)
+
+def registration_form_no_login(request,pk):
+	context={}
+	context['pk'] = pk
 	context['nazwa_turnieju'] = nazwa_turnieju(pk)
 	if request.POST:
 		form=RegistrationForm(request.POST)
@@ -84,7 +119,7 @@ def registration_form_no_login(request):
 			# raw_password = form.cleaned_data.get('inputPassword1')
 			account = authenticate(email=email, password=raw_password)
 			# login(request, account)
-			return redirect('users')
+			return redirect('users', pk)
 		else:
 			context['registration_form'] = form
 	else:
@@ -118,6 +153,10 @@ def login_view(request, pk):
 	context['login_form'] = form
 	context['pk'] = pk
 	return render(request, 'account/login.html', context)
+
+def login_info(request, pk):
+	return redirect('not_authorized')
+
 
 class AccountUpdateView(LoginRequiredMixin, UpdateView):
 	login_url = '/login/'
@@ -183,8 +222,8 @@ class AccountDeleteView(LoginRequiredMixin, DeleteView):
 	def get_context_data(self, **kwargs):
 		context = super().get_context_data(**kwargs)
 		context['sedziowie_lista'] = sedziowie_lista()
-		context['pk'] = self.kwargs['pk']
-		context['nazwa_turnieju'] = nazwa_turnieju(self.kwargs['pk'])
+		context['pk'] = self.kwargs['pk_turniej']
+		context['nazwa_turnieju'] = nazwa_turnieju(self.kwargs['pk_turniej'])
 		# context['rts_lista'] = rts_lista()
 		return context
 
@@ -230,7 +269,7 @@ class PasswordResetConfirmViewNew(auth_views.PasswordResetConfirmView):
 	def get_context_data(self, **kwargs):
 		context = super().get_context_data(**kwargs)
 		# context['sedziowie_lista'] = sedziowie_lista()
-		# context['pk'] = self.kwargs['pk']
+		# context['pki'] = self.kwargs['pk']
 		# context['nazwa_turnieju'] = nazwa_turnieju(self.kwargs['pk'])
 		# context['rts_lista'] = rts_lista()
 		return context
@@ -238,7 +277,7 @@ class PasswordResetConfirmViewNew(auth_views.PasswordResetConfirmView):
 class PasswordResetCompleteViewNew(auth_views.PasswordResetCompleteView):
 	def get_context_data(self, **kwargs):
 		context = super().get_context_data(**kwargs)
-		context['sedziowie_lista'] = sedziowie_lista()
+		# context['sedziowie_lista'] = sedziowie_lista()
 		# context['pk'] = self.kwargs['pk']
 		# context['nazwa_turnieju'] = nazwa_turnieju(self.kwargs['pk'])
 		# context['rts_lista'] = rts_lista()

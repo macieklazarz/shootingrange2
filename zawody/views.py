@@ -3,7 +3,7 @@ from django.views.generic import TemplateView, ListView, DetailView, CreateView,
 from django.views import generic
 from django.shortcuts import render, reverse
 from .forms import ZawodyModelForm, SedziaModelForm
-from .models import Sedzia, Zawody
+from .models import Sedzia, Zawody, Turniej
 from wyniki.views import sedziowie_lista
 from django.shortcuts import redirect
 from account.views import sedziowie_lista
@@ -11,8 +11,34 @@ from mainapp.views import nazwa_turnieju
 
 # Create your views here.
 
+
+class StronaStartowaListView(ListView):
+	template_name = "zawody/turniej_lista.html"
+	# def get_context_data(self, **kwargs):
+	# 	context = super().get_context_data(**kwargs)
+	# 	# context['sedziowie_lista'] = sedziowie_lista()
+	# 	# context['rts_lista'] = rts_lista()
+	# 	# context['pk'] = self.kwargs['pk']
+	# 	# context['nazwa_turnieju'] = nazwa_turnieju(self.kwargs['pk'])
+	# 	return context
+
+	def get_queryset(self):
+		return Turniej.objects.all()
+
+	# def dispatch(self, request, *args, **kwargs):
+	# 	try:
+	# 		if request.user.is_admin:
+	# 			return super(ZawodyListView, self).dispatch(request, *args, **kwargs)
+	# 		else:
+	# 			return redirect('not_authorized')
+	# 	except:
+	# 		return redirect('not_authorized')
+
+
+
+
 class ZawodyListView(LoginRequiredMixin, ListView):
-	login_url = '/login/'
+	login_url = '/start/'
 	template_name = "zawody/zawody_lista.html"
 
 	def get_context_data(self, **kwargs):
@@ -34,6 +60,7 @@ class ZawodyListView(LoginRequiredMixin, ListView):
 				return redirect('not_authorized')
 		except:
 			return redirect('not_authorized')
+
 
 class ZawodyCreateView(LoginRequiredMixin, CreateView):
 	login_url = '/login/'
@@ -74,7 +101,7 @@ class ZawodyDeleteView(LoginRequiredMixin, DeleteView):
 	def get_context_data(self, **kwargs):
 		context = super().get_context_data(**kwargs)
 		context['sedziowie_lista'] = sedziowie_lista()
-		context['pk'] = self.kwargs['pk']
+		context['pk'] = self.kwargs['pk_turniej']
 		context['nazwa_turnieju'] = nazwa_turnieju(self.kwargs['pk_turniej'])
 		# context['rts_lista'] = rts_lista()
 		return context

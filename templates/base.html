@@ -50,6 +50,7 @@
 			{% else %}
 				<li><a href="{% url 'home' pk=pk %}" onclick="toggleMenu();">Strona domowa</a></li>
 				<li><a href="{% url 'register' pk=pk %}" onclick="toggleMenu();">Zarejestruj się</a></li>
+				<li><a href="{% url 'register_sedzia' pk=pk %}" onclick="toggleMenu();">Rejestracja sędziego</a></li>
 				<li><a href="{% url 'login' pk=pk%}" onclick="toggleMenu();">Logowanie</a></li>
 			{% endif %}
 

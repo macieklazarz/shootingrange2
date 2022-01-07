@@ -1,4 +1,5 @@
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect, get_object_or_404, reverse
 from wyniki.models import Wyniki, Ustawienia
 from zawody.models import Sedzia, Zawody
@@ -23,7 +24,7 @@ from mainapp.views import nazwa_turnieju
 
 
 @csrf_exempt
-@login_required(login_url="/login/")
+@login_required(login_url="/start/")
 def wyniki_edycja(request, pk):
 	context = {}
 	context['sedziowie_lista'] = sedziowie_lista()
@@ -169,7 +170,7 @@ def rejestracja_na_zawody(request):
 
 
 class RejestracjaNaZawodyView(LoginRequiredMixin, CreateView):
-	login_url = '/login/'
+	login_url = '/not_authorized'
 	template_name = "wyniki/rejestracja.html"
 	form_class = RejestracjaModelForm
 	# user_id = request.user.id
@@ -347,8 +348,8 @@ class KonkurencjaDeleteView(LoginRequiredMixin, DeleteView):
 	def get_context_data(self, **kwargs):
 		context = super().get_context_data(**kwargs)
 		context['sedziowie_lista'] = sedziowie_lista()
-		context['pk'] = self.kwargs['pk']
-		context['nazwa_turnieju'] = nazwa_turnieju(self.kwargs['pk'])
+		context['pk'] = self.kwargs['pk_turniej']
+		context['nazwa_turnieju'] = nazwa_turnieju(self.kwargs['pk_turniej'])
 		# context['rts_lista'] = rts_lista()
 		return context
 
@@ -402,8 +403,8 @@ class TurniejDeleteView(LoginRequiredMixin, DeleteView):
 	def get_context_data(self, **kwargs):
 		context = super().get_context_data(**kwargs)
 		context['sedziowie_lista'] = sedziowie_lista()
-		context['pk'] = self.kwargs['pk']
-		context['nazwa_turnieju'] = nazwa_turnieju(self.kwargs['pk'])
+		context['pk'] = self.kwargs['pk_turniej']
+		context['nazwa_turnieju'] = nazwa_turnieju(self.kwargs['pk_turniej'])
 		# context['rts_lista'] = rts_lista()
 		return context
 
@@ -467,8 +468,8 @@ class TurniejEditView(LoginRequiredMixin,UpdateView):
 	def get_context_data(self, **kwargs):
 		context = super().get_context_data(**kwargs)
 		context['sedziowie_lista'] = sedziowie_lista()
-		context['pk'] = self.kwargs['pk']
-		context['nazwa_turnieju'] = nazwa_turnieju(self.kwargs['pk'])
+		context['pk'] = self.kwargs['pk_turniej']
+		context['nazwa_turnieju'] = nazwa_turnieju(self.kwargs['pk_turniej'])
 		# context['rts_lista'] = rts_lista()
 		return context
 

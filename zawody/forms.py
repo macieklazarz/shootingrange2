@@ -26,4 +26,5 @@ class SedziaModelForm(forms.ModelForm):
 			)
 	def __init__(self, *args, **kwargs):
 		super(SedziaModelForm, self).__init__(*args, **kwargs)
+		self.fields['sedzia'].queryset = self.fields['sedzia'].queryset.filter(is_sedzia=1)
 		self.fields['sedzia'].label = 'Sędzia'

@@ -13,22 +13,27 @@
 
 
 	</head>
-{% block content %}
-{% load tailwind_filters %}
 
-<section class="text-gray-600 body-font overflow-hidden">
-  <div class="container px-5 py-4 mx-auto">
-  	<div class="row justify-content-center">
-  		<div class="col-auto">
-  			<div class="table-responsive text-center"">
-				<h2>Zerowanie hasła</h2>
-				<p>Hasło zostało zdefiniowane. Możesz się już zalogować</a>.</p>
-			</div>
+{% block content %}
+
+  <div class="container justify-content-center">
+  	<div class="d-flex justify-content-center pt-5 pb-2">
+  		<h1>Przejdź do turnieju</h1>
+  	</div>
+    <div class="row justify-content-center pt-5 pb-5 col-auto">
+     
+		{% for turniej in object_list %}
+		<div class="col-auto">
+			<a href="{% url 'home' turniej.id %}" class="btn btn-primary btn-lg active" role="button" aria-pressed="true">{{turniej.nazwa}}</a>
 		</div>
+		{% endfor %}
 	</div>
   </div>
-</section>
 
-{% endblock content %}	
+
+
+
+{% endblock content %}
+
 
 </html>
