@@ -44,7 +44,7 @@ class Wyniki(models.Model):
 		# if liczba_strzalow < 10:
 		# 	self.komunikat = ""
 		self.result = str(self.X*10 + self.Xx*10 + self.dziewiec*9 + self.osiem*8 + self.siedem*7 + self.szesc*6+ self.piec*5+ self.cztery*4+ self.trzy*3+ self.dwa*2+ self.jeden*1)
-		if self.kara != 'BRAK':
+		if self.kara not in ['BRAK', 'PK']:
 			self.result = self.kara
 			self.X=0
 			self.Xx=0
@@ -58,6 +58,10 @@ class Wyniki(models.Model):
 			self.dwa=0
 			self.jeden=0
 			self.wynik=0
+		if self.kara == 'PK':
+			self.result = self.kara
+			self.wynik = 0
+
 		super(Wyniki, self).save(*args, **kwargs)
 
 	def clean(self):

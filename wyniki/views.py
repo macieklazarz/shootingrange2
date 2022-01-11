@@ -39,13 +39,13 @@ def wyniki_edycja(request, pk):
 	turniej_id = []
 	for i in turniej:
 		turniej_id.append(i)
-	print(f'turniej to {turniej_id}')
+	# print(f'turniej to {turniej_id}')
 
 	zawody_turnieju = Zawody.objects.filter(turniej__in=turniej_id).values_list('id', flat=True)
 	zawody_turnieju_id = []
 	for i in zawody_turnieju:
 		zawody_turnieju_id.append(i)
-	print(f'zawody turnieju to {zawody_turnieju_id}')
+	# print(f'zawody turnieju to {zawody_turnieju_id}')
 
 	user_id = request.user.id 																				#sprawdzamy użytkownika ktory jest zalogowany
 	powiazane_zawody = Sedzia.objects.filter(sedzia__id = user_id).values_list('zawody', flat=True)			#sprawdzamy do jakich zawodow jest przyporzadkowany sedzua
@@ -54,7 +54,7 @@ def wyniki_edycja(request, pk):
 	for i in powiazane_zawody:
 		if i in zawody_turnieju_id:
 			powiazane_zawody_lista.append(i)
-	print(f'powiazane_zawody TO {powiazane_zawody_lista}')
+	# print(f'powiazane_zawody TO {powiazane_zawody_lista}')
 
 	# if (request.user.username == 'admin'):
 	# 	wyniki1 = Wyniki.objects.filter(zawody = 1)
@@ -79,7 +79,7 @@ def wyniki_edycja(request, pk):
 	# 	print(i.zawodnik)
 	# print(f'wyniki moje to {wyniki[1]}')
 	# print(f'wyniki cale to {wyniki}')
-	print(f'zawody nazwa to {zawody_nazwa}')
+	# print(f'zawody nazwa to {zawody_nazwa}')
 	# print(f'wyniki1 to {wyniki1}')
 	context['wyniki'] = wyniki
 	context['zawody_nazwa'] = zawody_nazwa
@@ -111,7 +111,7 @@ def wyniki(request, pk):
 	sedziowie = []
 	for i in zawody_lista:
 		# wyniki.append(Wyniki.objects.filter(zawody = i).order_by('-wynik', '-X', '-Xx', '-dziewiec', '-osiem', '-siedem'))
-		wyniki.append(Wyniki.objects.filter(zawody = i, oplata=1).order_by('-wynik', '-X', '-Xx', '-dziewiec', '-osiem', '-siedem'))
+		wyniki.append(Wyniki.objects.filter(zawody = i, oplata=1).order_by('kara', '-wynik', '-X', '-Xx', '-dziewiec', '-osiem', '-siedem'))
 		# sedziowie_queryset.append(Sedzia.objects.filter(zawody = i).values_list(Concat('sedzia__imie', V(' '), 'sedzia__nazwisko'), output_field=CharField(), Flat = True))
 		# sedziowie_queryset.append(Sedzia.objects.filter(zawody = i).values_list('sedzia__imie', flat = True))
 		sedziowie_queryset.append(Sedzia.objects.filter(zawody = i).values_list('sedzia__imie', 'sedzia__nazwisko'))
@@ -130,7 +130,7 @@ def wyniki(request, pk):
 
 	# klasyfikacja_generalna = Wyniki.objects.all().order_by('-wynik', '-X', '-Xx', '-dziewiec', '-osiem', '-siedem')
 	# klasyfikacja_generalna = Wyniki.objects.raw('select id, zawodnik_id, sum(X) as X, sum(Xx) as Xx,sum(dziewiec) as dziewiec, sum(osiem) as osiem,sum(siedem) as siedem , sum(szesc) as szesc, sum(piec) as piec, sum(cztery) as cztery, sum(trzy) as trzy, sum(dwa) as dwa, sum(jeden) as jeden, sum(wynik) as wynik from wyniki_wyniki group by zawodnik_id order by wynik desc, X desc, Xx desc, dziewiec desc, osiem desc, siedem DESC')
-	klasyfikacja_generalna = Wyniki.objects.raw('select wyniki_wyniki.id, zawodnik_id, sum(X) as X, sum(Xx) as Xx,sum(dziewiec) as dziewiec, sum(osiem) as osiem,sum(siedem) as siedem , sum(szesc) as szesc, sum(piec) as piec, sum(cztery) as cztery, sum(trzy) as trzy, sum(dwa) as dwa, sum(jeden) as jeden, sum(wynik) as wynik from wyniki_wyniki inner join zawody_zawody on wyniki_wyniki.zawody_id = zawody_zawody.id where zawody_zawody.turniej_id = %s and oplata=1 group by zawodnik_id order by wynik desc, X desc, Xx desc, dziewiec desc, osiem desc, siedem DESC', [pk])
+	klasyfikacja_generalna = Wyniki.objects.raw('select wyniki_wyniki.id, zawodnik_id, sum(X) as X, sum(Xx) as Xx,sum(dziewiec) as dziewiec, sum(osiem) as osiem,sum(siedem) as siedem , sum(szesc) as szesc, sum(piec) as piec, sum(cztery) as cztery, sum(trzy) as trzy, sum(dwa) as dwa, sum(jeden) as jeden, sum(wynik) as wynik from wyniki_wyniki inner join zawody_zawody on wyniki_wyniki.zawody_id = zawody_zawody.id where zawody_zawody.turniej_id = %s and oplata=1 and wyniki_wyniki.kara = %s group by zawodnik_id order by wynik desc, X desc, Xx desc, dziewiec desc, osiem desc, siedem DESC', [pk, 'BRAK'])
 	# print(klasyfikacja_generalna.values_list())
 	# query = Wyniki.objects.all().query
 	# query.group_by = ['zawodnik']
@@ -163,7 +163,7 @@ def rejestracja_na_zawody(request):
 		}
 		# form = forms.DodajZawodnika(initial=def_data)
 		# form = forms.DodajZawodnika()
-		print(user)
+		# print(user)
 		form = forms.DodajZawodnika(initial={'zawodnik': user})
 		context['form'] = form
 	context['sedziowie_lista'] = sedziowie_lista()
@@ -274,15 +274,15 @@ class WynikUpdateView(LoginRequiredMixin, UpdateView):
 		sedzia_pk_lista = []
 		for i in sedzia_pk:
 			sedzia_pk_lista.append(i)
-		print(f'zawody: {zawody_pk_lista}')
-		print(f'sedzia_id: {sedzia_pk_lista}')
+		# print(f'zawody: {zawody_pk_lista}')
+		# print(f'sedzia_id: {sedzia_pk_lista}')
 		user_id=self.request.user.id
-		print(f'user_id: {user_id}')
+		# print(f'user_id: {user_id}')
 		if user_id in sedzia_pk_lista:
-			print('sedzia jest')
+			# print('sedzia jest')
 			return super(WynikUpdateView, self).dispatch(request, *args, **kwargs)
 		else:
-			print('sedzia nie ma')
+			# print('sedzia nie ma')
 			return redirect('not_authorized')
 
 
