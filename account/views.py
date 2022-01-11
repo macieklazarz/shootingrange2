@@ -14,6 +14,7 @@ from django.contrib.auth import views as auth_views
 from shootingrange import settings
 import urllib
 import json
+import urllib.request
 
 
 def nazwa_turnieju(arg):
@@ -232,7 +233,7 @@ class AccountListView(LoginRequiredMixin, ListView):
 		return context
 
 	def get_queryset(self):
-		return Account.objects.all()
+		return Account.objects.all().order_by('nazwisko')
 
 	def dispatch(self, request, *args, **kwargs):
 		try:
