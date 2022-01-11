@@ -18,13 +18,14 @@ from django.conf.urls import url
 from django.urls import path
 from mainapp.views import (home_screen_view,)
 from zawody.views import (ZawodyCreateView,SedziaCreateView, SedziaListView, SedziaDeleteView, ZawodyListView, ZawodyDeleteView, StronaStartowaListView )
-from account.views import (registration_form, registration_form_sedzia, registration_form_no_login, logout_view, login_view, login_info, AccountListView, AccountUpdateView, AccountDeleteView, PasswordResetViewNew, PasswordResetDoneViewNew, PasswordResetConfirmViewNew, PasswordResetCompleteViewNew)
-from wyniki.views import (wyniki_edycja,  wyniki, rejestracja_na_zawody,  exportexcel, WynikUpdateView, not_authorized, RejestracjaNaZawodyView, KonkurencjaDeleteView, TurniejListView, TurniejDeleteView, TurniejEditView, TurniejCreateView, OplataListView, OplataUpdateView, UczestnikDeleteView)
+from account.views import (registration_form, registration_form_sedzia, registration_form_no_login, logout_view, login_view, login_info, AccountListView, AccountUpdateView, AccountDeleteView, PasswordResetViewNew, PasswordResetDoneViewNew, PasswordResetConfirmViewNew, PasswordResetCompleteViewNew, SedziaUpdateView)
+from wyniki.views import (wyniki_edycja,  wyniki, rejestracja_na_zawody,  exportexcel, WynikUpdateView, not_authorized, RejestracjaNaZawodyView, KonkurencjaDeleteView, TurniejListView, TurniejDeleteView, TurniejEditView, TurniejCreateView, OplataListView, OplataUpdateView, OplataUpdateViewNew, UczestnikDeleteView)
 from django.contrib.auth import views as auth_views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('start/', StronaStartowaListView.as_view(), name="start"),
+    path('', StronaStartowaListView.as_view(), name="start"),
     # path('', home_screen_view, name="home"),
     path('<int:pk>/', home_screen_view, name="home"),
     path('<int:pk>/register/', registration_form, name="register"),
@@ -48,6 +49,7 @@ urlpatterns = [
     # url(r'^(?P<slug>[-\w]+)/'r'(?P<nr_zawodow>[-\w]+)/$', wyniki_edit, name="wyniki_edit"),
     path('<int:pk>/wyniki_edit/<int:pk_turniej>/', WynikUpdateView.as_view(), name="wyniki_edit"),
     path('<int:pk>/account_edit/<int:pk_turniej>/', AccountUpdateView.as_view(), name="account_edit"),
+    path('<int:pk>/sedzia_edit/<int:pk_turniej>/', SedziaUpdateView.as_view(), name="sedzia_edit"),
     path('<int:pk>/account_delete/<int:pk_turniej>/',AccountDeleteView.as_view(), name="account_delete"),
     # path('<int:pk>/rts_delete/',RtsDeleteView.as_view(), name="rts_delete"),
     # path('<int:pk>/konkurencja_delete/',KonkurencjaDeleteView.as_view(), name="konkurencja_delete"),
@@ -70,6 +72,7 @@ urlpatterns = [
     path('<int:pk>/turniej_add/', TurniejCreateView.as_view(), name="turniej_add"),
     path('oplata/<int:pk>/', OplataListView.as_view(), name="oplata_list"),
     path('<int:pk>/oplata_update/<int:pk_turniej>/', OplataUpdateView.as_view(), name="oplata_update"),
+    path('<int:pk>/oplata_updatenew/<int:pk_turniej>/', OplataUpdateViewNew.as_view(), name="oplata_update_new"),
     # path('/rts_add/', RtsCreateView.as_view(), name="rts_add"),
     path('<int:pk>/uczestnik_delete/<int:pk_turniej>/',UczestnikDeleteView.as_view(), name="uczestnik_delete"),
 

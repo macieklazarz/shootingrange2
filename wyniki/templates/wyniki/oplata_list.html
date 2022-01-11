@@ -18,6 +18,7 @@
 						<td class="mu"><b>Opłata</b></td>
 
 						<td class="mu"><b>Edycja</b></td>
+						<td class="mu"><b>EdycjaNowa</b></td>
 						<td class="mu"><b>Usuń</b></td>
 					</tr>
 				</thead>
@@ -32,6 +33,7 @@
 			        		</label>
 			        	</td>
 						<td><a href="{% url 'oplata_update' osoba.id pk %}" class="btn btn-secondary btn-sm active" role="button" aria-pressed="true">Edytuj opłatę</a></td>
+						<td><a href="{% url 'oplata_update_new' osoba.zawodnik.id pk%}" class="btn btn-secondary btn-sm active" role="button" aria-pressed="true">Edytuj opłatę</a></td>
 						<td><a href="{% url 'uczestnik_delete' osoba.id pk %}" class="btn btn-secondary btn-sm active" role="button" aria-pressed="true">Usuń z konkurencji</a></td>
 					</tr>	
 		        	{% endfor %}

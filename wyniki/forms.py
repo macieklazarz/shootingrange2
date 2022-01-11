@@ -6,6 +6,7 @@ from wyniki.models import Wyniki, Ustawienia
 from django.core.exceptions import ValidationError
 from django.forms.widgets import CheckboxSelectMultiple
 from django.forms.models import ModelMultipleChoiceField
+from django.forms.models import inlineformset_factory
 
 class Wyniki_edit(forms.ModelForm):
     class Meta:
@@ -96,9 +97,6 @@ class RejestracjaModelForm(forms.ModelForm):
             'zawodnik',
             )
 
-
-
-
     def clean(self):
         cleaned_data = super().clean()
         wybrane_zawody = cleaned_data.get('zawody').id                                                                                                           #sprawdzam jakie wybrano zawody
@@ -124,6 +122,7 @@ class RejestracjaModelForm(forms.ModelForm):
         super(RejestracjaModelForm, self).__init__(*args, **kwargs)
         print(f'user admin to {user}')
         self.fields['zawody'].queryset = Zawody.objects.filter(turniej__id=pk)
+        self.fields['zawodnik'].queryset = Account.objects.all().order_by('nazwisko')
         # self.fields['zawodnik'] = forms.ModelChoiceField(queryset=Account.objects.all())
         if not user:
             self.fields['zawodnik'].widget = HiddenInput()
@@ -158,9 +157,41 @@ class OplataModelForm(forms.ModelForm):
         fields = (
             'oplata',
             )
-
+class OplataModelFormNew(forms.ModelForm):
+    class Meta:
+        model = Wyniki
+        fields = (
+            'zawody',
+            'oplata',
+            )
     # def clean(self):
     #     cleaned_data = super().clean()
     #     nazwisko = cleaned_data.get('nazwisko') 
     #     nazwisko = nazwisko.upper() 
     #     self.cleaned_data['nazwisko'] = nazwisko
+
+# ModuleFormSet = inlineformset_factory(Account,
+#                                       Wyniki,
+#                                       fields=['zawody',
+#                                               'oplata',],
+#                                       extra=0,
+#                                       can_delete=False,
+#                                       widgets={'zawody': forms.Select(attrs={'readonly': 'readonly'})},
+#                                       # labels = ['aaa', 'bbb'],
+#                                       # widgets={'zawody': forms.Select(disabled=True)}
+#                                       # widgets={'zawody': forms.Select(attrs={'cols': 80, 'rows': 20})}
+#                                       )
+
+
+ModuleFormSet = inlineformset_factory(Account,
+                                      Wyniki,
+                                      fields=['oplata',],
+                                      extra=0,
+                                      can_delete=False,
+                                      # widgets={'zawody': forms.Select(attrs={'readonly': 'readonly'})},
+                                      labels = {'oplata': 'Opłata',}
+                                      # widgets={'zawody': forms.Select(disabled=True)}
+                                      # widgets={'zawody': forms.Select(attrs={'cols': 80, 'rows': 20})}
+                                      )
+
+# ModuleFormSetNew = ModuleFormSet(instance=i, queryset=Wyniki.objects.filter(zawody=i.zawody))

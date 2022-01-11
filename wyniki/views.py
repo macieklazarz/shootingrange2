@@ -1,8 +1,11 @@
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.views.generic.base import TemplateResponseMixin, View
+from django.views.generic.detail import SingleObjectMixin
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect, get_object_or_404, reverse
 from wyniki.models import Wyniki, Ustawienia
 from zawody.models import Sedzia, Zawody
+from account.models import Account
 from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse, HttpResponse
 from . import forms
@@ -11,8 +14,8 @@ from django.contrib.auth.decorators import login_required
 import datetime
 import xlwt
 from django.db.models.functions import Concat
-from django.views.generic import TemplateView, ListView, DetailView, CreateView, UpdateView, DeleteView
-from .forms import WynikiModelForm, RejestracjaModelForm, UstawieniaModelForm, TurniejModelForm, OplataModelForm
+from django.views.generic import TemplateView, ListView, DetailView, CreateView, UpdateView, DeleteView, FormView
+from .forms import WynikiModelForm, RejestracjaModelForm, UstawieniaModelForm, TurniejModelForm, OplataModelForm, OplataModelFormNew, ModuleFormSet
 from zawody.models import Sedzia, Turniej
 from account.views import sedziowie_lista
 # from django.contrib.auth.mixins import LoginRequiredMixin
@@ -494,21 +497,44 @@ class TurniejEditView(LoginRequiredMixin,UpdateView):
 
 
 
+# class OplataListView(LoginRequiredMixin, ListView):
+# 	login_url = 'start'
+# 	template_name = "wyniki/oplata_list.html"
+
+# 	def get_context_data(self, **kwargs):
+# 		context = super().get_context_data(**kwargs)
+# 		context['sedziowie_lista'] = sedziowie_lista()
+# 		# context['rts_lista'] = rts_lista()
+# 		context['pk'] = self.kwargs['pk']
+# 		context['nazwa_turnieju'] = nazwa_turnieju(self.kwargs['pk'])
+# 		context['nazwa_turnieju'] = nazwa_turnieju(self.kwargs['pk'])
+# 		return context
+
+# 	def get_queryset(self):
+# 		return Wyniki.objects.filter(zawody__turniej=self.kwargs['pk']).order_by('zawody__turniej','zawody__nazwa','zawodnik__nazwisko')
+
+# 	def dispatch(self, request, *args, **kwargs):
+# 		try:
+# 			if request.user.rts:
+# 				return super(OplataListView, self).dispatch(request, *args, **kwargs)
+# 			else:
+# 				return redirect('not_authorized')
+# 		except:
+# 			return redirect('not_authorized')
+
 class OplataListView(LoginRequiredMixin, ListView):
 	login_url = 'start'
-	template_name = "wyniki/oplata_list.html"
+	template_name = "wyniki/oplata_list_new.html"
 
 	def get_context_data(self, **kwargs):
 		context = super().get_context_data(**kwargs)
 		context['sedziowie_lista'] = sedziowie_lista()
-		# context['rts_lista'] = rts_lista()
 		context['pk'] = self.kwargs['pk']
-		context['nazwa_turnieju'] = nazwa_turnieju(self.kwargs['pk'])
 		context['nazwa_turnieju'] = nazwa_turnieju(self.kwargs['pk'])
 		return context
 
 	def get_queryset(self):
-		return Wyniki.objects.filter(zawody__turniej=self.kwargs['pk']).order_by('zawody__turniej','zawody__nazwa','zawodnik__nazwisko')
+		return Account.objects.all().order_by('nazwisko')
 
 	def dispatch(self, request, *args, **kwargs):
 		try:
@@ -518,6 +544,7 @@ class OplataListView(LoginRequiredMixin, ListView):
 				return redirect('not_authorized')
 		except:
 			return redirect('not_authorized')
+			# pass
 
 class OplataUpdateView(LoginRequiredMixin, UpdateView):
 	login_url = 'start'
@@ -550,6 +577,131 @@ class OplataUpdateView(LoginRequiredMixin, UpdateView):
 		except:
 			return redirect('not_authorized')
 			# pass
+
+
+# class OplataUpdateViewNew(LoginRequiredMixin, UpdateView):
+# 	login_url = 'start'
+# 	template_name = "wyniki/oplata_update.html"
+# 	form_class = OplataModelForm
+# 	context_object_name = 'cont'
+# 	def get_context_data(self, **kwargs):
+# 		context = super().get_context_data(**kwargs)
+# 		context['sedziowie_lista'] = sedziowie_lista()
+# 		context['pk'] = self.kwargs['pk_turniej']
+# 		context['nazwa_turnieju'] = nazwa_turnieju(self.kwargs['pk_turniej'])
+# 		user_id = self.kwargs['pk']
+# 		# context['rts_lista'] = rts_lista()
+# 		return context
+
+# 	def get_queryset(self):
+# 		# user_id = 
+# 		return Wyniki.objects.filter(zawodnik=user_id)
+# 		# return Wyniki.objects.all()
+
+# 	def get_success_url(self):
+# 		return reverse("oplata_list", kwargs={'pk': self.kwargs['pk_turniej']})
+		
+# 	def form_valid(self, form):
+# 		return super(OplataUpdateViewNew,self).form_valid(form)
+
+# 	def dispatch(self, request, *args, **kwargs):
+# 		try:
+# 			if request.user.rts:
+# 				return super(OplataUpdateViewNew, self).dispatch(request, *args, **kwargs)
+# 			else:
+# 				return redirect('not_authorized')
+# 		except:
+# 			# return redirect('not_authorized')
+# 			pass
+
+
+
+class OplataUpdateViewNew(LoginRequiredMixin, TemplateResponseMixin, View):
+    login_url='start'
+    template_name = 'wyniki/oplata_update_new.html'
+    account = None
+    # nazwa_turnieju = nazwa_turnieju(self.kwargs['pk_turniej'])
+
+    def get_formset(self, data=None):
+        return ModuleFormSet(instance=self.account,
+                             data=data)
+
+    def dispatch(self, request, pk, pk_turniej):
+    	try:
+    		
+    		if request.user.rts:
+    			self.account = get_object_or_404(Account,
+		                                        id=pk)
+    			return super().dispatch(request, pk)
+    		else:
+    			# return redirect('not_authorized')
+    			return reverse('not_authorized')
+    	except:
+    		return redirect(reverse('not_authorized'))
+
+
+    def get(self, request, *args, **kwargs):
+        formset = self.get_formset()
+        return self.render_to_response({'account': self.account,
+                                        'formset': formset,
+                                        'pk': self.kwargs['pk_turniej'],
+                                        'nazwa_turnieju': ''.join(nazwa_turnieju(self.kwargs['pk_turniej'])[0])})
+
+    def post(self, request, *args, **kwargs):
+        formset = self.get_formset(data=request.POST)
+        if formset.is_valid():
+            formset.save()
+            # return redirect('oplata_list', context'pk':1)
+            return redirect(reverse("oplata_list", kwargs={'pk': self.kwargs['pk_turniej']}))
+        return self.render_to_response({'account': self.account,
+                                        'formset': formset,
+                                        'pk': self.kwargs['pk_turniej'],
+                                        'nazwa_turnieju': ''.join(nazwa_turnieju(self.kwargs['pk_turniej'])[0])})
+
+    # def dispatch(self, request, *args, **kwargs):
+    # 	return super(OplataUpdateViewNew, self).dispatch(request, *args, **kwargs)
+
+
+
+
+
+
+# class OplataUpdateViewNew(SingleObjectMixin, FormView):
+
+#     model = Account
+#     template_name = 'wyniki/oplata_update_new.html'
+
+
+#     def get(self, request, *args, **kwargs):
+#         self.object = self.get_object(queryset=Account.objects.all())
+#         return super().get(request, *args, **kwargs)
+#         # return self.render_to_response({'pk': 1})
+#     def get_context_data(self, **kwargs):
+#        	context = super().get_context_data(**kwargs)
+#        	context['pk'] = 1
+#        	return context
+
+#     def post(self, request, *args, **kwargs):
+#         self.object = self.get_object(queryset=Account.objects.all())
+#         return super().post(request, *args, **kwargs)
+
+#     def get_form(self, form_class=None):
+#         return ModuleFormSet(**self.get_form_kwargs(), instance=self.object)
+
+#     def form_valid(self, form):
+#         form.save()
+
+#         messages.add_message(
+#             self.request,
+#             messages.SUCCESS,
+#             'Changes were saved.'
+#         )
+
+#         return HttpResponseRedirect(self.get_success_url())
+
+#     def get_success_url(self):
+#         return redirect(reverse("oplata_list", kwargs={'pk': 1}))
+
 
 
 class UczestnikDeleteView(LoginRequiredMixin, DeleteView):
