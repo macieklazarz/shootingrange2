@@ -27,5 +27,6 @@ def nazwa_turnieju(arg):
 	nazwa_flat = []
 	for i in nazwa:
 		nazwa_flat.append(i)
+	nazwa_str = ''.join(nazwa_flat[0])
 
-	return nazwa_flat
+	return nazwa_str

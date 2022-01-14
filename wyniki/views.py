@@ -622,8 +622,10 @@ class OplataUpdateViewNew(LoginRequiredMixin, TemplateResponseMixin, View):
     account = None
     # nazwa_turnieju = nazwa_turnieju(self.kwargs['pk_turniej'])
 
-    def get_formset(self, data=None):
-        return ModuleFormSet(instance=self.account,
+    # def get_formset(self, request, *args, **kwargs, data=None):
+    def get_formset(self, data=None, turniej=1):
+        # print(f'zawody {Wyniki.objects.filter(zawody__id=1)}')
+        return ModuleFormSet(instance=self.account,queryset=Wyniki.objects.filter(zawody__turniej__id=turniej),
                              data=data)
 
     def dispatch(self, request, pk, pk_turniej):
@@ -637,18 +639,19 @@ class OplataUpdateViewNew(LoginRequiredMixin, TemplateResponseMixin, View):
     			# return redirect('not_authorized')
     			return reverse('not_authorized')
     	except:
-    		return redirect(reverse('not_authorized'))
+    		# return redirect(reverse('not_authorized'))
+    		pass
 
 
     def get(self, request, *args, **kwargs):
-        formset = self.get_formset()
+        formset = self.get_formset(turniej=self.kwargs['pk_turniej'])
         return self.render_to_response({'account': self.account,
                                         'formset': formset,
                                         'pk': self.kwargs['pk_turniej'],
-                                        'nazwa_turnieju': ''.join(nazwa_turnieju(self.kwargs['pk_turniej'])[0])})
+                                        'nazwa_turnieju': nazwa_turnieju(self.kwargs['pk_turniej'])})
 
     def post(self, request, *args, **kwargs):
-        formset = self.get_formset(data=request.POST)
+        formset = self.get_formset(data=request.POST, turniej=self.kwargs['pk_turniej'])
         if formset.is_valid():
             formset.save()
             # return redirect('oplata_list', context'pk':1)
@@ -656,7 +659,7 @@ class OplataUpdateViewNew(LoginRequiredMixin, TemplateResponseMixin, View):
         return self.render_to_response({'account': self.account,
                                         'formset': formset,
                                         'pk': self.kwargs['pk_turniej'],
-                                        'nazwa_turnieju': ''.join(nazwa_turnieju(self.kwargs['pk_turniej'])[0])})
+                                        'nazwa_turnieju': nazwa_turnieju(self.kwargs['pk_turniej'])})
 
     # def dispatch(self, request, *args, **kwargs):
     # 	return super(OplataUpdateViewNew, self).dispatch(request, *args, **kwargs)

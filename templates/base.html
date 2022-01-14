@@ -31,7 +31,8 @@
 		<div class="MenuToggle" onclick="toggleMenu();"></div>
 		<ul class="navigation">
 			{% if request.user.is_authenticated %}
-				<li><a href="{% url 'home' pk=pk %}" onclick="toggleMenu();">Strona główna</a></li>
+				<li><a href="{% url 'start' %}" onclick="toggleMenu();">Strona główna</a></li>
+				<!-- <li><a href="{% url 'home' pk=pk %}" onclick="toggleMenu();">Strona główna</a></li> -->
 				<li><a href="{% url 'logout' pk=pk %}" onclick="toggleMenu();">Wylogowanie</a></li>
 				<li><a href="{% url 'rejestracja_na_zawody' pk=pk %}" onclick="toggleMenu();">Zapisy do konkurencji</a></li>
 				<li><a href="{% url 'wyniki' pk=pk %}" onclick="toggleMenu();">Wyniki</a></li>
@@ -48,7 +49,8 @@
 					<li><a href="{% url 'wyniki_edycja' pk=pk %}" onclick="toggleMenu();">Edytuj Wyniki</a></li>
 				{% endif%}
 			{% else %}
-				<li><a href="{% url 'home' pk=pk %}" onclick="toggleMenu();">Strona domowa</a></li>
+				<!-- <li><a href="{% url 'home' pk=pk %}" onclick="toggleMenu();">Strona domowa</a></li> -->
+				<li><a href="{% url 'start' %}" onclick="toggleMenu();">Strona główna</a></li>
 				<li><a href="{% url 'register' pk=pk %}" onclick="toggleMenu();">Zarejestruj się</a></li>
 				<li><a href="{% url 'register_sedzia' pk=pk %}" onclick="toggleMenu();">Rejestracja sędziego</a></li>
 				<li><a href="{% url 'login' pk=pk%}" onclick="toggleMenu();">Logowanie</a></li>
