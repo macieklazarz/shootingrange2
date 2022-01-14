@@ -17,11 +17,7 @@
 	<header>
 		<a href="#" class="logo">
 				<span> 
-					{% for i in nazwa_turnieju %}
-						{% for k in i %}
-							{{k}}
-						{% endfor %}
-					{% endfor %}
+					{{nazwa_turnieju}}
 					<br>
 			{% if request.user.is_authenticated %}
 					Witaj {{request.user}}
@@ -45,7 +41,7 @@
 					<li><a href="{% url 'turnieje' pk=pk%}" onclick="toggleMenu();">Turnieje</a></li>
 					<li><a href="{% url 'sedzia_lista' pk=pk %}" onclick="toggleMenu();">Zarządzaj sędziami</a></li>
 				{% endif %}
-				{% if request.user.id in sedziowie_lista%}
+				{% if request.user.is_sedzia %}
 					<li><a href="{% url 'wyniki_edycja' pk=pk %}" onclick="toggleMenu();">Edytuj Wyniki</a></li>
 				{% endif%}
 			{% else %}
@@ -57,19 +53,10 @@
 			{% endif %}
 
 
-
-
-
 		</ul>
 	</header>
 
 		<div class="container p-0 pt-5 mt-5">
-
-
-
-	        
-
-
 
 		{% block content %}
 		

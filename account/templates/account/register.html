@@ -48,8 +48,8 @@
       <input type="text" name="nazwisko" id="inputNazwisko" class="form-control" placeholder="Nazwisko (pole obowiązkowe)" required>
       <input type="text" name="klub" id="inputKlub" class="form-control"  placeholder="Klub">
       <input type="text" name="licencja" id="inputLicencja" class="form-control"  placeholder="Licencja">
-      <input type="password" name="password1" class="form-control" id="inputPassword1" placeholder="Password" required>
-      <input type="password" name="password2" class="form-control" id="floatingPassword2" placeholder="Confirm Password" required>
+      <input type="password" name="password1" class="form-control" id="inputPassword1" placeholder="Hasło" required>
+      <input type="password" name="password2" class="form-control" id="floatingPassword2" placeholder="Potwierdź hasło" required>
 	{% for field in registration_form %}
 	<p>
 		{% for error in field.errors %}

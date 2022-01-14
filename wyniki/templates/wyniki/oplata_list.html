@@ -12,29 +12,23 @@
 		      <table class="table table-hover table-responsive table-bordered mx-auto w-auto align-middle md:text-center table-condensed">
 		      	<thead class="table-secondary">
 		        	<tr>
-						<td class="mu"><b>Turniej</b></td>
-						<td class="mu"><b>Konkurencja</b></td>
-						<td class="mu"><b>Zawodnik</b></td>
-						<td class="mu"><b>Opłata</b></td>
 
-						<td class="mu"><b>Edycja</b></td>
-						<td class="mu"><b>EdycjaNowa</b></td>
-						<td class="mu"><b>Usuń</b></td>
+						<td class="mu"><b>Zawodnik</b></td>
+						<td class="mu"><b>Email</b></td>
+
+
+
+						<td class="mu"><b>Edycja opłat</b></td>
+
 					</tr>
 				</thead>
 		        	{% for osoba in object_list %}
 		        	<tr>
-			           <td class="mu">{{ osoba.zawody.turniej }}</td>
-			           <td class="mu">{{ osoba.zawody }}</td>
-			        	<td class="mu">{{ osoba.zawodnik }}</td>
-			        	<td class="mu">
-			        		<label class="inline-flex items-center">
-			        			<input type="checkbox" {% if osoba.oplata == 1 %} checked="checked" {% endif %} onclick="return false">
-			        		</label>
-			        	</td>
-						<td><a href="{% url 'oplata_update' osoba.id pk %}" class="btn btn-secondary btn-sm active" role="button" aria-pressed="true">Edytuj opłatę</a></td>
-						<td><a href="{% url 'oplata_update_new' osoba.zawodnik.id pk%}" class="btn btn-secondary btn-sm active" role="button" aria-pressed="true">Edytuj opłatę</a></td>
-						<td><a href="{% url 'uczestnik_delete' osoba.id pk %}" class="btn btn-secondary btn-sm active" role="button" aria-pressed="true">Usuń z konkurencji</a></td>
+			        	<td class="mu">{{ osoba }}</td>
+			        	<td class="mu">{{ osoba.email }}</td>
+
+						<td><a href="{% url 'oplata_update' osoba.id pk%}" class="btn btn-secondary btn-sm active" role="button" aria-pressed="true">Edytuj opłatę</a></td>
+
 					</tr>	
 		        	{% endfor %}
 		      </table>

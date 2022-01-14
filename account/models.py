@@ -59,7 +59,7 @@ class Account(AbstractBaseUser):
 	objects = MyAccountManager();
 
 	def __str__(self):
-		return (self.imie+' '+self.nazwisko)
+		return (self.nazwisko+' '+self.imie)
 
 	def has_perm(self, perm, obj=None):
 		return self.is_admin
@@ -68,9 +68,3 @@ class Account(AbstractBaseUser):
 		return True
 
 
-# class Rts(models.Model):
-# 	user 		= models.OneToOneField(Account, on_delete=models.CASCADE)
-
-
-	# def __str__(self):
-	# 	return (self.user.imie+' '+self.user.nazwisko)

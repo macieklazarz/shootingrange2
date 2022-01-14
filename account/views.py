@@ -4,13 +4,10 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import render, redirect, reverse
 from django.contrib.auth import login, authenticate, logout
 from account.forms import RegistrationForm, RegistrationFormSedzia, AccountAuthenticationForm, AccountModelForm, SedziaModelForm
-from django.views.generic import TemplateView, ListView, DetailView, CreateView, UpdateView, DeleteView
+from django.views.generic import ListView, UpdateView, DeleteView
 from .models import Account
-from zawody.models import Sedzia, Turniej
-# from wyniki.views import sedziowie_lista
-# from rest_auth.views import PasswordResetView, PasswordResetConfirmView, PasswordResetDoneView, PasswordResetCompleteView
+from zawody.models import Turniej
 from django.contrib.auth import views as auth_views
-# from mainapp.views import nazwa_turnieju
 from shootingrange import settings
 import urllib
 import json
@@ -22,22 +19,10 @@ def nazwa_turnieju(arg):
 	nazwa_flat = []
 	for i in nazwa:
 		nazwa_flat.append(i)
+	nazwa_str = ''.join(nazwa_flat[0])
 
-	return nazwa_flat
+	return nazwa_str
 
-def sedziowie_lista():
-	sedziowie = Sedzia.objects.all().values_list('sedzia', flat=True).distinct()
-	sedziowie_lista = []
-	for i in sedziowie:
-		sedziowie_lista.append(i)
-	return sedziowie_lista
-
-# def rts_lista():
-# 	rts = Rts.objects.all().values_list('user', flat=True).distinct()
-# 	rts_lista = []
-# 	for i in rts:
-# 		rts_lista.append(i)
-# 	return rts_lista
 
 def registration_form(request, pk):
 	context={}
@@ -89,7 +74,6 @@ def registration_form_sedzia(request, pk):
 			response = urllib.request.urlopen(req)
 			result = json.loads(response.read().decode())
 			if result['success']:
-				# print('jest success')
 				form.save()
 				messages.success(request, 'New comment added with success!')
 				email = form.cleaned_data.get('email')
@@ -98,7 +82,6 @@ def registration_form_sedzia(request, pk):
 				login(request, account)
 				return redirect('home', pk)
 			else:
-				# print(' nie ma success')
 				messages.error(request, 'Invalid reCAPTCHA. Please try again.')
 		else:
 			context['registration_form'] = form
@@ -116,11 +99,8 @@ def registration_form_no_login(request,pk):
 		if form.is_valid():
 			form.save()
 			email = form.cleaned_data.get('email')
-			# email = form.cleaned_data.get('inputemail')
 			raw_password = form.cleaned_data.get('password1')
-			# raw_password = form.cleaned_data.get('inputPassword1')
 			account = authenticate(email=email, password=raw_password)
-			# login(request, account)
 			return redirect('users', pk)
 		else:
 			context['registration_form'] = form
@@ -166,10 +146,8 @@ class AccountUpdateView(LoginRequiredMixin, UpdateView):
 	form_class = AccountModelForm
 	def get_context_data(self, **kwargs):
 		context = super().get_context_data(**kwargs)
-		context['sedziowie_lista'] = sedziowie_lista()
 		context['pk'] = self.kwargs['pk_turniej']
 		context['nazwa_turnieju'] = nazwa_turnieju(self.kwargs['pk'])
-		# context['rts_lista'] = rts_lista()
 		return context
 
 	def get_queryset(self):
@@ -196,10 +174,8 @@ class SedziaUpdateView(LoginRequiredMixin, UpdateView):
 	form_class = SedziaModelForm
 	def get_context_data(self, **kwargs):
 		context = super().get_context_data(**kwargs)
-		context['sedziowie_lista'] = sedziowie_lista()
 		context['pk'] = self.kwargs['pk_turniej']
 		context['nazwa_turnieju'] = nazwa_turnieju(self.kwargs['pk'])
-		# context['rts_lista'] = rts_lista()
 		return context
 
 	def get_queryset(self):
@@ -226,8 +202,6 @@ class AccountListView(LoginRequiredMixin, ListView):
 
 	def get_context_data(self, **kwargs):
 		context = super().get_context_data(**kwargs)
-		context['sedziowie_lista'] = sedziowie_lista()
-		# context['rts_lista'] = rts_lista()
 		context['pk'] = self.kwargs['pk']
 		context['nazwa_turnieju'] = nazwa_turnieju(self.kwargs['pk'])
 		return context
@@ -253,10 +227,8 @@ class AccountDeleteView(LoginRequiredMixin, DeleteView):
 
 	def get_context_data(self, **kwargs):
 		context = super().get_context_data(**kwargs)
-		context['sedziowie_lista'] = sedziowie_lista()
 		context['pk'] = self.kwargs['pk_turniej']
 		context['nazwa_turnieju'] = nazwa_turnieju(self.kwargs['pk_turniej'])
-		# context['rts_lista'] = rts_lista()
 		return context
 
 	def get_queryset(self):
@@ -273,16 +245,13 @@ class AccountDeleteView(LoginRequiredMixin, DeleteView):
 				return redirect('not_authorized')
 		except:
 			return redirect('not_authorized')
-			# pass
 
 
 class PasswordResetViewNew(auth_views.PasswordResetView):
 	def get_context_data(self, **kwargs):
 		context = super().get_context_data(**kwargs)
-		context['sedziowie_lista'] = sedziowie_lista()
 		context['pk'] = self.kwargs['pk']
 		context['nazwa_turnieju'] = nazwa_turnieju(self.kwargs['pk'])
-		# context['rts_lista'] = rts_lista()
 		return context
 	def get_success_url(self):
 		return reverse("password_reset_done", kwargs={'pk': self.kwargs['pk']})
@@ -291,26 +260,16 @@ class PasswordResetViewNew(auth_views.PasswordResetView):
 class PasswordResetDoneViewNew(auth_views.PasswordResetDoneView):
 	def get_context_data(self, **kwargs):
 		context = super().get_context_data(**kwargs)
-		context['sedziowie_lista'] = sedziowie_lista()
 		context['pk'] = self.kwargs['pk']
 		context['nazwa_turnieju'] = nazwa_turnieju(self.kwargs['pk'])
-		# context['rts_lista'] = rts_lista()
 		return context
 
 class PasswordResetConfirmViewNew(auth_views.PasswordResetConfirmView):
 	def get_context_data(self, **kwargs):
 		context = super().get_context_data(**kwargs)
-		# context['sedziowie_lista'] = sedziowie_lista()
-		# context['pki'] = self.kwargs['pk']
-		# context['nazwa_turnieju'] = nazwa_turnieju(self.kwargs['pk'])
-		# context['rts_lista'] = rts_lista()
 		return context
 
 class PasswordResetCompleteViewNew(auth_views.PasswordResetCompleteView):
 	def get_context_data(self, **kwargs):
 		context = super().get_context_data(**kwargs)
-		# context['sedziowie_lista'] = sedziowie_lista()
-		# context['pk'] = self.kwargs['pk']
-		# context['nazwa_turnieju'] = nazwa_turnieju(self.kwargs['pk'])
-		# context['rts_lista'] = rts_lista()
 		return context
