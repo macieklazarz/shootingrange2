@@ -12,10 +12,10 @@ class RegistrationForm(UserCreationForm):
 		fields = ("email", "username", "imie", "nazwisko", "klub", "licencja", "password1", "password2")
 
 	def clean(self):
+		#nawisko ma być zapisane wielkimi literami
 		cleaned_data = super().clean()
 		nazwisko = cleaned_data.get('nazwisko') 
 		nazwisko = nazwisko.upper() 
-		print(f'nzaiwsko o 17 to: {nazwisko}')
 		self.cleaned_data['nazwisko'] = nazwisko
 
 class RegistrationFormSedzia(UserCreationForm):
@@ -29,8 +29,8 @@ class RegistrationFormSedzia(UserCreationForm):
 		cleaned_data = super().clean()
 		nazwisko = cleaned_data.get('nazwisko') 
 		nazwisko = nazwisko.upper() 
-		print(f'nzaiwsko o 17 to: {nazwisko}')
 		self.cleaned_data['nazwisko'] = nazwisko
+		#domyślnie ustawiamy 1 w polu is_sedzia. Propertka is_sedzzia i tak nie jest wyświetlana, sprawdź w htmlce
 		self.cleaned_data['is_sedzia'] = 1
 
 
@@ -90,18 +90,3 @@ class SedziaModelForm(forms.ModelForm):
 		nazwisko = cleaned_data.get('nazwisko') 
 		nazwisko = nazwisko.upper() 
 		self.cleaned_data['nazwisko'] = nazwisko
-
-    # def __init__(self, *args, **kwargs):
-    #     super(SedziaModelForm, self).__init__(*args, **kwargs)
-    #     self.fields['sedzia'].label = 'Sędzia'
-
-
-    
-# class RtsModelForm(forms.ModelForm):
-#     class Meta:
-#         model = Rts
-#         fields = (
-#             'user',
-#             # 'password1',
-#             # 'password2',
-#             )

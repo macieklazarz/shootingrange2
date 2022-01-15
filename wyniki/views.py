@@ -12,7 +12,7 @@ from django.contrib.auth.decorators import login_required
 import datetime
 import xlwt
 from django.views.generic import TemplateView, ListView, DetailView, CreateView, UpdateView, DeleteView, FormView
-from .forms import WynikiModelForm, RejestracjaModelForm, TurniejModelForm, OplataModelForm, OplataModelFormNew, ModuleFormSet
+from .forms import WynikiModelForm, RejestracjaModelForm, TurniejModelForm, ModuleFormSet 
 from zawody.models import Turniej
 from mainapp.views import nazwa_turnieju
 
@@ -29,7 +29,9 @@ def wyniki_edycja(request, pk):
 	for i in turniej:
 		turniej_id.append(i)
 
-
+	print(f'turniej: {turniej}')
+	print(f'turniejx: {turniej[0]}')
+	print(f'turniej id: {turniej_id}')
 	zawody_turnieju = Zawody.objects.filter(turniej__in=turniej_id).values_list('id', flat=True)
 	zawody_turnieju_id = []
 	for i in zawody_turnieju:
@@ -364,7 +366,7 @@ class TurniejEditView(LoginRequiredMixin,UpdateView):
 		return Turniej.objects.all()
 
 	def get_success_url(self):
-		return reverse("turnieje", kwargs={'pk':1})
+		return reverse("turnieje", kwargs={'pk':self.kwargs['pk_turniej']})
 		return super(TurniejEditView, self).form_valid(form)
 
 	def dispatch(self, request, *args, **kwargs):

@@ -8,57 +8,7 @@ from django.forms.widgets import CheckboxSelectMultiple
 from django.forms.models import ModelMultipleChoiceField
 from django.forms.models import inlineformset_factory
 
-class Wyniki_edit(forms.ModelForm):
-    class Meta:
-        model = models.Wyniki
-        fields = ['zawodnik', 'X', 'Xx', 'dziewiec', 'osiem', 'siedem', 'szesc', 'piec', 'cztery', 'trzy', 'dwa', 'jeden']
 
-    def __init__(self, *args, **kwargs):
-        super(Wyniki_edit, self).__init__(*args, **kwargs)
-        self.fields['zawodnik'].disabled = True
-
-class DodajZawodnika(forms.ModelForm):
-
-    class Meta:
-        model = models.Wyniki
-
-        fields = [ 'zawody', 'zawodnik']
-
-
-    def __init__(self, *args, **kwargs):
-        from django.forms.widgets import HiddenInput
-        super(DodajZawodnika, self).__init__(*args, **kwargs)
-        # self.fields['zawodnik'] = forms.ModelChoiceField(queryset=Account.objects.all())
-        self.fields['zawodnik'].widget = HiddenInput()
-        # self.fields['zawody'] = forms.ModelChoiceField(queryset=Zawody.objects.all())
-        # self.fields['zawody'] = 'admin@admin.com'
-
-    def clean(self):
-        cleaned_data = super().clean()
-        wybrane_zawody = cleaned_data.get('zawody')                                                                                                                 #sprawdzam jakie wybrano zawody
-        wybrany_zawodnik = str(cleaned_data.get('zawodnik'))                                                                                                        #sprawdzam jakiego wybrano zawodnika (tu zostanie przypisany mail)
-        # zaw = str(cleaned_data.get('zawody'))
-        # zaw = request.POST['zawody']
-        # zaw = self.fields['zawody']
-        print(f'zawody to {wybrane_zawody}')
-        print(f'zawodnik to {wybrany_zawodnik}')
-        # id_zawodow=Zawody.objects.filter(nazwa=zaw)
-        zawodnicy_przypisani_do_zawodow = Wyniki.objects.filter(zawody__nazwa=wybrane_zawody).values_list('zawodnik', flat=True).distinct()                          #wybieram wszystkich zawodników którzy są przypisani do wybranych zawodów (zmienna wybrane_zawody)
-        zawodnicy_przypisani_do_zawodow_lista = []
-        # wybrane_zawody2 = wybrane_zawody.get('zawodnik')
-        for i in zawodnicy_przypisani_do_zawodow:
-            # print(f' wybrane zawody {i}')
-            zawodnicy_przypisani_do_zawodow_lista.append(i)                                                                                                          #robię listę z wsyztskich zawodników przypisanych do danych zawodow
-        # print(f'zawodnicy przypisani do zawodow to {zawodnicy_przypisani_do_zawodow_lista}')
-        zawodnicy_przypisani_do_zawodow_email = Account.objects.filter(pk__in=zawodnicy_przypisani_do_zawodow_lista).values_list('email', flat=True).distinct()      #sprawdzam mail zawodnikow wybranych do zawodow
-        zawodnicy_przypisani_do_zawodow_email_lista = []
-        for i in zawodnicy_przypisani_do_zawodow_email:
-            zawodnicy_przypisani_do_zawodow_email_lista.append(i)                                                                                                      #robie liste z mailami uczestnikow wybranych zawodow
-        print(f'zawodnicy email {zawodnicy_przypisani_do_zawodow_email_lista}')
-        if (wybrany_zawodnik in zawodnicy_przypisani_do_zawodow_email_lista):                                                                               #sprawdzam czy wybrany zawodnik jest na liscie z mailami uczestnikow wybranych zawodow
-            # print('powinno wywalic')
-            raise ValidationError("Jesteś już zarejestrowany na te zawody")
-            # self.fields['zawodnik'] =
 
 class WynikiModelForm(forms.ModelForm):
     CHOICE= [
@@ -99,31 +49,27 @@ class RejestracjaModelForm(forms.ModelForm):
 
     def clean(self):
         cleaned_data = super().clean()
-        wybrane_zawody = cleaned_data.get('zawody').id                                                                                                           #sprawdzam jakie wybrano zawody
-        wybrany_zawodnik = cleaned_data.get('zawodnik').id                                                                                                       #sprawdzam jakiego wybrano zawodnika (tu zostanie przypisany mail)
-
-        print(f'zawody to {wybrane_zawody}')
-        # print(f'zawodnik to {wybrany_zawodnik}')
-
-        zawodnicy_przypisani_do_zawodow = Wyniki.objects.filter(zawody__id=wybrane_zawody).values_list('zawodnik', flat=True).distinct()                          #wybieram wszystkich zawodników którzy są przypisani do wybranych zawodów (zmienna wybrane_zawody)
-        zawodnicy_przypisani_do_zawodow_lista = []
-        for i in zawodnicy_przypisani_do_zawodow:
-            # print(f' wybrane zawody {i}')
-            zawodnicy_przypisani_do_zawodow_lista.append(i)                                                                                                          #robię listę z wsyztskich zawodników przypisanych do danych zawodow
-        print(f'zawodnicy przypisani do zawodow to {zawodnicy_przypisani_do_zawodow_lista}')
-        if (wybrany_zawodnik in zawodnicy_przypisani_do_zawodow_lista):                                                                               #sprawdzam czy wybrany zawodnik jest na liscie z mailami uczestnikow wybranych zawodow
+        #sprawdzam czy zawodnik nie jest już przypisany do danej konkurencji
+        wybrane_zawody = cleaned_data.get('zawody').id                                                                                                          
+        wybrany_zawodnik = cleaned_data.get('zawodnik').id                                                                                                       
+        zawodnik_juz_zarejestrowany = Wyniki.objects.filter(zawody=wybrane_zawody, zawodnik=wybrany_zawodnik)
+        if zawodnik_juz_zarejestrowany:                                                                               
             raise ValidationError("Jesteś już zarejestrowany na te zawody")
+            #formularz jest czyszczony więc ustawiam wartość początkową w polu zawodnik na tego zawodnika, który próbuje się zarejestrować
             self.fields['zawodnik'] =wybrany_zawodnik
+
+
 
     def __init__(self, *args, **kwargs):
         from django.forms.widgets import HiddenInput
+        #kwargs podwawane są z views.py
         user = kwargs.pop('user', None)
         pk = kwargs.pop('pk', None)
         super(RejestracjaModelForm, self).__init__(*args, **kwargs)
-        print(f'user admin to {user}')
         self.fields['zawody'].queryset = Zawody.objects.filter(turniej__id=pk)
         self.fields['zawodnik'].queryset = Account.objects.all().order_by('nazwisko')
-        # self.fields['zawodnik'] = forms.ModelChoiceField(queryset=Account.objects.all())
+
+        #w zmiennej user podawana jest 1 jeśli user wywołujący formularz to rts (patrz plik views.py). Wtedy taki user może wybrać zawodnika, którego chce zarejestrować
         if not user:
             self.fields['zawodnik'].widget = HiddenInput()
 
@@ -136,62 +82,11 @@ class TurniejModelForm(forms.ModelForm):
             'rejestracja',
             )
 
-
-class UstawieniaModelForm(forms.ModelForm):
-    class Meta:
-        model = Ustawienia
-        fields = (
-            'nazwa',
-            'ustawienie',
-            )
-
-    def __init__(self, *args, **kwargs):
-        from django.forms.widgets import HiddenInput
-        super(UstawieniaModelForm, self).__init__(*args, **kwargs)
-        self.fields['nazwa'].widget = HiddenInput()
-
-
-class OplataModelForm(forms.ModelForm):
-    class Meta:
-        model = Wyniki
-        fields = (
-            'oplata',
-            )
-class OplataModelFormNew(forms.ModelForm):
-    class Meta:
-        model = Wyniki
-        fields = (
-            'zawody',
-            'oplata',
-            )
-    # def clean(self):
-    #     cleaned_data = super().clean()
-    #     nazwisko = cleaned_data.get('nazwisko') 
-    #     nazwisko = nazwisko.upper() 
-    #     self.cleaned_data['nazwisko'] = nazwisko
-
-# ModuleFormSet = inlineformset_factory(Account,
-#                                       Wyniki,
-#                                       fields=['zawody',
-#                                               'oplata',],
-#                                       extra=0,
-#                                       can_delete=False,
-#                                       widgets={'zawody': forms.Select(attrs={'readonly': 'readonly'})},
-#                                       # labels = ['aaa', 'bbb'],
-#                                       # widgets={'zawody': forms.Select(disabled=True)}
-#                                       # widgets={'zawody': forms.Select(attrs={'cols': 80, 'rows': 20})}
-#                                       )
-
-
 ModuleFormSet = inlineformset_factory(Account,
                                       Wyniki,
                                       fields=['oplata',],
                                       extra=0,
                                       can_delete=False,
-                                      # widgets={'zawody': forms.Select(attrs={'readonly': 'readonly'})},
                                       labels = {'oplata': 'Opłata',}
-                                      # widgets={'zawody': forms.Select(disabled=True)}
-                                      # widgets={'zawody': forms.Select(attrs={'cols': 80, 'rows': 20})}
                                       )
 
-# ModuleFormSetNew = ModuleFormSet(instance=i, queryset=Wyniki.objects.filter(zawody=i.zawody))

@@ -16,7 +16,7 @@ class ZawodyModelForm(forms.ModelForm):
 		super(ZawodyModelForm, self).__init__(*args, **kwargs)
 		self.fields['liczba_strzalow'].label = 'Liczba strzałów'
 
-
+#formularz przypisywania sędziego do konkurencji
 class SedziaModelForm(forms.ModelForm):
 	class Meta:
 		model = Sedzia
@@ -26,5 +26,6 @@ class SedziaModelForm(forms.ModelForm):
 			)
 	def __init__(self, *args, **kwargs):
 		super(SedziaModelForm, self).__init__(*args, **kwargs)
+		#w propertce sedzia możemy wybrać tylko takiego usera, który jest sędzią
 		self.fields['sedzia'].queryset = self.fields['sedzia'].queryset.filter(is_sedzia=1)
 		self.fields['sedzia'].label = 'Sędzia'
