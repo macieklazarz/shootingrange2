@@ -114,7 +114,8 @@ class SedziaCreateView(LoginRequiredMixin, CreateView):
 			else:
 				return redirect('not_authorized')
 		except:
-			return redirect('not_authorized')
+			# return redirect('not_authorized')
+			pass
 
 class SedziaListView(LoginRequiredMixin, ListView):
 	login_url = 'start'

@@ -31,7 +31,7 @@ def registration_form(request, pk):
 	if request.POST:
 		form=RegistrationForm(request.POST)
 		if form.is_valid():
-			print('jest is valid')
+			# print('jest is valid')
 			recaptcha_response = request.POST.get('g-recaptcha-response')
 			url = 'https://www.google.com/recaptcha/api/siteverify'
 			values = {'secret': settings.GOOGLE_RECAPTCHA_SECRET_KEY,'response': recaptcha_response}
@@ -40,7 +40,7 @@ def registration_form(request, pk):
 			response = urllib.request.urlopen(req)
 			result = json.loads(response.read().decode())
 			if result['success']:
-				print('jest success')
+				# print('jest success')
 				form.save()
 				messages.success(request, 'New comment added with success!')
 				email = form.cleaned_data.get('email')
@@ -49,7 +49,7 @@ def registration_form(request, pk):
 				login(request, account)
 				return redirect('home', pk)
 			else:
-				print(' nie ma success')
+				# print(' nie ma success')
 				messages.error(request, 'Invalid reCAPTCHA. Please try again.')
 		else:
 			context['registration_form'] = form

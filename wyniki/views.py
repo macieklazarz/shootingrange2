@@ -21,41 +21,47 @@ from mainapp.views import nazwa_turnieju
 @csrf_exempt
 @login_required(login_url="/start/")
 def wyniki_edycja(request, pk):
-	context = {}
-	context['pk'] = pk
-	context['nazwa_turnieju'] = nazwa_turnieju(pk)
-	turniej = Turniej.objects.filter(id=pk).values_list('id', flat=True)
-	turniej_id = []
-	for i in turniej:
-		turniej_id.append(i)
-
-	print(f'turniej: {turniej}')
-	print(f'turniejx: {turniej[0]}')
-	print(f'turniej id: {turniej_id}')
-	zawody_turnieju = Zawody.objects.filter(turniej__in=turniej_id).values_list('id', flat=True)
-	zawody_turnieju_id = []
-	for i in zawody_turnieju:
-		zawody_turnieju_id.append(i)
-
-	user_id = request.user.id 																				#sprawdzamy użytkownika ktory jest zalogowany
-	powiazane_zawody = Sedzia.objects.filter(sedzia__id = user_id).values_list('zawody', flat=True)			#sprawdzamy do jakich zawodow jest przyporzadkowany sedzua
-	powiazane_zawody_lista = []																				#robimy liste powiazanych zawodow
-	for i in powiazane_zawody:
-		if i in zawody_turnieju_id:
-			powiazane_zawody_lista.append(i)
-
-	wyniki = []
-	zawody_nazwa = []																							#robimy liste ktorej elementami beda wyniki poszczegolnych zawodow
-	for i in powiazane_zawody_lista:
-		wynik = Wyniki.objects.filter(zawody = i).order_by('zawodnik__nazwisko')
-		wyniki.append(wynik.filter(zawody__turniej=pk, oplata=1))
-	nazwy_zawodow = Zawody.objects.filter(id__in=powiazane_zawody_lista).values_list('nazwa', flat=True)
-	nazwy_zawodow = nazwy_zawodow.filter(turniej=pk)
-	for i in nazwy_zawodow:
-		zawody_nazwa.append(i)
-	context['wyniki'] = wyniki
-	context['zawody_nazwa'] = zawody_nazwa
 	if request.user.is_sedzia:
+		context = {}
+		context['pk'] = pk
+		context['nazwa_turnieju'] = nazwa_turnieju(pk)
+		turniej = Turniej.objects.filter(id=pk).values_list('id', flat=True)
+		turniej_id = turniej[0]
+
+		#sprawdzam konkurencje przypisane do turnieju
+		zawody_turnieju = Zawody.objects.filter(turniej=turniej_id).values_list('id', flat=True)
+		zawody_turnieju_id = []
+		for i in zawody_turnieju:
+			zawody_turnieju_id.append(i)
+
+		#sprawdzamy użytkownika ktory jest zalogowany
+		user_id = request.user.id 					
+		#sprawdzamy do jakich zawodow jest przyporzadkowany zalogowany user															
+		powiazane_zawody = Sedzia.objects.filter(sedzia__id = user_id).values_list('zawody', flat=True)			
+		powiazane_zawody_lista = []																				
+		for i in powiazane_zawody:
+			if i in zawody_turnieju_id:
+				powiazane_zawody_lista.append(i)
+
+		#zapisujemy w liście wyniki wyniki wszystkich zawodników dla poszczególnych zawodów
+		wyniki = []																			
+		for i in powiazane_zawody_lista:
+			wynik = Wyniki.objects.filter(zawody = i).order_by('zawodnik__nazwisko')
+			#do listy wyniki mają trafiać tylko te wyniki, które dotyczą konkretnego turnieju
+			#gdyby nie było dodatkowego filtrowania pojawiały by się błędy w przypadku gdy jedna konkurencja występowałaby w wielu turniejach
+			wyniki.append(wynik.filter(zawody__turniej=pk, oplata=1))
+
+		#zapisujemy w liście zawody_nazwa nazwy zawodów, z którymi powiązany jest sędzia
+		zawody_nazwa = []
+		nazwy_zawodow = Zawody.objects.filter(id__in=powiazane_zawody_lista).values_list('nazwa', flat=True)
+		#do listy zawody_nazwa mają trafiać tylko te wyniki, które dotyczą konkretnego turnieju
+		#gdyby nie było dodatkowego filtrowania pojawiały by się błędy w przypadku gdy jedna konkurencja występowałaby w wielu turniejach
+		nazwy_zawodow = nazwy_zawodow.filter(turniej=pk)
+		for i in nazwy_zawodow:
+			zawody_nazwa.append(i)
+		context['wyniki'] = wyniki
+		context['zawody_nazwa'] = zawody_nazwa
+		
 		return render(request, 'wyniki/edytuj_wyniki.html', context)
 	else:
 		return redirect('not_authorized')
@@ -64,10 +70,12 @@ def wyniki_edycja(request, pk):
 def wyniki(request, pk):
 	context = {}
 	context['nazwa_turnieju'] = nazwa_turnieju(pk)
+	#robię listę 'zawody_lista' zawodów turnieju
 	zawody = Zawody.objects.filter(turniej__id=pk).values_list('id', flat=True).order_by('id')
 	zawody_lista = []
 	for i in zawody:
 		zawody_lista.append(i)
+	#robię listę z nazwami zawodów 'zawody_nazwa' za pomocą listy 'zawody_lista' 
 	zawody_nazwa_queryset = Zawody.objects.filter(turniej__id=pk).values_list('nazwa', flat=True).order_by('id')
 	zawody_nazwa = []
 	for i in zawody_nazwa_queryset:
@@ -77,12 +85,12 @@ def wyniki(request, pk):
 	sedziowie_queryset = []																						#robimy liste ktorej elementami beda wyniki poszczegolnych zawodow
 	sedziowie = []
 	for i in zawody_lista:
-		wyniki.append(Wyniki.objects.filter(zawody = i, oplata=1).order_by('kara', '-wynik', '-X', '-Xx', '-dziewiec', '-osiem', '-siedem'))
+		wyniki.append(Wyniki.objects.filter(zawody = i, oplata=1).order_by('kara', '-wynik', '-X', '-Xx', '-dziewiec', '-osiem', '-siedem', '-szesc', '-piec', '-cztery', '-trzy', '-dwa', '-jeden'))
 		sedziowie_queryset.append(Sedzia.objects.filter(zawody = i).values_list('sedzia__imie', 'sedzia__nazwisko'))
 	for i in sedziowie_queryset:
 		sedziowie.append(i)
 	context['sedziowie'] = sedziowie
-	klasyfikacja_generalna = Wyniki.objects.raw('select wyniki_wyniki.id, zawodnik_id, sum(X) as X, sum(Xx) as Xx,sum(dziewiec) as dziewiec, sum(osiem) as osiem,sum(siedem) as siedem , sum(szesc) as szesc, sum(piec) as piec, sum(cztery) as cztery, sum(trzy) as trzy, sum(dwa) as dwa, sum(jeden) as jeden, sum(wynik) as wynik from wyniki_wyniki inner join zawody_zawody on wyniki_wyniki.zawody_id = zawody_zawody.id where zawody_zawody.turniej_id = %s and oplata=1 and wyniki_wyniki.kara = %s group by zawodnik_id order by wynik desc, X desc, Xx desc, dziewiec desc, osiem desc, siedem DESC', [pk, 'BRAK'])
+	klasyfikacja_generalna = Wyniki.objects.raw('select wyniki_wyniki.id, zawodnik_id, sum(X) as X, sum(Xx) as Xx,sum(dziewiec) as dziewiec, sum(osiem) as osiem,sum(siedem) as siedem , sum(szesc) as szesc, sum(piec) as piec, sum(cztery) as cztery, sum(trzy) as trzy, sum(dwa) as dwa, sum(jeden) as jeden, sum(wynik) as wynik from wyniki_wyniki inner join zawody_zawody on wyniki_wyniki.zawody_id = zawody_zawody.id where zawody_zawody.turniej_id = %s and oplata=1 and wyniki_wyniki.kara = %s group by zawodnik_id order by wynik desc, X desc, Xx desc, dziewiec desc, osiem desc, siedem DESC, szesc desc, piec desc, cztery desc, trzy desc, dwa desc, jeden desc', [pk, 'BRAK'])
 	context['wyniki'] = wyniki
 	context['zawody_nazwa'] = zawody_nazwa
 	context['klasyfikacja_generalna'] = klasyfikacja_generalna
@@ -100,10 +108,10 @@ class RejestracjaNaZawodyView(LoginRequiredMixin, CreateView):
 
 	def get_context_data(self, **kwargs):
 		context = super().get_context_data(**kwargs)
-		dodawanie_zawodnika = Turniej.objects.filter(id=self.kwargs['pk']).values_list("rejestracja")
-		for i in dodawanie_zawodnika:
-			opcja = i[0]
-		context['dodawanie_zawodnika'] = opcja
+		#sprawdzam czy rejestracja jest otwarta i podaję informację o tym w argumencie 'dodawanie_zawodnika'
+		dodawanie_zawodnika = Turniej.objects.filter(id=self.kwargs['pk']).values_list("rejestracja", flat=True)
+		rejestracja_otwarta = dodawanie_zawodnika[0]
+		context['dodawanie_zawodnika'] = rejestracja_otwarta
 		context['pk'] = self.kwargs['pk']
 		context['nazwa_turnieju'] = nazwa_turnieju(self.kwargs['pk'])
 		return context
