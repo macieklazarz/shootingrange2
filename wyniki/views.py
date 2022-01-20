@@ -115,7 +115,6 @@ class RejestracjaNaZawodyView(LoginRequiredMixin, CreateView):
 		context['pk'] = self.kwargs['pk']
 		context['nazwa_turnieju'] = nazwa_turnieju(self.kwargs['pk'])
 		lista_zarejestrowanych = Wyniki.objects.filter(zawodnik__id = self.request.user.id).filter(zawody__turniej__id = self.kwargs['pk']).values_list("zawody__nazwa", flat=True)
-		print(f'lista: {lista_zarejestrowanych}')
 		context['lista_zarejestrowanych'] = lista_zarejestrowanych
 		return context
 
