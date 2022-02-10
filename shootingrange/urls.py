@@ -18,7 +18,9 @@ from django.urls import path
 from mainapp.views import (home_screen_view,)
 from zawody.views import (ZawodyCreateView,SedziaCreateView, SedziaListView, SedziaDeleteView, ZawodyListView, ZawodyDeleteView, StronaStartowaListView )
 from account.views import (registration_form, registration_form_sedzia, registration_form_no_login, logout_view, login_view, login_info, AccountListView, AccountUpdateView, AccountDeleteView, PasswordResetViewNew, PasswordResetDoneViewNew, PasswordResetConfirmViewNew, PasswordResetCompleteViewNew, SedziaUpdateView)
-from wyniki.views import (wyniki_edycja,  wyniki, exportexcel, WynikUpdateView, not_authorized, RejestracjaNaZawodyView, KonkurencjaDeleteView, TurniejListView, TurniejDeleteView, TurniejEditView, TurniejCreateView, OplataListView, OplataUpdateView, UczestnikDeleteView)
+from wyniki.views import (wyniki_edycja,  wyniki, exportexcel, WynikUpdateView, not_authorized, RejestracjaNaZawodyView, KonkurencjaDeleteView, TurniejListView, TurniejDeleteView, TurniejEditView, TurniejCreateView, OplataListView, OplataUpdateView, UczestnikDeleteView, BronAmunicjaListView)
+from django.conf import settings
+from django.conf.urls.static import static
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -53,6 +55,7 @@ urlpatterns = [
     path('<int:pk>/turniej_delete/<int:pk_turniej>/', TurniejDeleteView.as_view(), name="turniej_delete"),
     path('<int:pk>/turniej_add/', TurniejCreateView.as_view(), name="turniej_add"),
     path('oplata/<int:pk>/', OplataListView.as_view(), name="oplata_list"),
+    path('bron_amunicja_list/<int:pk>/', BronAmunicjaListView.as_view(), name="bron_amunicja_list"),
     # path('<int:pk>/oplata_update/<int:pk_turniej>/', OplataUpdateView.as_view(), name="oplata_update"),
     path('<int:pk>/oplata_update/<int:pk_turniej>/', OplataUpdateView.as_view(), name="oplata_update"),
     path('<int:pk>/uczestnik_delete/<int:pk_turniej>/',UczestnikDeleteView.as_view(), name="uczestnik_delete"),
@@ -70,4 +73,4 @@ urlpatterns = [
     path('reset/done/',
         PasswordResetCompleteViewNew.as_view(),
         name='password_reset_complete'),
-]
+] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

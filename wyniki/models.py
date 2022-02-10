@@ -31,19 +31,22 @@ class Wyniki(models.Model):
 	wynik 		=models.IntegerField(blank=True, default=0)
 	result		=models.TextField(max_length=60, null=True, default='0')
 	kara		=models.CharField(max_length=10, choices=KARA_CHOICES, default='BRAK')
+	kara_punktowa = models.IntegerField(blank=True, null=False, default=0, verbose_name='Kara punktowa')
 	oplata		= models.BooleanField(default=False)
+	bron_klubowa		= models.BooleanField(default=False, verbose_name='Broń klubowa')
+	amunicja_klubowa		= models.BooleanField(default=False, verbose_name='Amunicja klubowa')
 	# komunikat	=models.CharField(blank=True, max_length=100)
 
 	class Meta:
 		verbose_name_plural = "Wyniki"
 # Create your models here.
 	def save(self, *args, **kwargs):
-		self.wynik = self.X*10 + self.Xx*10 + self.dziewiec*9 + self.osiem*8 + self.siedem*7 + self.szesc*6+ self.piec*5+ self.cztery*4+ self.trzy*3+ self.dwa*2+ self.jeden*1
+		self.wynik = self.X*10 + self.Xx*10 + self.dziewiec*9 + self.osiem*8 + self.siedem*7 + self.szesc*6+ self.piec*5+ self.cztery*4+ self.trzy*3+ self.dwa*2+ self.jeden*1-self.kara_punktowa
 		# self.slug = (self.zawodnik.username + str(self.zawody.id))
-		liczba_strzalow = self.X*10 + self.Xx*10 + self.dziewiec+ self.osiem + self.siedem + self.szesc+ self.piec+ self.cztery+ self.trzy+ self.dwa+ self.jeden
+		# liczba_strzalow = self.X*10 + self.Xx*10 + self.dziewiec+ self.osiem + self.siedem + self.szesc+ self.piec+ self.cztery+ self.trzy+ self.dwa+ self.jeden
 		# if liczba_strzalow < 10:
 		# 	self.komunikat = ""
-		self.result = str(self.X*10 + self.Xx*10 + self.dziewiec*9 + self.osiem*8 + self.siedem*7 + self.szesc*6+ self.piec*5+ self.cztery*4+ self.trzy*3+ self.dwa*2+ self.jeden*1)
+		self.result = str(self.X*10 + self.Xx*10 + self.dziewiec*9 + self.osiem*8 + self.siedem*7 + self.szesc*6+ self.piec*5+ self.cztery*4+ self.trzy*3+ self.dwa*2+ self.jeden*1-self.kara_punktowa)
 		if self.kara not in ['BRAK', 'PK']:
 			self.result = self.kara
 			self.X=0

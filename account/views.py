@@ -74,6 +74,7 @@ def registration_form_sedzia(request, pk):
 			response = urllib.request.urlopen(req)
 			result = json.loads(response.read().decode())
 			if result['success']:
+				print('jest success')
 				form.save()
 				messages.success(request, 'New comment added with success!')
 				email = form.cleaned_data.get('email')
@@ -82,6 +83,7 @@ def registration_form_sedzia(request, pk):
 				login(request, account)
 				return redirect('home', pk)
 			else:
+				print('lipa')
 				messages.error(request, 'Invalid reCAPTCHA. Please try again.')
 		else:
 			context['registration_form'] = form
@@ -146,8 +148,8 @@ class AccountUpdateView(LoginRequiredMixin, UpdateView):
 	form_class = AccountModelForm
 	def get_context_data(self, **kwargs):
 		context = super().get_context_data(**kwargs)
-		context['pk'] = self.kwargs['pk_turniej']
-		context['nazwa_turnieju'] = nazwa_turnieju(self.kwargs['pk'])
+		context['pk'] = self.kwargs['pk']
+		context['nazwa_turnieju'] = nazwa_turnieju(self.kwargs['pk_turniej'])
 		return context
 
 	def get_queryset(self):
@@ -175,7 +177,7 @@ class SedziaUpdateView(LoginRequiredMixin, UpdateView):
 	def get_context_data(self, **kwargs):
 		context = super().get_context_data(**kwargs)
 		context['pk'] = self.kwargs['pk_turniej']
-		context['nazwa_turnieju'] = nazwa_turnieju(self.kwargs['pk'])
+		context['nazwa_turnieju'] = nazwa_turnieju(self.kwargs['pk_turniej'])
 		return context
 
 	def get_queryset(self):
@@ -194,7 +196,9 @@ class SedziaUpdateView(LoginRequiredMixin, UpdateView):
 			else:
 				return redirect('not_authorized')
 		except:
+		  #  pass
 			return redirect('not_authorized')
+
 
 class AccountListView(LoginRequiredMixin, ListView):
 	login_url = 'start'

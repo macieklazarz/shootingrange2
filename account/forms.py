@@ -23,7 +23,7 @@ class RegistrationFormSedzia(UserCreationForm):
 
 	class Meta:
 		model = Account
-		fields = ("email", "username", "imie", "nazwisko", "klasa_sedziego", "licencja_sedziego","is_sedzia", "password1", "password2")
+		fields = ("email", "username", "imie", "nazwisko", "klasa_sedziego", "licencja_sedziego","licencja", "is_sedzia", "password1", "password2")
 
 	def clean(self):
 		cleaned_data = super().clean()
@@ -75,6 +75,7 @@ class SedziaModelForm(forms.ModelForm):
 	nazwisko = forms.CharField(widget=forms.TextInput())
 	licencja_sedziego = forms.CharField(required=False,widget=forms.TextInput())
 	klasa_sedziego	 = forms.CharField(required=False,widget=forms.TextInput())
+	licencja	 = forms.CharField(required=False,widget=forms.TextInput())
 	class Meta:
 		model = Account
 		fields = (
@@ -84,6 +85,7 @@ class SedziaModelForm(forms.ModelForm):
 			'nazwisko',
 			'licencja_sedziego',
 			'klasa_sedziego',
+			'licencja'
 			)
 	def clean(self):
 		cleaned_data = super().clean()

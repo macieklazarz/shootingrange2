@@ -2,12 +2,6 @@
 
 {% block content %}
 
-
-
-<!-- 		<div class="title white">
-			<h2 class="titleText"> <span>M</span>oje tuzy<span>.</span></h2>
-			<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
-		</div> -->
 		<div class="container pt-6">
 {% for encjawyniki in wyniki %}
 		
@@ -38,6 +32,7 @@
 									<td class="m"><b>3</b></td>
 									<td class="m"><b>2</b></td>
 									<td class="m"><b>1</b></td>
+									<td class="m"><b>Kara</b></td>
 									<!-- <td class="m"><b>Suma</b></td> -->
 									<td class="m"><b>Wynik</b></td>
 									{% if user.rts %}
@@ -59,6 +54,7 @@
 								<td class="m">{{osoba.trzy}}</td>
 								<td class="m">{{osoba.dwa}}</td>
 								<td class="m">{{osoba.jeden}}</td>
+								<td class="m">{{osoba.kara_punktowa}}</td>
 								<!-- <td class="m">{{osoba.wynik}}</td> -->
 								<td class="m">{{osoba.result}}</td>
 								{% if user.rts %}
@@ -81,7 +77,7 @@
 			</div>
 			<br>
 {% endfor %}
-
+{% if klasyfikacja_generalna_display %}
 			<div class="d-flex justify-content-center" >
 				<div>
 					<h3>Klasyfikacja generalna</h3>
@@ -129,6 +125,7 @@
 					</div>	
 				</div>
 			</div>
+{% endif %}
 
 		{% if request.user.username == 'admin' %}
 			<div class="d-flex justify-content-center" >

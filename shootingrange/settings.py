@@ -12,7 +12,13 @@ https://docs.djangoproject.com/en/3.2/ref/settings/
 
 from pathlib import Path
 import os
+import mimetypes
 
+WHITENOISE_MIMETYPES = {
+    '.xsl': 'application/xml'
+}
+
+mimetypes.add_type("text/css", ".css", True)
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -26,7 +32,8 @@ SECRET_KEY = 'django-insecure-ka!8qloj8+*%tqprv@a7$sd#q7iwa_f)8-2r5%*jsbqpwca&ct
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+# ALLOWED_HOSTS = ['http://zawodylts.xyz/','zawodylts.xyz','www.zawodylts.xyz']
+ALLOWED_HOSTS = ['127.0.0.1']
 
 
 # Application definition
@@ -53,6 +60,7 @@ CRISPY_TEMPLATE_PACK = 'bootstrap4'
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -133,7 +141,7 @@ DEFAULT_FROM_EMAIL = 'zawodyreset@mail.com'
 SERVER_EMAIL = 'tuzownia@gmail.com'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_HOST_USER = 'tuzownia@gmail.com'
-EMAIL_HOST_PASSWORD = 'Tuzownia123!@#'
+EMAIL_HOST_PASSWORD = 'qapl12!@'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
@@ -141,7 +149,27 @@ EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 
 
 
+#HOSTOVITA
+# # STATIC_URL = '/statics/'
+# STATIC_URL = 'home/tpfdsedq/strzelnica/shootingrange/static/'
+# # STATIC_URL = '/home/tpfdsedq/strzelnica/shootingrange/static/'
+# STATICFILES_DIRS = [
+#     os.path.join(BASE_DIR, "statics"),]
 
+# STATIC_ROOT = os.path.join(BASE_DIR, 'static')
+# # Default primary key field type
+# # https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field
+
+# DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+# CRISPY_TEMPLATE_PACK = 'tailwind'
+# CRISPY_ALLOWED_TEMPLATE_PACKS = "tailwind"
+
+# GOOGLE_RECAPTCHA_SECRET_KEY = '6LdlCvIdAAAAABtzVOjjqYa3KLiFX_4b6zYSsNtr'
+
+
+# LOGIN_URL='start/'
+# LOGIN_REDIRECT_URL='start/'
+#HOSTOVITA
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, "static"),]

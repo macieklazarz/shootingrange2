@@ -26,18 +26,25 @@ class WynikiModelForm(forms.ModelForm):
     ]
     X = forms.CharField(widget=forms.Select(choices=CHOICE))
     Xx = forms.CharField(widget=forms.Select(choices=CHOICE), label='10')
-    dziewiec = forms.CharField(widget=forms.Select(choices=CHOICE))
-    osiem = forms.CharField(widget=forms.Select(choices=CHOICE))
-    siedem = forms.CharField(widget=forms.Select(choices=CHOICE))
-    szesc = forms.CharField(widget=forms.Select(choices=CHOICE))
-    piec = forms.CharField(widget=forms.Select(choices=CHOICE))
-    cztery = forms.CharField(widget=forms.Select(choices=CHOICE))
-    trzy = forms.CharField(widget=forms.Select(choices=CHOICE))
-    dwa = forms.CharField(widget=forms.Select(choices=CHOICE))
-    jeden = forms.CharField(widget=forms.Select(choices=CHOICE))
+    dziewiec = forms.CharField(widget=forms.Select(choices=CHOICE), label='9')
+    osiem = forms.CharField(widget=forms.Select(choices=CHOICE), label='8')
+    siedem = forms.CharField(widget=forms.Select(choices=CHOICE), label='7')
+    szesc = forms.CharField(widget=forms.Select(choices=CHOICE), label='6')
+    piec = forms.CharField(widget=forms.Select(choices=CHOICE), label='5')
+    cztery = forms.CharField(widget=forms.Select(choices=CHOICE), label='4')
+    trzy = forms.CharField(widget=forms.Select(choices=CHOICE), label='3')
+    dwa = forms.CharField(widget=forms.Select(choices=CHOICE), label='2')
+    jeden = forms.CharField(widget=forms.Select(choices=CHOICE), label='1')
+    # kara_punktowa = forms.CharField()
     class Meta:
         model = Wyniki
-        fields = ['X', 'Xx', 'dziewiec', 'osiem', 'siedem', 'szesc', 'piec', 'cztery', 'trzy', 'dwa', 'jeden','kara']
+        fields = ['X', 'Xx', 'dziewiec', 'osiem', 'siedem', 'szesc', 'piec', 'cztery', 'trzy', 'dwa', 'jeden','kara', 'kara_punktowa']
+
+    def clean(self):
+        cleaned_data = super().clean
+        if self.cleaned_data['kara_punktowa'] == None:
+            # raise ValidationError("Podaj wartość kary punktowej")
+            self.cleaned_data['kara_punktowa'] = 0
 
 class RejestracjaModelForm(forms.ModelForm):
     class Meta:
@@ -45,6 +52,8 @@ class RejestracjaModelForm(forms.ModelForm):
         fields = (
             'zawody',
             'zawodnik',
+            'bron_klubowa',
+            'amunicja_klubowa',
             )
 
     def clean(self):
@@ -80,6 +89,7 @@ class TurniejModelForm(forms.ModelForm):
         fields = (
             'nazwa',
             'rejestracja',
+            'klasyfikacja_generalna',
             )
 
 ModuleFormSet = inlineformset_factory(Account,

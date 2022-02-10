@@ -4,10 +4,6 @@
 
 {% for wynikiencja in wyniki %}
 <div class="container pt-6">
-<!-- 		<div class="title white">
-			<h2 class="titleText"> <span>M</span>oje tuzy<span>.</span></h2>
-			<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
-		</div> -->
 			<div class="d-flex justify-content-center" >
 				<div>
 					{% for i in zawody_nazwa %}
@@ -36,6 +32,7 @@
     								<td class="m"><b>3</b></td>
     								<td class="m"><b>2</b></td>
     								<td class="m"><b>1</b></td>
+    								<td class="m"><b>Kara</b></td>
     								<!-- <td class="m"><b>Suma</b></td> -->
                                     <td class="m"><b>Wynik</b></td>
                                     <!-- <td class="m"><b>Kara</b></td> -->
@@ -56,6 +53,7 @@
     							<td class="m" data-id="{{ osoba.id }}" data-type="trzy">{{osoba.trzy}}</td>
     							<td class="m" data-id="{{ osoba.id }}" data-type="dwa">{{osoba.dwa}}</td>
     							<td class="m" data-id="{{ osoba.id }}" data-type="jeden">{{osoba.jeden}}</td>
+    							<td class="m" data-id="{{ osoba.id }}" data-type="jeden">{{osoba.kara_punktowa}}</td>
     							<!-- <td class="m" data-id="{{ osoba.id }}" data-type="wynik">{{osoba.wynik}}</td> -->
                                 <td class="m" data-id="{{ osoba.id }}" data-type="wynik">{{osoba.result}}</td>
                                 <!-- <td class="m" data-id="{{ osoba.id }}" data-type="wynik">{{osoba.kara}}</td> -->

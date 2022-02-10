@@ -94,6 +94,9 @@ def wyniki(request, pk):
 	context['wyniki'] = wyniki
 	context['zawody_nazwa'] = zawody_nazwa
 	context['klasyfikacja_generalna'] = klasyfikacja_generalna
+	klasyfikacja_generalna_display = Turniej.objects.filter(id=pk).values_list('klasyfikacja_generalna', flat=True)
+	context['klasyfikacja_generalna_display'] = klasyfikacja_generalna_display[0]
+	# print(f'klasyfikacja generalna:')
 	context['pk'] = pk
 
 	return render(request, 'wyniki/wyniki.html', context)
@@ -192,7 +195,7 @@ def exportexcel(request, pk):
 		font_style = xlwt.XFStyle()
 		font_style.font.bold=True
 
-		columns = ['Nazwisko','Imię', 'Klub', 'X', '10', '9', '8', '7','6','5','4','3','2','1', 'Suma', 'Kara']
+		columns = ['Nazwisko','Imię', 'Klub', 'X', '10', '9', '8', '7','6','5','4','3','2','1','Kara punktowa', 'Suma', 'Kara']
 
 		for col_num in range(len(columns)):
 			for i in ws:
@@ -208,7 +211,7 @@ def exportexcel(request, pk):
 
 		rows = []
 		for i in zawody_id_lista:
-			rows.append(Wyniki.objects.filter(zawody__id = i, oplata = 1).values_list('zawodnik__nazwisko','zawodnik__imie', 'zawodnik__klub', 'X', 'Xx', 'dziewiec', 'osiem', 'siedem', 'szesc', 'piec', 'cztery', 'trzy', 'dwa', 'jeden', 'wynik', 'kara').order_by('-wynik', '-X', '-Xx', '-dziewiec', '-osiem', '-siedem', '-szesc', '-piec', '-cztery', '-trzy', '-dwa', '-jeden'))
+			rows.append(Wyniki.objects.filter(zawody__id = i, oplata = 1).values_list('zawodnik__nazwisko','zawodnik__imie', 'zawodnik__klub', 'X', 'Xx', 'dziewiec', 'osiem', 'siedem', 'szesc', 'piec', 'cztery', 'trzy', 'dwa', 'jeden', 'kara_punktowa', 'wynik', 'kara').order_by('-wynik', '-X', '-Xx', '-dziewiec', '-osiem', '-siedem', '-szesc', '-piec', '-cztery', '-trzy', '-dwa', '-jeden'))
 		# rows.append(Wyniki.objects.filter(zawody__turniej = pk, oplata = 1).values_list('zawodnik__nazwisko','zawodnik__imie', 'zawodnik__klub', 'X', 'Xx', 'dziewiec', 'osiem', 'siedem', 'szesc', 'piec', 'cztery', 'trzy', 'dwa', 'jeden', 'wynik', 'kara').order_by('-wynik', '-X', '-Xx', '-dziewiec', '-osiem', '-siedem', '-szesc', '-piec', '-cztery', '-trzy', '-dwa', '-jeden'))	
 		generalka = Wyniki.objects.raw('select account_account.nazwisko, account_account.imie, account_account.klub, sum(X) as X, sum(Xx) as Xx,sum(dziewiec) as dziewiec, sum(osiem) as osiem,sum(siedem) as siedem , sum(szesc) as szesc, sum(piec) as piec, sum(cztery) as cztery, sum(trzy) as trzy, sum(dwa) as dwa, sum(jeden) as jeden, sum(wynik) as wynik, account_account.id from account_account inner join zawody_zawody on wyniki_wyniki.zawody_id = zawody_zawody.id inner join wyniki_wyniki on account_account.id=wyniki_wyniki.zawodnik_id where zawody_zawody.turniej_id = %s and oplata=1 and wyniki_wyniki.kara = %s group by account_account.id order by wynik desc, X desc, Xx desc, dziewiec desc, osiem desc, siedem DESC', [pk, 'BRAK'])
 		# generalka = Wyniki.objects.raw('select wyniki_wyniki.id, zawodnik_id, sum(X) as X, sum(Xx) as Xx,sum(dziewiec) as dziewiec, sum(osiem) as osiem,sum(siedem) as siedem , sum(szesc) as szesc, sum(piec) as piec, sum(cztery) as cztery, sum(trzy) as trzy, sum(dwa) as dwa, sum(jeden) as jeden, sum(wynik) as wynik from wyniki_wyniki inner join zawody_zawody on wyniki_wyniki.zawody_id = zawody_zawody.id where zawody_zawody.turniej_id = %s and oplata=1 and wyniki_wyniki.kara = %s group by zawodnik_id order by wynik desc, X desc, Xx desc, dziewiec desc, osiem desc, siedem DESC', [pk, 'BRAK'])
@@ -220,33 +223,35 @@ def exportexcel(request, pk):
 				for col_num in range(len(row)):
 					y.write(row_num, col_num, str(row[col_num]), font_style)
 
+		klasyfikacja_generalna_display = Turniej.objects.filter(id=pk).values_list('klasyfikacja_generalna', flat=True)
+		if klasyfikacja_generalna_display[0] == 1:
 
+			ws.append(wb.add_sheet("Klasyfikacja generalna"))
+			columns = ['Nazwisko','Imię', 'Klub', 'X', '10', '9', '8', '7','6','5','4','3','2','1', 'Suma']
+			row_num = 0
+			font_style = xlwt.XFStyle()
+			font_style.font.bold=True
+			for col_num in range(len(columns)):
+					ws[len(ws)-1].write(row_num, col_num, columns[col_num], font_style)
 
-		ws.append(wb.add_sheet("Klasyfikacja generalna"))
-		columns = ['Nazwisko','Imię', 'Klub', 'X', '10', '9', '8', '7','6','5','4','3','2','1', 'Suma']
-		row_num = 0
-		font_style = xlwt.XFStyle()
-		font_style.font.bold=True
-		for col_num in range(len(columns)):
-				ws[len(ws)-1].write(row_num, col_num, columns[col_num], font_style)
-
-		font_style = xlwt.XFStyle()
-		for i,y in enumerate(generalka):
-			ws[len(ws)-1].write(i+1, 0, y.nazwisko, font_style)
-			ws[len(ws)-1].write(i+1, 1, y.imie, font_style)
-			ws[len(ws)-1].write(i+1, 2, y.klub, font_style)
-			ws[len(ws)-1].write(i+1, 3, y.X, font_style)
-			ws[len(ws)-1].write(i+1, 4, y.Xx, font_style)
-			ws[len(ws)-1].write(i+1, 5, y.dziewiec, font_style)
-			ws[len(ws)-1].write(i+1, 6, y.osiem, font_style)
-			ws[len(ws)-1].write(i+1, 7, y.siedem, font_style)
-			ws[len(ws)-1].write(i+1, 8, y.szesc, font_style)
-			ws[len(ws)-1].write(i+1, 9, y.piec, font_style)
-			ws[len(ws)-1].write(i+1, 10, y.cztery, font_style)
-			ws[len(ws)-1].write(i+1, 11, y.trzy, font_style)
-			ws[len(ws)-1].write(i+1, 12, y.dwa, font_style)
-			ws[len(ws)-1].write(i+1, 13, y.jeden, font_style)
-			ws[len(ws)-1].write(i+1, 14, y.wynik, font_style)
+			font_style = xlwt.XFStyle()
+			tab_generalka = len(ws)-1
+			for i,y in enumerate(generalka):
+				ws[tab_generalka].write(i+1, 0, y.nazwisko, font_style)
+				ws[tab_generalka].write(i+1, 1, y.imie, font_style)
+				ws[tab_generalka].write(i+1, 2, y.klub, font_style)
+				ws[tab_generalka].write(i+1, 3, y.X, font_style)
+				ws[tab_generalka].write(i+1, 4, y.Xx, font_style)
+				ws[tab_generalka].write(i+1, 5, y.dziewiec, font_style)
+				ws[tab_generalka].write(i+1, 6, y.osiem, font_style)
+				ws[tab_generalka].write(i+1, 7, y.siedem, font_style)
+				ws[tab_generalka].write(i+1, 8, y.szesc, font_style)
+				ws[tab_generalka].write(i+1, 9, y.piec, font_style)
+				ws[tab_generalka].write(i+1, 10, y.cztery, font_style)
+				ws[tab_generalka].write(i+1, 11, y.trzy, font_style)
+				ws[tab_generalka].write(i+1, 12, y.dwa, font_style)
+				ws[tab_generalka].write(i+1, 13, y.jeden, font_style)
+				ws[tab_generalka].write(i+1, 14, y.wynik, font_style)
 
 
 		wb.save(response)
@@ -400,7 +405,12 @@ class OplataListView(LoginRequiredMixin, ListView):
 		return context
 
 	def get_queryset(self):
-		return Account.objects.all().order_by('nazwisko')
+		turniej_zawodnicy = Wyniki.objects.filter(zawody__turniej__id = self.kwargs['pk']).values_list('zawodnik__id')
+		turniej_zawodnicy_id = []
+		for i in turniej_zawodnicy:
+			turniej_zawodnicy_id.append(i[0])
+		turniej_zawodnicy_id_set = set(turniej_zawodnicy_id)
+		return Account.objects.filter(id__in = turniej_zawodnicy_id_set).order_by('nazwisko')
 
 	def dispatch(self, request, *args, **kwargs):
 		try:
@@ -410,6 +420,7 @@ class OplataListView(LoginRequiredMixin, ListView):
 				return redirect('not_authorized')
 		except:
 			return redirect('not_authorized')
+			# pass
 
 
 
@@ -480,3 +491,39 @@ class UczestnikDeleteView(LoginRequiredMixin, DeleteView):
 				return redirect('not_authorized')
 		except:
 			return redirect('not_authorized')
+
+
+
+
+class BronAmunicjaListView(LoginRequiredMixin, ListView):
+	login_url = 'start'
+	template_name = "wyniki/bron_amunicja_list.html"
+
+	def get_context_data(self, **kwargs):
+		context = super().get_context_data(**kwargs)
+		context['pk'] = self.kwargs['pk']
+		context['nazwa_turnieju'] = nazwa_turnieju(self.kwargs['pk'])
+		amunicja_klubowa = Wyniki.objects.filter(zawody__turniej__id = self.kwargs['pk'], amunicja_klubowa = 1)
+		amunicja_klubowa_ilosc = 0
+		for i in amunicja_klubowa:
+			amunicja_klubowa_ilosc +=1
+		bron_klubowa = Wyniki.objects.filter(zawody__turniej__id = self.kwargs['pk'], bron_klubowa = 1)
+		bron_klubowa_ilosc = 0
+		for i in bron_klubowa:
+			bron_klubowa_ilosc +=1
+		context['bron_klubowa_ilosc'] = bron_klubowa_ilosc
+		context['amunicja_klubowa_ilosc'] = amunicja_klubowa_ilosc
+		return context
+
+	def get_queryset(self):
+		return Wyniki.objects.filter(zawody__turniej__id = self.kwargs['pk']).order_by('zawody')
+
+	def dispatch(self, request, *args, **kwargs):
+		try:
+			if request.user.rts:
+				return super(BronAmunicjaListView, self).dispatch(request, *args, **kwargs)
+			else:
+				return redirect('not_authorized')
+		except:
+			# return redirect('not_authorized')
+			pass

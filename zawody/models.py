@@ -4,7 +4,8 @@ from account.models import Account
 
 class Turniej(models.Model):
 	nazwa = models.CharField(max_length=30)
-	rejestracja = models.BooleanField(verbose_name='Rejestracja')
+	rejestracja = models.BooleanField(default=True, verbose_name='Rejestracja')
+	klasyfikacja_generalna = models.BooleanField(default=True, verbose_name='Klasyfikacja generalna')
 
 	def __str__(self):
 		return self.nazwa

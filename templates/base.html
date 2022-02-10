@@ -7,7 +7,7 @@
 		<title>Zawody strzeleckie</title>
 	    <meta charset="utf-8">
 	    <meta name="viewport" content="width=device-width, initial-scale=1">
-	    <link href="{% static 'css/static.css' %}" rel="stylesheet">
+        <link href="{% static 'css/static.css' %}" rel="stylesheet" type="text/css">
 	    <link href="https://unpkg.com/tailwindcss@^2/dist/tailwind.min.css" rel="stylesheet">
 	    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-BmbxuPwQa2lc/FVzBcNJ7UAyJxM6wuqIj61tLrc4wSX0szH/Ev+nYRRuWlolflfl" crossorigin="anonymous">
 
@@ -35,6 +35,7 @@
 				{% if user.is_superuser or user.rts %}
 					<li><a href="{% url 'users' pk=pk %}" onclick="toggleMenu();">Zarządzaj użytkownikami</a></li>
 					<li><a href="{% url 'oplata_list' pk=pk %}" onclick="toggleMenu();">Opłaty</a></li>
+					<li><a href="{% url 'bron_amunicja_list' pk=pk %}" onclick="toggleMenu();">Broń/Amunicja</a></li>
 				{% endif %}
 				{% if user.is_superuser %}
 					<li><a href="{% url 'zawody_lista' pk=pk %}" onclick="toggleMenu();">Edycja konkurencji</a></li>

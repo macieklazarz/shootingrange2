@@ -23,7 +23,7 @@
     <div class="row justify-content-center pt-5 pb-5 col-auto">
      
 		{% for turniej in object_list %}
-		<div class="col-auto">
+		<div class="col-auto pt-2">
 			<a href="{% url 'home' turniej.id %}" class="btn btn-primary btn-lg active" role="button" aria-pressed="true">{{turniej.nazwa}}</a>
 		</div>
 		{% endfor %}

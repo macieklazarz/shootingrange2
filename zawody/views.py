@@ -63,6 +63,7 @@ class ZawodyCreateView(LoginRequiredMixin, CreateView):
 				return redirect('not_authorized')
 		except:
 			return redirect("not_authorized")
+# 			pass
 
 
 class ZawodyDeleteView(LoginRequiredMixin, DeleteView):
