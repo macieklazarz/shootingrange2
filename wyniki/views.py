@@ -158,6 +158,19 @@ class WynikUpdateView(LoginRequiredMixin, UpdateView):
 	def form_valid(self, form):
 		return super(WynikUpdateView,self).form_valid(form)
 
+	def get_form_kwargs(self):
+		kwargs = super(WynikUpdateView, self).get_form_kwargs()
+		zawody = Wyniki.objects.filter(id = self.kwargs['pk']).values_list('zawody__id', flat=True)
+		print(f'zawody: {zawody[0]}')
+		liczba_strzalow = Zawody.objects.filter(id = zawody[0]).values_list('liczba_strzalow', flat=True)
+		liczba_strzalow_range = list(range(0,liczba_strzalow[0]+1))
+		lista = []
+		for i in liczba_strzalow_range:
+			lista.append(tuple((i,i)))
+		kwargs.update({'strzaly': lista})
+		return kwargs
+
+
 	def dispatch(self, request, *args, **kwargs):
 		wynik_pk = self.kwargs.get('pk')
 		zawody_pk = Wyniki.objects.filter(id = wynik_pk).values_list('zawody__id', flat=True)

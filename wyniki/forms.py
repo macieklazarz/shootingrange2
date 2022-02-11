@@ -46,6 +46,24 @@ class WynikiModelForm(forms.ModelForm):
             # raise ValidationError("Podaj wartość kary punktowej")
             self.cleaned_data['kara_punktowa'] = 0
 
+    def __init__(self, *args, **kwargs):
+        strzaly = kwargs.pop('strzaly', None)
+        # print(f'strzaly: {strzaly}')
+
+
+        super(WynikiModelForm, self).__init__(*args, **kwargs)
+        self.fields["X"] = forms.ChoiceField(choices = strzaly)
+        self.fields["Xx"] = forms.ChoiceField(choices = strzaly)
+        self.fields["dziewiec"] = forms.ChoiceField(choices = strzaly)
+        self.fields["osiem"] = forms.ChoiceField(choices = strzaly)
+        self.fields["siedem"] = forms.ChoiceField(choices = strzaly)
+        self.fields["szesc"] = forms.ChoiceField(choices = strzaly)
+        self.fields["piec"] = forms.ChoiceField(choices = strzaly)
+        self.fields["cztery"] = forms.ChoiceField(choices = strzaly)
+        self.fields["trzy"] = forms.ChoiceField(choices = strzaly)
+        self.fields["dwa"] = forms.ChoiceField(choices = strzaly)
+        self.fields["jeden"] = forms.ChoiceField(choices = strzaly)
+
 class RejestracjaModelForm(forms.ModelForm):
     class Meta:
         model = Wyniki

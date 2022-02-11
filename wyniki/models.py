@@ -70,29 +70,29 @@ class Wyniki(models.Model):
 	def clean(self):
 		# print(f'liczba strzalow {self.zawody.liczba_strzalow}')
 		liczba_strzalow = self.zawody.liczba_strzalow
-		mozliwe_wyniki = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+		mozliwe_wyniki = list(range(0,self.zawody.liczba_strzalow + 1))
 		if (self.X not in mozliwe_wyniki):
-			raise ValidationError({'X': "Uzupełnij  pole wartością od 0 do 10"})
+			raise ValidationError({'X': f'Uzupełnij  pole wartością od 0 do {liczba_strzalow}'})
 		elif (self.Xx not in mozliwe_wyniki):
-			raise ValidationError({'Xx': "Uzupełnij pole wartością od 0 do 10"})
+			raise ValidationError({'Xx': f'Uzupełnij  pole wartością od 0 do {liczba_strzalow}'})
 		elif (self.dziewiec not in mozliwe_wyniki):
-			raise ValidationError({'dziewiec': "Uzupełnij pole wartością od 0 do 10"})
+			raise ValidationError({'dziewiec': f'Uzupełnij  pole wartością od 0 do {liczba_strzalow}'})
 		elif (self.osiem not in mozliwe_wyniki):
-			raise ValidationError({'osiem': "Uzupełnij pole wartością od 0 do 10"})
+			raise ValidationError({'osiem': f'Uzupełnij  pole wartością od 0 do {liczba_strzalow}'})
 		elif (self.siedem not in mozliwe_wyniki):
-			raise ValidationError({'siedem': "Uzupełnij pole wartością od 0 do 10"})
+			raise ValidationError({'siedem': f'Uzupełnij  pole wartością od 0 do {liczba_strzalow}'})
 		elif (self.szesc not in mozliwe_wyniki):
-			raise ValidationError({'szesc': "Uzupełnij pole wartością od 0 do 10"})
+			raise ValidationError({'szesc': f'Uzupełnij  pole wartością od 0 do {liczba_strzalow}'})
 		elif (self.piec not in mozliwe_wyniki):
-			raise ValidationError({'piec': "Uzupełnij pole wartością od 0 do 10"})
+			raise ValidationError({'piec': f'Uzupełnij  pole wartością od 0 do {liczba_strzalow}'})
 		elif (self.cztery not in mozliwe_wyniki):
-			raise ValidationError({'cztery': "Uzupełnij pole wartością od 0 do 10"})
+			raise ValidationError({'cztery': f'Uzupełnij  pole wartością od 0 do {liczba_strzalow}'})
 		elif (self.trzy not in mozliwe_wyniki):
-			raise ValidationError({'trzy': "Uzupełnij pole wartością od 0 do 10"})
+			raise ValidationError({'trzy': f'Uzupełnij  pole wartością od 0 do {liczba_strzalow}'})
 		elif (self.dwa not in mozliwe_wyniki):
-			raise ValidationError({'dwa': "Uzupełnij pole wartością od 0 do 10"})
+			raise ValidationError({'dwa': f'Uzupełnij  pole wartością od 0 do {liczba_strzalow}'})
 		elif (self.jeden not in mozliwe_wyniki):
-			raise ValidationError({'jeden': "Uzupełnij pole wartością od 0 do 10"})
+			raise ValidationError({'jeden': f'Uzupełnij  pole wartością od 0 do {liczba_strzalow}'})
 		elif self.X+self.Xx+self.dziewiec+self.osiem+self.siedem+self.szesc+self.piec+self.cztery+self.trzy+self.dwa+self.jeden > liczba_strzalow:
 			raise ValidationError({'X': f'Maksymalna liczba strzałów w tej konkurencji to {liczba_strzalow}'})
 
