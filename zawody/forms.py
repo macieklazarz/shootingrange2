@@ -25,7 +25,10 @@ class SedziaModelForm(forms.ModelForm):
 			'sedzia',
 			)
 	def __init__(self, *args, **kwargs):
+		pk = kwargs.pop('zawody_pk', None)
 		super(SedziaModelForm, self).__init__(*args, **kwargs)
+
 		#w propertce sedzia możemy wybrać tylko takiego usera, który jest sędzią lub rtsem
 		self.fields['sedzia'].queryset = self.fields['sedzia'].queryset.filter(is_sedzia=1) | self.fields['sedzia'].queryset.filter(rts=1)
+		self.fields['zawody'].queryset = self.fields['zawody'].queryset.filter(turniej=pk)
 		self.fields['sedzia'].label = 'Sędzia'

@@ -15,6 +15,7 @@ from django.views.generic import TemplateView, ListView, DetailView, CreateView,
 from .forms import WynikiModelForm, RejestracjaModelForm, TurniejModelForm, ModuleFormSet 
 from zawody.models import Turniej
 from mainapp.views import nazwa_turnieju
+from django.db.models import Count, Sum
 
 
 
@@ -516,16 +517,8 @@ class BronAmunicjaListView(LoginRequiredMixin, ListView):
 		context = super().get_context_data(**kwargs)
 		context['pk'] = self.kwargs['pk']
 		context['nazwa_turnieju'] = nazwa_turnieju(self.kwargs['pk'])
-		amunicja_klubowa = Wyniki.objects.filter(zawody__turniej__id = self.kwargs['pk'], amunicja_klubowa = 1)
-		amunicja_klubowa_ilosc = 0
-		for i in amunicja_klubowa:
-			amunicja_klubowa_ilosc +=1
-		bron_klubowa = Wyniki.objects.filter(zawody__turniej__id = self.kwargs['pk'], bron_klubowa = 1)
-		bron_klubowa_ilosc = 0
-		for i in bron_klubowa:
-			bron_klubowa_ilosc +=1
-		context['bron_klubowa_ilosc'] = bron_klubowa_ilosc
-		context['amunicja_klubowa_ilosc'] = amunicja_klubowa_ilosc
+		abr = (Wyniki.objects.filter(zawody__turniej__id = self.kwargs['pk']).values('zawody__nazwa').annotate(acount=Sum('amunicja_klubowa'), bcount=Sum('bron_klubowa')).order_by())
+		context['abr'] = abr
 		return context
 
 	def get_queryset(self):
@@ -538,5 +531,5 @@ class BronAmunicjaListView(LoginRequiredMixin, ListView):
 			else:
 				return redirect('not_authorized')
 		except:
-			# return redirect('not_authorized')
-			pass
+			return redirect('not_authorized')
+			# pass

@@ -108,6 +108,12 @@ class SedziaCreateView(LoginRequiredMixin, CreateView):
 		return reverse("sedzia_lista", kwargs={'pk': self.kwargs['pk']})
 		return super(SedziaCreateView, self).form_valid(form)
 
+	def get_form_kwargs(self):
+		kwargs = super(SedziaCreateView, self).get_form_kwargs()
+		zawody_pk = self.kwargs['pk']
+		kwargs.update({'zawody_pk': zawody_pk})
+		return kwargs
+
 	def dispatch(self, request, *args, **kwargs):
 		try:
 			if request.user.is_admin:
@@ -115,8 +121,8 @@ class SedziaCreateView(LoginRequiredMixin, CreateView):
 			else:
 				return redirect('not_authorized')
 		except:
-			# return redirect('not_authorized')
-			pass
+			return redirect('not_authorized')
+			# pass
 
 class SedziaListView(LoginRequiredMixin, ListView):
 	login_url = 'start'
@@ -130,7 +136,7 @@ class SedziaListView(LoginRequiredMixin, ListView):
 		return context
 
 	def get_queryset(self):
-		return Sedzia.objects.all().order_by('zawody')
+		return Sedzia.objects.filter(zawody__turniej__id=self.kwargs['pk']).order_by('zawody')
 
 	def dispatch(self, request, *args, **kwargs):
 		try:

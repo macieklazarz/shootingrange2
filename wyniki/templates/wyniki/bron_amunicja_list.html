@@ -45,18 +45,20 @@
 		        	<tr>
 
 
+						<td class="mu"><b>Zawody</b></td>
 						<td class="mu"><b>Broń klubowa</b></td>
 						<td class="mu"><b>Amunicja klubowa</b></td>
 
 
 					</tr>
 				</thead>
-
+					{% for i in abr %}
 		        	<tr>
-			        	<td class="mu">{{ bron_klubowa_ilosc }}</td>
-			        	<td class="mu">{{ amunicja_klubowa_ilosc }}</td>
-
+			        	<td class="mu">{{ i.zawody__nazwa }}</td>
+			        	<td class="mu">{% if i.bcount == 0 %}0{% elif i.bcount == 1 %}1{%else%}{{ i.bcount }}{% endif %}</td>
+			        	<td class="mu">{% if i.acount == 0 %}0{% elif i.acount == 1 %}1{%else%}{{ i.acount }}{% endif %}</td>
 					</tr>	
+					{% endfor %}
 
 		      </table>
 
