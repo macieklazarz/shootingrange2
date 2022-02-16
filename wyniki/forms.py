@@ -77,6 +77,8 @@ class RejestracjaModelForm(forms.ModelForm):
     def clean(self):
         cleaned_data = super().clean()
         #sprawdzam czy zawodnik nie jest już przypisany do danej konkurencji
+        if not cleaned_data.get('zawody'):
+            raise ValidationError('')
         wybrane_zawody = cleaned_data.get('zawody').id                                                                                                          
         wybrany_zawodnik = cleaned_data.get('zawodnik').id                                                                                                       
         zawodnik_juz_zarejestrowany = Wyniki.objects.filter(zawody=wybrane_zawody, zawodnik=wybrany_zawodnik)

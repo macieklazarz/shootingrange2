@@ -15,8 +15,8 @@ class Wyniki(models.Model):
 
 
 	slug 		= models.SlugField(default=0)
-	zawody 		= models.ForeignKey(Zawody, on_delete=models.CASCADE, verbose_name='konkurencja')
-	zawodnik 	= models.ForeignKey(Account, on_delete=models.CASCADE)
+	zawody 		= models.ForeignKey(Zawody, on_delete=models.CASCADE, null=False, verbose_name='konkurencja')
+	zawodnik 	= models.ForeignKey(Account, on_delete=models.CASCADE, null=False)
 	X			=models.IntegerField(blank=True, null=False, default=0)
 	Xx			=models.IntegerField(blank=True, null=False, default=0, verbose_name='10')
 	dziewiec	=models.IntegerField(blank=True, null=False, default=0, verbose_name='9')
@@ -69,7 +69,11 @@ class Wyniki(models.Model):
 
 	def clean(self):
 		# print(f'liczba strzalow {self.zawody.liczba_strzalow}')
-		liczba_strzalow = self.zawody.liczba_strzalow
+		try:
+			liczba_strzalow = self.zawody.liczba_strzalow
+		except:
+			raise ValidationError("Musisz wybrać konkurencję")
+
 		mozliwe_wyniki = list(range(0,self.zawody.liczba_strzalow + 1))
 		if (self.X not in mozliwe_wyniki):
 			raise ValidationError({'X': f'Uzupełnij  pole wartością od 0 do {liczba_strzalow}'})
@@ -94,7 +98,7 @@ class Wyniki(models.Model):
 		elif (self.jeden not in mozliwe_wyniki):
 			raise ValidationError({'jeden': f'Uzupełnij  pole wartością od 0 do {liczba_strzalow}'})
 		elif self.X+self.Xx+self.dziewiec+self.osiem+self.siedem+self.szesc+self.piec+self.cztery+self.trzy+self.dwa+self.jeden > liczba_strzalow:
-			raise ValidationError({'X': f'Maksymalna liczba strzałów w tej konkurencji to {liczba_strzalow}'})
+			raise ValidationError(f'Maksymalna liczba strzałów w tej konkurencji to {liczba_strzalow}')
 
 
 class Ustawienia(models.Model):
