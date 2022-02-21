@@ -44,10 +44,8 @@ def wyniki_edycja(request, pk):
 			if i in zawody_turnieju_id:
 				powiazane_zawody_lista.append(i)
 
-		powiazane_zawody_lista.sort()
-
-
 		#zapisujemy w liście wyniki wyniki wszystkich zawodników dla poszczególnych zawodów
+		powiazane_zawody_lista.sort()
 		wyniki = []																			
 		for i in powiazane_zawody_lista:
 			wynik = Wyniki.objects.filter(zawody = i).order_by('zawodnik__nazwisko')

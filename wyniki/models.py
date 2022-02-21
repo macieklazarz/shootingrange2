@@ -15,8 +15,8 @@ class Wyniki(models.Model):
 
 
 	slug 		= models.SlugField(default=0)
-	zawody 		= models.ForeignKey(Zawody, on_delete=models.CASCADE, null=False, verbose_name='konkurencja')
-	zawodnik 	= models.ForeignKey(Account, on_delete=models.CASCADE, null=False)
+	zawody 		= models.ForeignKey(Zawody, on_delete=models.CASCADE, verbose_name='konkurencja')
+	zawodnik 	= models.ForeignKey(Account, on_delete=models.CASCADE)
 	X			=models.IntegerField(blank=True, null=False, default=0)
 	Xx			=models.IntegerField(blank=True, null=False, default=0, verbose_name='10')
 	dziewiec	=models.IntegerField(blank=True, null=False, default=0, verbose_name='9')

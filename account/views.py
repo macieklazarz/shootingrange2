@@ -148,7 +148,7 @@ class AccountUpdateView(LoginRequiredMixin, UpdateView):
 	form_class = AccountModelForm
 	def get_context_data(self, **kwargs):
 		context = super().get_context_data(**kwargs)
-		context['pk'] = self.kwargs['pk']
+		context['pk'] = self.kwargs['pk_turniej']
 		context['nazwa_turnieju'] = nazwa_turnieju(self.kwargs['pk_turniej'])
 		return context
 
@@ -169,7 +169,7 @@ class AccountUpdateView(LoginRequiredMixin, UpdateView):
 				return redirect('not_authorized')
 		except:
 			return redirect('not_authorized')
-
+			
 class AccountUpdateViewPersonal(LoginRequiredMixin, UpdateView):
 	login_url = 'start'
 	template_name = "account/account_update.html"

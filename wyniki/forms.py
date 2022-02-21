@@ -52,17 +52,17 @@ class WynikiModelForm(forms.ModelForm):
 
 
         super(WynikiModelForm, self).__init__(*args, **kwargs)
-        self.fields["X"] = forms.CharField(widget=forms.Select(choices=strzaly))
-        self.fields["Xx"] = forms.CharField(widget=forms.Select(choices=strzaly), label='10')
-        self.fields["dziewiec"] = forms.CharField(widget=forms.Select(choices=strzaly), label='9')
-        self.fields["osiem"] = forms.CharField(widget=forms.Select(choices=strzaly), label='8')
-        self.fields["siedem"] = forms.CharField(widget=forms.Select(choices=strzaly), label='7')
-        self.fields["szesc"] = forms.CharField(widget=forms.Select(choices=strzaly), label='6')
-        self.fields["piec"] = forms.CharField(widget=forms.Select(choices=strzaly), label='5')
-        self.fields["cztery"] = forms.CharField(widget=forms.Select(choices=strzaly), label='4')
-        self.fields["trzy"] = forms.CharField(widget=forms.Select(choices=strzaly), label='3')
-        self.fields["dwa"] = forms.CharField(widget=forms.Select(choices=strzaly), label='2')
-        self.fields["jeden"] = forms.CharField(widget=forms.Select(choices=strzaly), label='1')
+        self.fields["X"] = forms.ChoiceField(choices = strzaly)
+        self.fields["Xx"] = forms.ChoiceField(choices = strzaly, label='10')
+        self.fields["dziewiec"] = forms.ChoiceField(choices = strzaly, label='9')
+        self.fields["osiem"] = forms.ChoiceField(choices = strzaly, label='8')
+        self.fields["siedem"] = forms.ChoiceField(choices = strzaly, label='7')
+        self.fields["szesc"] = forms.ChoiceField(choices = strzaly, label='6')
+        self.fields["piec"] = forms.ChoiceField(choices = strzaly, label='5')
+        self.fields["cztery"] = forms.ChoiceField(choices = strzaly, label='4')
+        self.fields["trzy"] = forms.ChoiceField(choices = strzaly, label='3')
+        self.fields["dwa"] = forms.ChoiceField(choices = strzaly, label='2')
+        self.fields["jeden"] = forms.ChoiceField(choices = strzaly, label='1')
 
 class RejestracjaModelForm(forms.ModelForm):
     class Meta:
