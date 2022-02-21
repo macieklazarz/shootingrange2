@@ -70,6 +70,27 @@ class AccountModelForm(forms.ModelForm):
 		nazwisko = nazwisko.upper() 
 		self.cleaned_data['nazwisko'] = nazwisko
 
+class AccountModelFormPersonal(forms.ModelForm):
+	imie	 = forms.CharField(widget=forms.TextInput())
+	nazwisko = forms.CharField(widget=forms.TextInput())
+	licencja = forms.CharField(required=False,widget=forms.TextInput())
+	klub	 = forms.CharField(required=False,widget=forms.TextInput())
+	class Meta:
+		model = Account
+		fields = (
+			'email',
+			'username',
+			'imie',
+			'nazwisko',
+			'licencja',
+			'klub',
+			)
+	def clean(self):
+		cleaned_data = super().clean()
+		nazwisko = cleaned_data.get('nazwisko') 
+		nazwisko = nazwisko.upper() 
+		self.cleaned_data['nazwisko'] = nazwisko
+
 class SedziaModelForm(forms.ModelForm):
 	imie	 = forms.CharField(widget=forms.TextInput())
 	nazwisko = forms.CharField(widget=forms.TextInput())

@@ -28,6 +28,7 @@
 		<ul class="navigation">
 			{% if request.user.is_authenticated %}
 				<li><a href="{% url 'start' %}" onclick="toggleMenu();">Strona główna</a></li>
+				<li><a href="{% url 'account_edit_personal' pk=user.id pk_turniej=pk%}" onclick="toggleMenu();">Edytuj profil</a></li>
 				<!-- <li><a href="{% url 'home' pk=pk %}" onclick="toggleMenu();">Strona główna</a></li> -->
 				<li><a href="{% url 'logout' pk=pk %}" onclick="toggleMenu();">Wylogowanie</a></li>
 				<li><a href="{% url 'rejestracja_na_zawody' pk=pk %}" onclick="toggleMenu();">Zapisy do konkurencji</a></li>

@@ -17,7 +17,7 @@ from django.contrib import admin
 from django.urls import path
 from mainapp.views import (home_screen_view,)
 from zawody.views import (ZawodyCreateView,SedziaCreateView, SedziaListView, SedziaDeleteView, ZawodyListView, ZawodyDeleteView, StronaStartowaListView )
-from account.views import (registration_form, registration_form_sedzia, registration_form_no_login, logout_view, login_view, login_info, AccountListView, AccountUpdateView, AccountDeleteView, PasswordResetViewNew, PasswordResetDoneViewNew, PasswordResetConfirmViewNew, PasswordResetCompleteViewNew, SedziaUpdateView)
+from account.views import (registration_form, registration_form_sedzia, registration_form_no_login, logout_view, login_view, login_info, AccountListView, AccountUpdateView, AccountUpdateViewPersonal, AccountDeleteView, PasswordResetViewNew, PasswordResetDoneViewNew, PasswordResetConfirmViewNew, PasswordResetCompleteViewNew, SedziaUpdateView)
 from wyniki.views import (wyniki_edycja,  wyniki, exportexcel, WynikUpdateView, not_authorized, RejestracjaNaZawodyView, KonkurencjaDeleteView, TurniejListView, TurniejDeleteView, TurniejEditView, TurniejCreateView, OplataListView, OplataUpdateView, UczestnikDeleteView, BronAmunicjaListView)
 from django.conf import settings
 from django.conf.urls.static import static
@@ -39,6 +39,7 @@ urlpatterns = [
     path('rejestracja_na_zawody/<int:pk>/', RejestracjaNaZawodyView.as_view(), name="rejestracja_na_zawody"),
     path('<int:pk>/wyniki_edit/<int:pk_turniej>/', WynikUpdateView.as_view(), name="wyniki_edit"),
     path('<int:pk>/account_edit/<int:pk_turniej>/', AccountUpdateView.as_view(), name="account_edit"),
+    path('<int:pk>/account_edit_personal/<int:pk_turniej>/', AccountUpdateViewPersonal.as_view(), name="account_edit_personal"),
     path('<int:pk>/sedzia_edit/<int:pk_turniej>/', SedziaUpdateView.as_view(), name="sedzia_edit"),
     path('<int:pk>/account_delete/<int:pk_turniej>/',AccountDeleteView.as_view(), name="account_delete"),
     path('<int:pk>/konkurencja_delete/<int:pk_turniej>',KonkurencjaDeleteView.as_view(), name="konkurencja_delete"),

@@ -17,9 +17,10 @@
 			<div class="row justify-content-center">
 				<div class="col-auto">
 					<div class="table-responsive">
-						<table class="table table-hover table-responsive table-bordered mx-auto w-auto align-middle md:text-center table-condensed">
-							<thead class="table-secondary">
+						<table class="table table-hover table-responsive table-bordered mx-auto w-auto align-middle md:text-center table-condensed table-striped">
+							<thead class="table-secondary ">
 								<tr>
+									<td class="m"><b>Klasyfikacja</b></td>
 									<td class="m"><b>Zawodnik</b></td>
 									<td class="m"><b>X</b></td>
 									<td class="m"><b>10</b></td>
@@ -42,6 +43,7 @@
 							</thead>
 							{% for osoba in encjawyniki %}
 							<tr>
+								<td class="m">{{forloop.counter}}</td>
 								<td class="m">{{osoba.zawodnik}}</td>
 								<td class="m">{{osoba.X}}</td>
 								<td class="m">{{osoba.Xx}}</td>
@@ -86,9 +88,10 @@
 			<div class="row justify-content-center">
 				<div class="col-auto">
 					<div class="table-responsive">
-						<table class="table table-hover table-bordered table-responsive mx-auto w-auto align-middle md:text-center">
+						<table class="table table-hover table-bordered table-responsive mx-auto w-auto align-middle md:text-center table-striped">
 							<thead class="table-secondary">
 								<tr>
+									<td class="m"><b>Klasyfikacja</b></td>
 									<td class="m"><b>Zawodnik</b></td>
 									<td class="m"><b>X</b></td>
 									<td class="m"><b>10</b></td>
@@ -106,6 +109,7 @@
 							</thead>
 							{% for osoba in klasyfikacja_generalna %}
 							<tr>
+								<td class="m">{{forloop.counter}}</td>
 								<td class="m">{{osoba.zawodnik}}</td>
 								<td class="m">{{osoba.X}}</td>
 								<td class="m">{{osoba.Xx}}</td>
@@ -127,7 +131,7 @@
 			</div>
 {% endif %}
 
-		{% if request.user.username == 'admin' %}
+		{% if request.user.is_admin %}
 			<div class="d-flex justify-content-center" >
 				<div>
 					<a href="{% url 'exportexcel' pk%}" class="btn btn-primary btn-lg active" role="button" aria-pressed="true">

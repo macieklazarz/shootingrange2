@@ -3,7 +3,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import render, redirect, reverse
 from django.contrib.auth import login, authenticate, logout
-from account.forms import RegistrationForm, RegistrationFormSedzia, AccountAuthenticationForm, AccountModelForm, SedziaModelForm
+from account.forms import RegistrationForm, RegistrationFormSedzia, AccountAuthenticationForm, AccountModelForm, SedziaModelForm, AccountModelFormPersonal
 from django.views.generic import ListView, UpdateView, DeleteView
 from .models import Account
 from zawody.models import Turniej
@@ -165,6 +165,35 @@ class AccountUpdateView(LoginRequiredMixin, UpdateView):
 		try:
 			if request.user.rts:
 				return super(AccountUpdateView, self).dispatch(request, *args, **kwargs)
+			else:
+				return redirect('not_authorized')
+		except:
+			return redirect('not_authorized')
+
+class AccountUpdateViewPersonal(LoginRequiredMixin, UpdateView):
+	login_url = 'start'
+	template_name = "account/account_update.html"
+	form_class = AccountModelFormPersonal
+	def get_context_data(self, **kwargs):
+		context = super().get_context_data(**kwargs)
+		context['pk'] = self.kwargs['pk_turniej']
+		context['nazwa_turnieju'] = nazwa_turnieju(self.kwargs['pk_turniej'])
+		return context
+
+	def get_queryset(self):
+		return Account.objects.all()
+		# return Account.objects.filter(id=request.user.id)
+
+	def get_success_url(self):
+		return reverse("home", kwargs={'pk': self.kwargs['pk_turniej']})
+		
+	def form_valid(self, form):
+		return super(AccountUpdateViewPersonal,self).form_valid(form)
+
+	def dispatch(self, request, *args, **kwargs):
+		try:
+			if request.user.id == self.kwargs['pk']:
+				return super(AccountUpdateViewPersonal, self).dispatch(request, *args, **kwargs)
 			else:
 				return redirect('not_authorized')
 		except:
