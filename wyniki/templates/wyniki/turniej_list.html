@@ -11,9 +11,12 @@
         <thead class="table-secondary">
           <tr>
         <td class="m"><b>Nazwa</b></td>
-        <td class="m"><b>Id</b></td>
+
         <td class="m"><b>Rejestracja</b></td>
         <td class="m"><b>Klasyfikacja generalna</b></td>
+        <td class="m"><b>Turniej archiwalny</b></td>
+        <td class="m"><b>Pokaż wyniki</b></td>
+        <td class="m"><b>Pokaż wyniki generalne</b></td>
         <td class="m"><b>Edytuj</b></td>
         <td class="m"><b>Usuwanie</b></td>
       </tr>
@@ -21,7 +24,6 @@
           {% for turniej in object_list %}
           <tr>
               <td class="m">{{ turniej.nazwa }}</td>
-              <td class="m">{{ turniej.id }}</td>
             <td class="m">
               <label class="inline-flex items-center">
                 <input type="checkbox" {% if turniej.rejestracja == 1 %} checked="checked" {% endif %} onclick="return false">
@@ -30,6 +32,21 @@
             <td class="m">
               <label class="inline-flex items-center">
                 <input type="checkbox" {% if turniej.klasyfikacja_generalna == 1 %} checked="checked" {% endif %} onclick="return false">
+              </label>
+            </td>
+            <td class="m">
+              <label class="inline-flex items-center">
+                <input type="checkbox" {% if turniej.turniej_archiwalny == 1 %} checked="checked" {% endif %} onclick="return false">
+              </label>
+            </td>
+            <td class="m">
+              <label class="inline-flex items-center">
+                <input type="checkbox" {% if turniej.wyniki_widoczne == 1 %} checked="checked" {% endif %} onclick="return false">
+              </label>
+            </td>
+            <td class="m">
+              <label class="inline-flex items-center">
+                <input type="checkbox" {% if turniej.wyniki_generalne_widoczne == 1 %} checked="checked" {% endif %} onclick="return false">
               </label>
             </td>
             <td class="m">

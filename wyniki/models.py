@@ -1,7 +1,7 @@
 from django.core.exceptions import ValidationError
 from django.db import models
 from account.models import Account
-from zawody.models import Zawody
+from zawody.models import Zawody, ZawodyDynamic
 class Wyniki(models.Model):
 	# zawody = models.CharField(max_length=30)
 	KARA_CHOICES = (
@@ -12,7 +12,6 @@ class Wyniki(models.Model):
 		('PK', 'PK'),
 		
 	)
-
 
 	slug 		= models.SlugField(default=0)
 	zawody 		= models.ForeignKey(Zawody, on_delete=models.CASCADE, verbose_name='konkurencja')
@@ -35,6 +34,7 @@ class Wyniki(models.Model):
 	oplata		= models.BooleanField(default=False)
 	bron_klubowa		= models.BooleanField(default=False, verbose_name='Broń klubowa')
 	amunicja_klubowa		= models.BooleanField(default=False, verbose_name='Amunicja klubowa')
+	edited_by_sedzia = models.BooleanField(default=False)
 	# komunikat	=models.CharField(blank=True, max_length=100)
 
 	class Meta:
@@ -75,10 +75,10 @@ class Wyniki(models.Model):
 			raise ValidationError("Musisz wybrać konkurencję")
 
 		mozliwe_wyniki = list(range(0,self.zawody.liczba_strzalow + 1))
-		if (self.X not in mozliwe_wyniki):
-			raise ValidationError({'X': f'Uzupełnij  pole wartością od 0 do {liczba_strzalow}'})
-		elif (self.Xx not in mozliwe_wyniki):
-			raise ValidationError({'Xx': f'Uzupełnij  pole wartością od 0 do {liczba_strzalow}'})
+		if (self.Xx not in mozliwe_wyniki):
+			raise ValidationError({'Xx': f'Uzupełnij pole wartością od 0 do {liczba_strzalow}'})
+		elif (self.X not in mozliwe_wyniki):
+			raise ValidationError({'X': f'Uzupełnij pole wartością od 0 do {liczba_strzalow}'})
 		elif (self.dziewiec not in mozliwe_wyniki):
 			raise ValidationError({'dziewiec': f'Uzupełnij  pole wartością od 0 do {liczba_strzalow}'})
 		elif (self.osiem not in mozliwe_wyniki):
@@ -100,6 +100,9 @@ class Wyniki(models.Model):
 		elif self.X+self.Xx+self.dziewiec+self.osiem+self.siedem+self.szesc+self.piec+self.cztery+self.trzy+self.dwa+self.jeden > liczba_strzalow:
 			raise ValidationError(f'Maksymalna liczba strzałów w tej konkurencji to {liczba_strzalow}')
 
+	def __str__(self):
+		return (self.zawody.nazwa+' '+self.zawodnik.nazwisko+' '+self.zawodnik.imie)
+
 
 class Ustawienia(models.Model):
 	nazwa = models.TextField()
@@ -107,3 +110,89 @@ class Ustawienia(models.Model):
 
 	class Meta:
 		verbose_name_plural = "Ustawienia"
+
+
+
+class WynikiDynamic(models.Model):
+	# zawody = models.CharField(max_length=30)
+	KARA_CHOICES = (
+		('BRAK', 'BRAK'),
+		('DNF', 'DNF'),
+		('DNS', 'DNS'),
+		('DSQ', 'DSQ'),
+		('PK', 'PK'),
+		
+	)
+
+	zawody 				= models.ForeignKey(ZawodyDynamic, on_delete=models.CASCADE, verbose_name='konkurencja')
+	zawodnik 			= models.ForeignKey(Account, on_delete=models.CASCADE)
+	czas				= models.FloatField(null=False, default=0, verbose_name='Czas')
+	miss_value			= models.IntegerField(null=False, default=0, verbose_name='Miss')
+	procedura_value		= models.IntegerField(null=False, default=0, verbose_name='Procedura')
+	noshoot_value		= models.IntegerField(null=False, default=0, verbose_name='NoShoot')
+	wynik				= models.FloatField(null=False, default=0)
+	result				= models.TextField(max_length=60, null=True, default='0')
+	kara				= models.CharField(max_length=10, choices=KARA_CHOICES, default='BRAK')
+	oplata				= models.BooleanField(default=False)
+	bron_klubowa		= models.BooleanField(default=False, verbose_name='Broń klubowa')
+	amunicja_klubowa	= models.BooleanField(default=False, verbose_name='Amunicja klubowa')
+	edited_by_sedzia 	= models.BooleanField(default=False)
+	# komunikat	=models.CharField(blank=True, max_length=100)
+
+	class Meta:
+		verbose_name_plural = "Wyniki zawodów dynamicznych"
+# Create your models here.
+	def save(self, *args, **kwargs):
+		self.wynik = self.czas + self.miss_value*self.zawody.miss + self.procedura_value*self.zawody.procedura + self.noshoot_value*self.zawody.noshoot 
+		self.result = str(self.czas + self.miss_value*self.zawody.miss + self.procedura_value*self.zawody.procedura + self.noshoot_value*self.zawody.noshoot)
+		# self.slug = (self.zawodnik.username + str(self.zawody.id))
+		# liczba_strzalow = self.X*10 + self.Xx*10 + self.dziewiec+ self.osiem + self.siedem + self.szesc+ self.piec+ self.cztery+ self.trzy+ self.dwa+ self.jeden
+		# if liczba_strzalow < 10:
+		# 	self.komunikat = ""
+		# self.result = str(self.X*10 + self.Xx*10 + self.dziewiec*9 + self.osiem*8 + self.siedem*7 + self.szesc*6+ self.piec*5+ self.cztery*4+ self.trzy*3+ self.dwa*2+ self.jeden*1-self.kara_punktowa)
+		if self.kara != 'BRAK':
+			self.result = self.kara
+
+			# self.wynik = 0
+
+		super(WynikiDynamic, self).save(*args, **kwargs)
+
+	def clean(self):
+		# print(f'liczba strzalow {self.zawody.liczba_strzalow}')
+		try:
+			liczba_strzalow = self.zawody
+		except:
+			raise ValidationError("Musisz wybrać konkurencję")
+
+	# def clean(self):
+		# print(f'liczba strzalow {self.zawody.liczba_strzalow}')
+		# try:
+		# 	liczba_strzalow = self.zawody.liczba_strzalow
+		# except:
+		# 	raise ValidationError("Musisz wybrać konkurencję")
+
+		# mozliwe_wyniki = list(range(0,self.zawody.liczba_strzalow + 1))
+		# if (self.Xx not in mozliwe_wyniki):
+		# 	raise ValidationError({'Xx': f'Uzupełnij pole wartością od 0 do {liczba_strzalow}'})
+		# elif (self.X not in mozliwe_wyniki):
+		# 	raise ValidationError({'X': f'Uzupełnij pole wartością od 0 do {liczba_strzalow}'})
+		# elif (self.dziewiec not in mozliwe_wyniki):
+		# 	raise ValidationError({'dziewiec': f'Uzupełnij  pole wartością od 0 do {liczba_strzalow}'})
+		# elif (self.osiem not in mozliwe_wyniki):
+		# 	raise ValidationError({'osiem': f'Uzupełnij  pole wartością od 0 do {liczba_strzalow}'})
+		# elif (self.siedem not in mozliwe_wyniki):
+		# 	raise ValidationError({'siedem': f'Uzupełnij  pole wartością od 0 do {liczba_strzalow}'})
+		# elif (self.szesc not in mozliwe_wyniki):
+		# 	raise ValidationError({'szesc': f'Uzupełnij  pole wartością od 0 do {liczba_strzalow}'})
+		# elif (self.piec not in mozliwe_wyniki):
+		# 	raise ValidationError({'piec': f'Uzupełnij  pole wartością od 0 do {liczba_strzalow}'})
+		# elif (self.cztery not in mozliwe_wyniki):
+		# 	raise ValidationError({'cztery': f'Uzupełnij  pole wartością od 0 do {liczba_strzalow}'})
+		# elif (self.trzy not in mozliwe_wyniki):
+		# 	raise ValidationError({'trzy': f'Uzupełnij  pole wartością od 0 do {liczba_strzalow}'})
+		# elif (self.dwa not in mozliwe_wyniki):
+		# 	raise ValidationError({'dwa': f'Uzupełnij  pole wartością od 0 do {liczba_strzalow}'})
+		# elif (self.jeden not in mozliwe_wyniki):
+		# 	raise ValidationError({'jeden': f'Uzupełnij  pole wartością od 0 do {liczba_strzalow}'})
+		# elif self.X+self.Xx+self.dziewiec+self.osiem+self.siedem+self.szesc+self.piec+self.cztery+self.trzy+self.dwa+self.jeden > liczba_strzalow:
+			# raise ValidationError(f'Maksymalna liczba strzałów w tej konkurencji to {liczba_strzalow}')

@@ -1,6 +1,6 @@
 from django.contrib import admin
 from account.models import Account
-from wyniki.models import Wyniki, Ustawienia
+from wyniki.models import Wyniki, Ustawienia, WynikiDynamic
 
 # Register your models here.
 @admin.register(Wyniki)
@@ -14,3 +14,9 @@ class WynikiAdmin(admin.ModelAdmin):
 class UstawieniaAdmin(admin.ModelAdmin):
 	list_display = ('nazwa','ustawienie')
 	search_fields = ('nazwa','ustawienie')
+
+
+@admin.register(WynikiDynamic)
+class WynikiDynamicAdmin(admin.ModelAdmin):
+	list_display = ('zawody', 'zawodnik', 'oplata', 'czas', 'miss_value', 'procedura_value', 'noshoot_value', 'result', 'kara')
+	search_fields = ('zawody', 'zawodnik')

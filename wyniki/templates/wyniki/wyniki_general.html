@@ -1,0 +1,143 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+		<div class="container pt-6">
+
+
+
+{% for key, value in wynik_grupowy.items %}
+		
+			<div class="d-flex justify-content-center" >
+				<div>
+					<h3>{{ key }}</h3>
+				</div>
+			</div>
+			<div class="row justify-content-center">
+				<div class="col-auto">
+					<div class="table-responsive">
+						<table class="table table-hover table-responsive table-bordered mx-auto w-auto align-middle md:text-center table-condensed table-striped">
+							<thead class="table-secondary">
+								<tr>
+									<td class="m"><b>Klasyfikacja</b></td>
+									<td class="m"><b>Zawodnik</b></td>
+									<td class="m"><b>X</b></td>
+									<td class="m"><b>10</b></td>
+									<td class="m"><b>9</b></td>
+									<td class="m"><b>8</b></td>
+									<td class="m"><b>7</b></td>
+									<td class="m"><b>6</b></td>
+									<td class="m"><b>5</b></td>
+									<td class="m"><b>4</b></td>
+									<td class="m"><b>3</b></td>
+									<td class="m"><b>2</b></td>
+									<td class="m"><b>1</b></td>
+
+									<td class="m"><b>Wynik</b></td>
+
+								</tr>
+							</thead>
+							{% for val in value %}
+							<tr>
+								<td class="m">{{forloop.counter}}</td>
+								<td class="m">{{val.zawodnik}}</td>
+								<td class="m">{{val.X}}</td>
+								<td class="m">{{val.Xx}}</td>
+								<td class="m">{{val.dziewiec}}</td>
+								<td class="m">{{val.osiem}}</td>
+								<td class="m">{{val.siedem}}</td>
+								<td class="m">{{val.szesc}}</td>
+								<td class="m">{{val.piec}}</td>
+								<td class="m">{{val.cztery}}</td>
+								<td class="m">{{val.trzy}}</td>
+								<td class="m">{{val.dwa}}</td>
+								<td class="m">{{val.jeden}}</td>
+								<td class="m">{{val.Wynik}}</td>
+
+							</tr>
+							{% endfor %}
+						</table>
+					</div>
+				</div>
+			</div>
+{% endfor %}
+
+			<div class="d-flex justify-content-center" >
+				<div>
+					<h3>Podsumowanie</h3>
+				</div>
+			</div>
+
+			<div class="row justify-content-center">
+				<div class="col-auto">
+					<div class="table-responsive">
+						<table class="table table-hover table-responsive table-bordered mx-auto w-auto align-middle md:text-center table-condensed table-striped">
+							<thead class="table-secondary">
+								<tr>
+									<td class="m"><b>Klasyfikacja</b></td>
+									<td class="m"><b>Zawodnik</b></td>
+									<td class="m"><b>X</b></td>
+									<td class="m"><b>10</b></td>
+									<td class="m"><b>9</b></td>
+									<td class="m"><b>8</b></td>
+									<td class="m"><b>7</b></td>
+									<td class="m"><b>6</b></td>
+									<td class="m"><b>5</b></td>
+									<td class="m"><b>4</b></td>
+									<td class="m"><b>3</b></td>
+									<td class="m"><b>2</b></td>
+									<td class="m"><b>1</b></td>
+
+									<td class="m"><b>Wynik</b></td>
+
+								</tr>
+							</thead>
+							{% for val in wynik_general %}
+							<tr>
+								<td class="m">{{forloop.counter}}</td>
+								<td class="m">{{val.zawodnik}}</td>
+								<td class="m">{{val.X}}</td>
+								<td class="m">{{val.Xx}}</td>
+								<td class="m">{{val.dziewiec}}</td>
+								<td class="m">{{val.osiem}}</td>
+								<td class="m">{{val.siedem}}</td>
+								<td class="m">{{val.szesc}}</td>
+								<td class="m">{{val.piec}}</td>
+								<td class="m">{{val.cztery}}</td>
+								<td class="m">{{val.trzy}}</td>
+								<td class="m">{{val.dwa}}</td>
+								<td class="m">{{val.jeden}}</td>
+								<td class="m">{{val.Wynik}}</td>
+
+							</tr>
+							{% endfor %}
+						</table>
+					</div>
+				</div>
+			</div>
+
+
+
+
+
+
+
+
+		{% if request.user.is_admin %}
+			<div class="d-flex justify-content-center" >
+				<div>
+					<a href="{% url 'exportexcelgeneralka' pk%}" class="btn btn-primary btn-lg active" role="button" aria-pressed="true">
+						Eksport excel
+					</a>
+				</div>
+			</div>
+		{% endif %}
+		</div>
+
+
+
+
+
+{% endblock %}
+
+

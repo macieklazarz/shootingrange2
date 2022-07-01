@@ -7,34 +7,44 @@
 {% endblock %}
 
 {% block content %}
-<section class="text-gray-600 body-font overflow-hidden">
-  <div class="container px-5 py-4 mx-auto">
-    <div class="row justify-content-center">
-      <div class="col-auto">
-        <div class="table-responsive">
-            <p>Edytujesz opłaty zawodnika {{account }}</p>
+  <div class="d-flex justify-content-center" >
+    <p>Edytujesz opłaty zawodnika {{account }}</p>
+  </div>
+  <div class="d-flex justify-content-center" >
+    <div class="btn btn-secondary btn-sm active"  onclick="SelectorById()" value="Zaznacz wszystko">Zaznacz wszystkie opłaty</div>
+  </div>
+        
+            
 
-            <form method="post">
+            <form method="post" class="widthauto">
               {% csrf_token %}
                 {{ formset.management_form }}
-                {% for form in formset %}
-
-                    <table class="table-responsive  mx-auto w-auto align-middle md:text-center">
+               
+                  <div class="table-responsive">
+                    <table class="table table-hover table-responsive table-bordered mx-auto w-auto align-middle md:text-center table-condensed table-striped">
                       <tr>
-                          <p class="text-center"><b>Turniej:</b> {{ form.instance.zawody.turniej|title }}</p>
-                          <td class="mu"><p><b>Konkurencja:</b> {{ form.instance.zawody|title }}</p></td>
-                          <td class="mu">{{ form }}</td>
+                         {% for form in formset %}
+                          <td class="mu"><p><b>{{ form.instance.zawody|title }}</b></p></td>
+
+                          {% endfor %}
                       </tr>
+                      <tr>
+                         {% for form in formset %}
+                          <td class="mu">
+                            {{ form.as_p }}
+                           </td>
+                          {% endfor %}
+                      </tr>
+
                     </table>
+                    </div>
                     <br>              
                     <br>              
                     <br>              
-              {% endfor %}
-                            <input type="submit" class="mt-1 w-full text-white bg-blue-500 hover:bg-blue-600 px-3 py-1 rounded-md" value="Zapisz">
+              
+                            <input type="submit" class="btn btn-primary btn-lg active" value="Zapisz">
             </form>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
+        
+
 {% endblock %}
+

@@ -13,7 +13,6 @@
 		      	<thead class="table-secondary">
 		        	<tr>
 						<td class="mu"><b>Email</b></td>
-						<td class="mu"><b>Username</b></td>
 						<td class="mu"><b>Imie</b></td>
 						<td class="mu"><b>Nazwisko</b></td>
 						<td class="mu"><b>Licencja</b></td>
@@ -26,7 +25,6 @@
 		        	{% for osoba in object_list %}
 		        	<tr>
 			            <td class="mu">{{ osoba.email }}</td>
-			        	<td class="mu">{{ osoba.username }}</td>
 			        	<td class="mu">{{ osoba.imie }}</td>
 			        	<td class="mu">{{ osoba.nazwisko }}</td>
 			        	<td class="mu">{{ osoba.licencja }}</td>

@@ -20,13 +20,19 @@
   	<div class="d-flex justify-content-center pt-5 pb-2">
   		<h1>Przejdź do turnieju</h1>
   	</div>
-    <div class="row justify-content-center pt-5 pb-5 col-auto">
+    <div class="row justify-content-center pt-5 pb-2 col-auto">
      
 		{% for turniej in object_list %}
 		<div class="col-auto pt-2">
 			<a href="{% url 'home' turniej.id %}" class="btn btn-primary btn-lg active" role="button" aria-pressed="true">{{turniej.nazwa}}</a>
 		</div>
 		{% endfor %}
+
+	</div>
+	<div class="row justify-content-center pt-2 pb-5 col-auto">
+		<div class="col-auto pt-1">
+			<a href="{% url 'start_archive' %}" class="btn btn-success btn-lg active" role="button" aria-pressed="true">Turnieje archiwalne</a>
+		</div>
 	</div>
   </div>
 

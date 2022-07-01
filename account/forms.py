@@ -9,7 +9,7 @@ class RegistrationForm(UserCreationForm):
 
 	class Meta:
 		model = Account
-		fields = ("email", "username", "imie", "nazwisko", "klub", "licencja", "password1", "password2")
+		fields = ("email", "username", "imie", "nazwisko", "klub", "licencja", "password1", "password2", "rodo_accepted")
 
 	def clean(self):
 		#nawisko ma być zapisane wielkimi literami
@@ -17,13 +17,15 @@ class RegistrationForm(UserCreationForm):
 		nazwisko = cleaned_data.get('nazwisko') 
 		nazwisko = nazwisko.upper() 
 		self.cleaned_data['nazwisko'] = nazwisko
+		if self.cleaned_data['rodo_accepted'] != 1:
+			raise forms.ValidationError('Musisz zaakceptować postanowienia RODO aby przejść dalej')
 
 class RegistrationFormSedzia(UserCreationForm):
 	email = forms.EmailField(max_length=60, help_text='Required. Add a valid email address')
 
 	class Meta:
 		model = Account
-		fields = ("email", "username", "imie", "nazwisko", "klasa_sedziego", "licencja_sedziego","licencja", "is_sedzia", "password1", "password2")
+		fields = ("email", "username", "imie", "nazwisko", "klasa_sedziego", "licencja_sedziego","licencja", "is_sedzia", "password1", "password2", "rodo_accepted")
 
 	def clean(self):
 		cleaned_data = super().clean()
@@ -32,6 +34,8 @@ class RegistrationFormSedzia(UserCreationForm):
 		self.cleaned_data['nazwisko'] = nazwisko
 		#domyślnie ustawiamy 1 w polu is_sedzia. Propertka is_sedzzia i tak nie jest wyświetlana, sprawdź w htmlce
 		self.cleaned_data['is_sedzia'] = 1
+		if self.cleaned_data['rodo_accepted'] != 1:
+			raise forms.ValidationError('Musisz zaakceptować postanowienia RODO aby przejść dalej')
 
 
 class AccountAuthenticationForm(forms.ModelForm):
@@ -70,6 +74,22 @@ class AccountModelForm(forms.ModelForm):
 		nazwisko = nazwisko.upper() 
 		self.cleaned_data['nazwisko'] = nazwisko
 
+class RodoModelForm(forms.ModelForm):
+	class Meta:
+		model = Account
+		fields = (
+			'rodo_accepted',
+			)
+		labels = {'rodo_accepted': 'Akceptuj'}
+
+	def clean(self):
+		data = self.cleaned_data
+		if data['rodo_accepted'] != 1:
+			raise forms.ValidationError('Musisz zaakceptować postanowienia RODO aby przejść dalej')
+
+
+
+
 class AccountModelFormPersonal(forms.ModelForm):
 	imie	 = forms.CharField(widget=forms.TextInput())
 	nazwisko = forms.CharField(widget=forms.TextInput())
@@ -97,6 +117,7 @@ class SedziaModelForm(forms.ModelForm):
 	licencja_sedziego = forms.CharField(required=False,widget=forms.TextInput())
 	klasa_sedziego	 = forms.CharField(required=False,widget=forms.TextInput())
 	licencja	 = forms.CharField(required=False,widget=forms.TextInput())
+	klub	 = forms.CharField(required=False,widget=forms.TextInput())
 	class Meta:
 		model = Account
 		fields = (
@@ -106,7 +127,8 @@ class SedziaModelForm(forms.ModelForm):
 			'nazwisko',
 			'licencja_sedziego',
 			'klasa_sedziego',
-			'licencja'
+			'licencja',
+			'klub',
 			)
 	def clean(self):
 		cleaned_data = super().clean()

@@ -26,7 +26,7 @@ SECRET_KEY = 'django-insecure-ka!8qloj8+*%tqprv@a7$sd#q7iwa_f)8-2r5%*jsbqpwca&ct
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['localhost','127.0.0.1','aaa']
 
 
 # Application definition
@@ -36,6 +36,7 @@ INSTALLED_APPS = [
     'account',
     'wyniki',
     'zawody',
+    'Orders',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -44,6 +45,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'crispy_forms',
     'crispy_tailwind',
+    'sslserver',
+    'django_extensions',
     # 'widget_tweaks',
     # 'agents',
 ]
@@ -132,8 +135,8 @@ USE_TZ = True
 DEFAULT_FROM_EMAIL = 'zawodyreset@mail.com'
 SERVER_EMAIL = 'tuzownia@gmail.com'
 EMAIL_HOST = 'smtp.gmail.com'
-EMAIL_HOST_USER = 'tuzownia@gmail.com'
-EMAIL_HOST_PASSWORD = 'Tuzownia123!@#'
+EMAIL_HOST_USER = 'pomoc.zawodylts@gmail.com'
+EMAIL_HOST_PASSWORD = 'turorwuapbtdlget'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
@@ -158,3 +161,5 @@ GOOGLE_RECAPTCHA_SECRET_KEY = '6LdlCvIdAAAAABtzVOjjqYa3KLiFX_4b6zYSsNtr'
 
 LOGIN_URL='start/'
 LOGIN_REDIRECT_URL='start/'
+
+

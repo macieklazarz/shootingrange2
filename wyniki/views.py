@@ -2,8 +2,8 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views.generic.base import TemplateResponseMixin, View
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect, get_object_or_404, reverse
-from wyniki.models import Wyniki
-from zawody.models import Sedzia, Zawody
+from wyniki.models import Wyniki, WynikiDynamic
+from zawody.models import Sedzia, Zawody, ZawodyDynamic, SedziaDynamic
 from account.models import Account
 from django.views.decorators.csrf import csrf_exempt
 from django.http import HttpResponse
@@ -12,10 +12,13 @@ from django.contrib.auth.decorators import login_required
 import datetime
 import xlwt
 from django.views.generic import TemplateView, ListView, DetailView, CreateView, UpdateView, DeleteView, FormView
-from .forms import WynikiModelForm, RejestracjaModelForm, TurniejModelForm, ModuleFormSet 
+from .forms import WynikiModelForm, RejestracjaModelForm, TurniejModelForm, ModuleFormSet, ModuleFormSetDynamic, RejestracjaDynamicModelForm, WynikiDynamicModelForm, RejestracjaModelFormNew
 from zawody.models import Turniej
 from mainapp.views import nazwa_turnieju
 from django.db.models import Count, Sum
+from Orders.models import OrderItem, Order
+from django.http import JsonResponse
+import json
 
 
 
@@ -68,40 +71,169 @@ def wyniki_edycja(request, pk):
 	else:
 		return redirect('not_authorized')
 
+
+@login_required(login_url="/start/")
+def wyniki_dynamic_edycja(request, pk):
+	if request.user.is_sedzia:
+		context = {}
+		context['pk'] = pk
+		context['nazwa_turnieju'] = nazwa_turnieju(pk)
+		turniej = Turniej.objects.filter(id=pk).values_list('id', flat=True)
+		turniej_id = turniej[0]
+
+		#sprawdzam konkurencje przypisane do turnieju
+		zawody_turnieju = ZawodyDynamic.objects.filter(turniej=turniej_id).values_list('id', flat=True)
+		zawody_turnieju_id = []
+		for i in zawody_turnieju:
+			zawody_turnieju_id.append(i)
+
+		#sprawdzamy użytkownika ktory jest zalogowany
+		user_id = request.user.id 					
+		#sprawdzamy do jakich zawodow jest przyporzadkowany zalogowany user															
+		powiazane_zawody = SedziaDynamic.objects.filter(sedzia__id = user_id).values_list('zawody', flat=True)			
+		powiazane_zawody_lista = []																				
+		for i in powiazane_zawody:
+			if i in zawody_turnieju_id:
+				powiazane_zawody_lista.append(i)
+
+		#zapisujemy w liście wyniki wyniki wszystkich zawodników dla poszczególnych zawodów
+		powiazane_zawody_lista.sort()
+		wyniki = []																			
+		for i in powiazane_zawody_lista:
+			wynik = WynikiDynamic.objects.filter(zawody = i).order_by('zawodnik__nazwisko')
+			#do listy wyniki mają trafiać tylko te wyniki, które dotyczą konkretnego turnieju
+			#gdyby nie było dodatkowego filtrowania pojawiały by się błędy w przypadku gdy jedna konkurencja występowałaby w wielu turniejach
+			wyniki.append(wynik.filter(zawody__turniej=pk, oplata=1))
+
+		#zapisujemy w liście zawody_nazwa nazwy zawodów, z którymi powiązany jest sędzia
+		zawody_nazwa = []
+		nazwy_zawodow = ZawodyDynamic.objects.filter(id__in=powiazane_zawody_lista).values_list('nazwa', flat=True)
+		#do listy zawody_nazwa mają trafiać tylko te wyniki, które dotyczą konkretnego turnieju
+		#gdyby nie było dodatkowego filtrowania pojawiały by się błędy w przypadku gdy jedna konkurencja występowałaby w wielu turniejach
+		nazwy_zawodow = nazwy_zawodow.filter(turniej=pk)
+		for i in nazwy_zawodow:
+			zawody_nazwa.append(i)
+		context['wyniki'] = wyniki
+		context['zawody_nazwa'] = zawody_nazwa
+		
+		return render(request, 'wyniki/edytuj_wyniki_dynamic.html', context)
+	else:
+		return redirect('not_authorized')
+
 @login_required(login_url="/start/")
 def wyniki(request, pk):
 	context = {}
 	context['nazwa_turnieju'] = nazwa_turnieju(pk)
-	#robię listę 'zawody_lista' zawodów turnieju
-	zawody = Zawody.objects.filter(turniej__id=pk).values_list('id', flat=True).order_by('id')
-	zawody_lista = []
-	for i in zawody:
-		zawody_lista.append(i)
-	#robię listę z nazwami zawodów 'zawody_nazwa' za pomocą listy 'zawody_lista' 
-	zawody_nazwa_queryset = Zawody.objects.filter(turniej__id=pk).values_list('nazwa', flat=True).order_by('id')
-	zawody_nazwa = []
-	for i in zawody_nazwa_queryset:
-		zawody_nazwa.append(i)
-
-	wyniki = []
-	sedziowie_queryset = []																						#robimy liste ktorej elementami beda wyniki poszczegolnych zawodow
-	sedziowie = []
-	for i in zawody_lista:
-		wyniki.append(Wyniki.objects.filter(zawody = i, oplata=1).order_by('kara', '-wynik', '-X', '-Xx', '-dziewiec', '-osiem', '-siedem', '-szesc', '-piec', '-cztery', '-trzy', '-dwa', '-jeden'))
-		sedziowie_queryset.append(Sedzia.objects.filter(zawody = i).values_list('sedzia__imie', 'sedzia__nazwisko'))
-	for i in sedziowie_queryset:
-		sedziowie.append(i)
-	context['sedziowie'] = sedziowie
-	klasyfikacja_generalna = Wyniki.objects.raw('select wyniki_wyniki.id, zawodnik_id, sum(X) as X, sum(Xx) as Xx,sum(dziewiec) as dziewiec, sum(osiem) as osiem,sum(siedem) as siedem , sum(szesc) as szesc, sum(piec) as piec, sum(cztery) as cztery, sum(trzy) as trzy, sum(dwa) as dwa, sum(jeden) as jeden, sum(wynik) as wynik from wyniki_wyniki inner join zawody_zawody on wyniki_wyniki.zawody_id = zawody_zawody.id where zawody_zawody.turniej_id = %s and oplata=1 and wyniki_wyniki.kara = %s group by zawodnik_id order by wynik desc, X desc, Xx desc, dziewiec desc, osiem desc, siedem DESC, szesc desc, piec desc, cztery desc, trzy desc, dwa desc, jeden desc', [pk, 'BRAK'])
-	context['wyniki'] = wyniki
-	context['zawody_nazwa'] = zawody_nazwa
-	context['klasyfikacja_generalna'] = klasyfikacja_generalna
+	context['pk'] = pk
 	klasyfikacja_generalna_display = Turniej.objects.filter(id=pk).values_list('klasyfikacja_generalna', flat=True)
 	context['klasyfikacja_generalna_display'] = klasyfikacja_generalna_display[0]
-	# print(f'klasyfikacja generalna:')
+	klasyfikacja_generalna = Wyniki.objects.raw('select wyniki_wyniki.id, zawodnik_id, sum(X) as X, sum(Xx) as Xx,sum(dziewiec) as dziewiec, sum(osiem) as osiem,sum(siedem) as siedem , sum(szesc) as szesc, sum(piec) as piec, sum(cztery) as cztery, sum(trzy) as trzy, sum(dwa) as dwa, sum(jeden) as jeden, sum(wynik) as wynik from wyniki_wyniki inner join zawody_zawody on wyniki_wyniki.zawody_id = zawody_zawody.id where zawody_zawody.turniej_id = %s and oplata=1 and wyniki_wyniki.kara = %s group by zawodnik_id order by wynik desc, X desc, Xx desc, dziewiec desc, osiem desc, siedem DESC, szesc desc, piec desc, cztery desc, trzy desc, dwa desc, jeden desc', [pk, 'BRAK'])
+	context['klasyfikacja_generalna'] = klasyfikacja_generalna
+
+	if context['nazwa_turnieju'][0].wyniki_widoczne or request.user.rts:
+
+		static_list = []
+		zawody_static = Zawody.objects.filter(turniej__id=pk).values_list('id', flat=True).order_by('id')
+		
+		for i in zawody_static:
+			slownik = {}
+			slownik['zawody_nazwa'] = Zawody.objects.filter(id=i).values_list('nazwa', flat=True)
+			slownik['wyniki'] = Wyniki.objects.filter(zawody = i, oplata=1).order_by('kara', '-wynik', '-X', '-Xx', '-dziewiec', '-osiem', '-siedem', '-szesc', '-piec', '-cztery', '-trzy', '-dwa', '-jeden')
+			slownik['sedzia'] = Sedzia.objects.filter(zawody = i).values_list('sedzia__imie', 'sedzia__nazwisko')
+
+			static_list.append(slownik)
+		context['static_list'] = static_list
+
+
+		dynamic_list = []
+		zawody_dynamic = ZawodyDynamic.objects.filter(turniej__id=pk).values_list('id', flat=True).order_by('id')
+		
+		for i in zawody_dynamic:
+			slownik = {}
+			slownik['zawody_nazwa'] = ZawodyDynamic.objects.filter(id=i).values_list('nazwa', flat=True)
+			slownik['wyniki'] = WynikiDynamic.objects.filter(zawody = i, oplata=1).order_by('kara', 'wynik', 'czas')
+			slownik['sedzia'] = SedziaDynamic.objects.filter(zawody = i).values_list('sedzia__imie', 'sedzia__nazwisko')
+
+			dynamic_list.append(slownik)
+		context['dynamic_list'] = dynamic_list
+
+		return render(request, 'wyniki/wyniki.html', context)
+
+	else:
+		return redirect('not_authorized')
+
+
+@login_required(login_url="/start/")
+def wyniki_general(request, pk):
+	context = {}
+	context['nazwa_turnieju'] = nazwa_turnieju(pk)
 	context['pk'] = pk
 
-	return render(request, 'wyniki/wyniki.html', context)
+
+	if context['nazwa_turnieju'][0].wyniki_generalne_widoczne or request.user.rts:
+
+		grupy_zawodow_w_tym_turnieju = Zawody.objects.filter(turniej__id=pk, zawody_grupa__isnull=False).values_list('zawody_grupa__nazwa', flat=True)
+		# print(f'grupy_zawodow_w_tym_turnieju: {grupy_zawodow_w_tym_turnieju}')
+		# for i in grupy_zawodow_w_tym_turnieju:
+		# 	print(f'i: {i}')
+		zawody_grup = {}
+		for i in grupy_zawodow_w_tym_turnieju:
+			zawody_grup[i] = Zawody.objects.filter(zawody_grupa__nazwa=i).values_list('id', flat=True)
+
+		
+		wszystkie_id_zawodow = []
+		
+		for j in zawody_grup:
+			konkurencja_id = []
+			for i in zawody_grup[j]:
+				konkurencja_id.append(i)
+				wszystkie_id_zawodow.append(i)
+			zawody_grup[j] = konkurencja_id
+
+
+		converted_list = [str(element) for element in wszystkie_id_zawodow]
+		joined_wszystkie_id_zawodow = ','.join(converted_list)
+		# print(f'zawody grup dict: {zawody_grup}')
+		# print(f'Pcz: {zawody_grup["Dziurkacz 2022 PCZ 5 min"]}')
+		# print(f'Pcz tupl : {tuple(zawody_grup["Dziurkacz 2022 PCZ 5 min"])}')
+
+		# print(f'PSP: {zawody_grup["Dziurkacz 2022 PSP 5 min"]}')
+		# print(f'PSP tupl: {str(tuple(zawody_grup["Dziurkacz 2022 PSP 5 min"]))}')
+		
+		for i in zawody_grup:
+			converted_list = [str(element) for element in zawody_grup[i]]
+			joined_string = ",".join(converted_list)
+			# print(f'joined string: {joined_string}')
+			# print(f'joined string type: {type(joined_string)}')
+			# print(f'tupl: {tupl}')
+
+			# wynik_grupowy = Wyniki.objects.raw(f'select wyniki_wyniki.id, zawodnik_id from wyniki_wyniki inner join zawody_zawody on wyniki_wyniki.zawody_id = zawody_zawody.id where zawody_zawody.id in ({joined_string})')
+			wynik_grupowy = Wyniki.objects.raw(f'select wyniki_wyniki.id, account_account.nazwisko, account_account.imie, account_account.email, sum(wyniki_wyniki.X) as X, sum(wyniki_wyniki.Xx) as dziesiec, sum(wyniki_wyniki.dziewiec) as dziewiec, sum(wyniki_wyniki.osiem) as osiem, sum(wyniki_wyniki.siedem) as siedem, sum(wyniki_wyniki.szesc) as szesc, sum(wyniki_wyniki.piec) as piec, sum(wyniki_wyniki.cztery) as cztery, sum(wyniki_wyniki.trzy) as trzy, sum(wyniki_wyniki.dwa) as dwa, sum(wyniki_wyniki.jeden) as jeden, sum(wyniki_wyniki.X*10 + wyniki_wyniki.Xx*10 + wyniki_wyniki.dziewiec*9 + wyniki_wyniki.osiem*8 + wyniki_wyniki.siedem*7 + wyniki_wyniki.szesc*6 + wyniki_wyniki.piec*5 + wyniki_wyniki.cztery*4 + wyniki_wyniki.trzy*3 + wyniki_wyniki.dwa*2 + wyniki_wyniki.jeden*1) as Wynik from account_account left join wyniki_wyniki on account_account.id = wyniki_wyniki.zawodnik_id left join zawody_zawody on zawody_zawody.id = wyniki_wyniki.zawody_id where zawody_zawody.id in ({joined_string}) group by account_account.id order by Wynik desc, X desc, Xx desc, dziewiec desc, osiem desc, siedem DESC, szesc desc, piec desc, cztery desc, trzy desc, dwa desc, jeden desc')
+			zawody_grup[i] = wynik_grupowy
+		# print(f'wszystkie_id_zawodow: {wszystkie_id_zawodow}')
+		# print(f'joined_wszystkie_id_zawodow: {joined_wszystkie_id_zawodow}')
+		context['wynik_grupowy'] = zawody_grup
+		wynik_general = Wyniki.objects.raw(f'select wyniki_wyniki.id, account_account.nazwisko, account_account.imie, account_account.email, sum(wyniki_wyniki.X) as X, sum(wyniki_wyniki.Xx) as dziesiec, sum(wyniki_wyniki.dziewiec) as dziewiec, sum(wyniki_wyniki.osiem) as osiem, sum(wyniki_wyniki.siedem) as siedem, sum(wyniki_wyniki.szesc) as szesc, sum(wyniki_wyniki.piec) as piec, sum(wyniki_wyniki.cztery) as cztery, sum(wyniki_wyniki.trzy) as trzy, sum(wyniki_wyniki.dwa) as dwa, sum(wyniki_wyniki.jeden) as jeden, sum(wyniki_wyniki.X*10 + wyniki_wyniki.Xx*10 + wyniki_wyniki.dziewiec*9 + wyniki_wyniki.osiem*8 + wyniki_wyniki.siedem*7 + wyniki_wyniki.szesc*6 + wyniki_wyniki.piec*5 + wyniki_wyniki.cztery*4 + wyniki_wyniki.trzy*3 + wyniki_wyniki.dwa*2 + wyniki_wyniki.jeden*1) as Wynik from account_account left join wyniki_wyniki on account_account.id = wyniki_wyniki.zawodnik_id left join zawody_zawody on zawody_zawody.id = wyniki_wyniki.zawody_id where zawody_zawody.id in ({joined_wszystkie_id_zawodow}) group by account_account.id order by Wynik desc, X desc, Xx desc, dziewiec desc, osiem desc, siedem DESC, szesc desc, piec desc, cztery desc, trzy desc, dwa desc, jeden desc')
+		context['wynik_general'] = wynik_general
+
+		# print(f'dict: {zawody_grup}')
+		return render(request, 'wyniki/wyniki_general.html', context)
+
+	else:
+		return redirect('not_authorized')
+
+
+
+@login_required(login_url="/start/")
+def rejestracja_choose(request, pk):
+	context = {}
+	context['nazwa_turnieju'] = nazwa_turnieju(pk)
+	context['pk'] = pk
+
+	# print(f'dict: {zawody_grup}')
+	return render(request, 'wyniki/rejestracja_choose.html', context)
+
+
 
 
 
@@ -119,11 +251,38 @@ class RejestracjaNaZawodyView(LoginRequiredMixin, CreateView):
 		context['dodawanie_zawodnika'] = rejestracja_otwarta
 		context['pk'] = self.kwargs['pk']
 		context['nazwa_turnieju'] = nazwa_turnieju(self.kwargs['pk'])
-		lista_zarejestrowanych = Wyniki.objects.filter(zawodnik__id = self.request.user.id).filter(zawody__turniej__id = self.kwargs['pk']).values_list("zawody__nazwa", flat=True)
+		# lista_zarejestrowanych = Wyniki.objects.filter(zawodnik__id = self.request.user.id).filter(zawody__turniej__id = self.kwargs['pk']).values_list("zawody__nazwa", flat=True)
+		lista_zarejestrowanych = Wyniki.objects.filter(zawodnik__id = self.request.user.id).filter(zawody__turniej__id = self.kwargs['pk'])
 		context['lista_zarejestrowanych'] = lista_zarejestrowanych
+		suma_oplat = 0
+		for i in lista_zarejestrowanych:
+			suma_oplat += i.zawody.oplata_konkurencja
+			if i.amunicja_klubowa:
+				suma_oplat += i.zawody.oplata_amunicja
+			if i.bron_klubowa:
+				suma_oplat += i.zawody.oplata_bron
+
+
+		orders = {}
+		order = Order.objects.filter(turniej__id=self.kwargs['pk'], zawodnik=self.request.user)
+		# print(f'order: {order}')
+		for i in order:
+			orders[i] = OrderItem.objects.filter(order=i)
+
+
+
+		# print(f'orders: {orders}')
+
+
+		context['orders'] = orders
+
+			# print(f'konkurencja: {i.zawody} amunicja_klubowa: {i.amunicja_klubowa}  cena: {i.zawody.oplata_amunicja}')
+			# print(f'konkurencja: {i.zawody} broń klubowa: {i.bron_klubowa} cena: {i.zawody.oplata_bron} ')
+		context['suma_oplat'] = suma_oplat
 		return context
 
 	def get_success_url(self):
+		
 		return reverse("rejestracja_na_zawody", kwargs={'pk': self.kwargs['pk']})
 		return super(RejestracjaNaZawodyView, self).form_valid(form)
 
@@ -135,6 +294,125 @@ class RejestracjaNaZawodyView(LoginRequiredMixin, CreateView):
 
 	def get_initial(self, *args, **kwargs):
 		initial = super(RejestracjaNaZawodyView, self).get_initial()
+		initial = initial.copy()
+		initial['zawodnik'] = self.request.user
+		return initial
+
+	def form_valid(self, form):
+		result = super().form_valid(form)
+		add_order(turniej_id=self.kwargs['pk'], wynik_id=self.object.pk, zawodnik=self.object.zawodnik)
+		return result
+
+def add_order(*args, **kwargs):
+	# print(f'turniej: {kwargs["turniej_id"]}')
+	# print(f'turniej: {Turniej.objects.filter(id=kwargs["turniej_id"])[0]}')
+	# print(f'wynik: {kwargs["wynik_id"]}')
+	# print(f'zawodnik: {kwargs["zawodnik"]}')
+	# print(f'wynik: {Wyniki.objects.filter(id=kwargs["wynik_id"])[0]}')
+
+	turniej_ = Turniej.objects.filter(id=kwargs["turniej_id"])[0]
+	wynik_ = Wyniki.objects.filter(id=kwargs["wynik_id"])[0]
+	zawodnik_ = kwargs["zawodnik"]
+
+	# print(f'Order: {Order.objects.all()}')
+
+	if not Order.objects.filter(turniej=turniej_, zawodnik=zawodnik_, is_paid=False):
+		# print('nie ma ordera')
+		order_ = Order.objects.create(turniej=turniej_, zawodnik=zawodnik_)
+	else:
+		# print('jest order')
+		order_instance = Order.objects.filter(turniej=turniej_, zawodnik=zawodnik_, is_paid=False)
+		order_ = order_instance[0]
+
+	to_pay_ = wynik_.zawody.oplata_konkurencja
+	if wynik_.bron_klubowa:
+		to_pay_ += wynik_.zawody.oplata_bron
+	if wynik_.amunicja_klubowa:
+		to_pay_ += wynik_.zawody.oplata_amunicja
+
+	# print(f'to pay: {to_pay_}')
+	order_item = OrderItem.objects.create(order=order_, wynik=wynik_, to_pay=to_pay_)
+
+
+
+def rejestracja_na_zawody(request, pk):
+	context={}
+	context['pk'] = pk
+	context['nazwa_turnieju'] = nazwa_turnieju(pk)
+	lista_zarejestrowanych = Wyniki.objects.filter(zawodnik__id = request.user.id).filter(zawody__turniej__id = pk)
+	context['lista_zarejestrowanych'] = lista_zarejestrowanych
+
+
+	dodawanie_zawodnika = Turniej.objects.filter(id=pk).values_list("rejestracja", flat=True)
+	rejestracja_otwarta = dodawanie_zawodnika[0]
+	context['dodawanie_zawodnika'] = rejestracja_otwarta
+	for i in lista_zarejestrowanych:
+		suma_oplat += i.zawody.oplata_konkurencja
+		if i.amunicja_klubowa:
+			suma_oplat += i.zawody.oplata_amunicja
+		if i.bron_klubowa:
+			suma_oplat += i.zawody.oplata_bron
+
+			# print(f'konkurencja: {i.zawody} amunicja_klubowa: {i.amunicja_klubowa}  cena: {i.zawody.oplata_amunicja}')
+			# print(f'konkurencja: {i.zawody} broń klubowa: {i.bron_klubowa} cena: {i.zawody.oplata_bron} ')
+	# context['suma_oplat'] = suma_oplat
+	
+	if request.method == 'POST':
+		form = RejestracjaModelFormNew(request.POST)
+		if form.is_valid():
+			pass
+	else:
+		form = RejestracjaModelFormNew(user=request.user, pk=pk, initial={'zawodnik': request.user.id})
+
+	context['form'] = form
+
+	return render(request, 'wyniki/rejestracja.html', context)
+
+
+
+
+
+class RejestracjaNaZawodyDynamicView(LoginRequiredMixin, CreateView):
+	login_url = 'start'
+	template_name = "wyniki/rejestracja.html"
+	form_class = RejestracjaDynamicModelForm
+
+	def get_context_data(self, **kwargs):
+		context = super().get_context_data(**kwargs)
+		#sprawdzam czy rejestracja jest otwarta i podaję informację o tym w argumencie 'dodawanie_zawodnika'
+		dodawanie_zawodnika = Turniej.objects.filter(id=self.kwargs['pk']).values_list("rejestracja", flat=True)
+		rejestracja_otwarta = dodawanie_zawodnika[0]
+		context['dodawanie_zawodnika'] = rejestracja_otwarta
+		context['pk'] = self.kwargs['pk']
+		context['nazwa_turnieju'] = nazwa_turnieju(self.kwargs['pk'])
+		# lista_zarejestrowanych = Wyniki.objects.filter(zawodnik__id = self.request.user.id).filter(zawody__turniej__id = self.kwargs['pk']).values_list("zawody__nazwa", flat=True)
+		lista_zarejestrowanych = WynikiDynamic.objects.filter(zawodnik__id = self.request.user.id).filter(zawody__turniej__id = self.kwargs['pk'])
+		context['lista_zarejestrowanych'] = lista_zarejestrowanych
+		suma_oplat = 0
+		for i in lista_zarejestrowanych:
+			suma_oplat += i.zawody.oplata_konkurencja
+			if i.amunicja_klubowa:
+				suma_oplat += i.zawody.oplata_amunicja
+			if i.bron_klubowa:
+				suma_oplat += i.zawody.oplata_bron
+
+			# print(f'konkurencja: {i.zawody} amunicja_klubowa: {i.amunicja_klubowa}  cena: {i.zawody.oplata_amunicja}')
+			# print(f'konkurencja: {i.zawody} broń klubowa: {i.bron_klubowa} cena: {i.zawody.oplata_bron} ')
+		context['suma_oplat'] = suma_oplat
+		return context
+
+	def get_success_url(self):
+		return reverse("rejestracja_na_zawody_dynamic", kwargs={'pk': self.kwargs['pk']})
+		return super(RejestracjaNaZawodyDynamicView, self).form_valid(form)
+
+	def get_form_kwargs(self):
+		kwargs = super(RejestracjaNaZawodyDynamicView, self).get_form_kwargs()
+		kwargs.update({'user': self.request.user.rts})
+		kwargs.update({'pk': self.kwargs['pk']})
+		return kwargs
+
+	def get_initial(self, *args, **kwargs):
+		initial = super(RejestracjaNaZawodyDynamicView, self).get_initial()
 		initial = initial.copy()
 		initial['zawodnik'] = self.request.user
 		return initial
@@ -163,18 +441,20 @@ class WynikUpdateView(LoginRequiredMixin, UpdateView):
 	def get_form_kwargs(self):
 		kwargs = super(WynikUpdateView, self).get_form_kwargs()
 		zawody = Wyniki.objects.filter(id = self.kwargs['pk']).values_list('zawody__id', flat=True)
-		print(f'zawody: {zawody[0]}')
+		# print(f'zawody: {zawody[0]}')
 		liczba_strzalow = Zawody.objects.filter(id = zawody[0]).values_list('liczba_strzalow', flat=True)
 		liczba_strzalow_range = list(range(0,liczba_strzalow[0]+1))
 		lista = []
 		for i in liczba_strzalow_range:
 			lista.append(tuple((i,i)))
 		kwargs.update({'strzaly': lista})
+		# kwargs.update({'is_sedzia_editing': self.request.user.is_sedzia and not self.request.user.rts})
 		return kwargs
 
 
 	def dispatch(self, request, *args, **kwargs):
 		wynik_pk = self.kwargs.get('pk')
+		wynik_edytowany = Wyniki.objects.filter(id = wynik_pk).values_list('edited_by_sedzia', flat=True)
 		zawody_pk = Wyniki.objects.filter(id = wynik_pk).values_list('zawody__id', flat=True)
 		zawody_pk_lista = []
 		for i in zawody_pk:
@@ -185,8 +465,89 @@ class WynikUpdateView(LoginRequiredMixin, UpdateView):
 		for i in sedzia_pk:
 			sedzia_pk_lista.append(i)
 		user_id=self.request.user.id
+		sedzia_not_rts = self.request.user.is_sedzia and not self.request.user.rts
 		if user_id in sedzia_pk_lista:
-			return super(WynikUpdateView, self).dispatch(request, *args, **kwargs)
+			if sedzia_not_rts and wynik_edytowany[0]:
+				return redirect('not_authorized')
+			else:
+				return super(WynikUpdateView, self).dispatch(request, *args, **kwargs)
+		else:
+			return redirect('not_authorized')
+
+
+class WynikDynamicUpdateView(LoginRequiredMixin, UpdateView):
+	login_url = 'start'
+	template_name = "wyniki/wyniki_dynamic_edit.html"
+	form_class = WynikiDynamicModelForm
+	context_object_name = 'cont'
+
+
+
+
+
+
+	def get_context_data(self, **kwargs):
+		context = super().get_context_data(**kwargs)
+		context['pk'] = self.kwargs['pk_turniej']
+		context['nazwa_turnieju'] = nazwa_turnieju(self.kwargs['pk_turniej'])
+		zawody = WynikiDynamic.objects.filter(id = self.kwargs['pk']).values_list('zawody__id', flat=True)
+		miss = ZawodyDynamic.objects.filter(id = zawody[0]).values_list('miss', flat=True)
+		procedura = ZawodyDynamic.objects.filter(id = zawody[0]).values_list('procedura', flat=True)
+		noshoot = ZawodyDynamic.objects.filter(id = zawody[0]).values_list('noshoot', flat=True)
+		context['miss'] = miss[0]
+		context['procedura'] = procedura[0]
+		context['noshoot'] = noshoot[0]
+		return context
+
+	def get_queryset(self):
+		return WynikiDynamic.objects.all()
+
+	def get_success_url(self):
+		return reverse("wyniki_dynamic_edycja", kwargs={'pk': self.kwargs['pk_turniej']})
+
+	def form_valid(self, form):
+		return super(WynikDynamicUpdateView,self).form_valid(form)
+
+	def get_form_kwargs(self):
+		kwargs = super(WynikDynamicUpdateView, self).get_form_kwargs()
+		zawody = WynikiDynamic.objects.filter(id = self.kwargs['pk']).values_list('zawody__id', flat=True)
+		# print(f'zawody: {zawody[0]}')
+		miss = ZawodyDynamic.objects.filter(id = zawody[0]).values_list('miss', flat=True)
+		procedura = ZawodyDynamic.objects.filter(id = zawody[0]).values_list('procedura', flat=True)
+		noshoot = ZawodyDynamic.objects.filter(id = zawody[0]).values_list('noshoot', flat=True)
+
+
+
+
+		# kwargs.update({'miss_ref': miss})
+		# kwargs.update({'procedura_ref': procedura})
+		# kwargs.update({'noshoot_ref': noshoot})
+		# kwargs.update({'is_sedzia_editing': self.request.user.is_sedzia and not self.request.user.rts})
+
+
+
+		return kwargs
+
+
+	def dispatch(self, request, *args, **kwargs):
+		wynik_pk = self.kwargs.get('pk')
+		wynik_edytowany = WynikiDynamic.objects.filter(id = wynik_pk).values_list('edited_by_sedzia', flat=True)
+		zawody_pk = WynikiDynamic.objects.filter(id = wynik_pk).values_list('zawody__id', flat=True)
+		zawody_pk_lista = []
+		for i in zawody_pk:
+			zawody_pk_lista.append(i)
+		zawody_pk_lista = zawody_pk_lista[0]
+		sedzia_pk = SedziaDynamic.objects.filter(zawody__id = zawody_pk_lista).values_list('sedzia__id', flat=True)
+		sedzia_pk_lista = []
+		for i in sedzia_pk:
+			sedzia_pk_lista.append(i)
+		user_id=self.request.user.id
+		sedzia_not_rts = self.request.user.is_sedzia and not self.request.user.rts
+		if user_id in sedzia_pk_lista:
+			if sedzia_not_rts and wynik_edytowany[0]:
+				return redirect('not_authorized')
+			else:
+				return super(WynikDynamicUpdateView, self).dispatch(request, *args, **kwargs)
 		else:
 			return redirect('not_authorized')
 
@@ -196,7 +557,7 @@ def not_authorized(request):
 
 @login_required(login_url="/start/")
 def exportexcel(request, pk):
-	if request.user.username == 'admin':
+	if request.user.is_admin:
 		response=HttpResponse(content_type='application/ms-excel')
 		response['Content-Disposition'] = 'attachment; filename=Wyniki_' + str(datetime.datetime.now())+'.xls'
 		wb = xlwt.Workbook(encoding='utf-8')
@@ -210,7 +571,7 @@ def exportexcel(request, pk):
 		font_style = xlwt.XFStyle()
 		font_style.font.bold=True
 
-		columns = ['Nazwisko','Imię', 'Klub', 'X', '10', '9', '8', '7','6','5','4','3','2','1','Kara punktowa', 'Suma', 'Kara']
+		columns = ['Pozycja','Nazwisko','Imię', 'Klub', 'Suma']
 
 		for col_num in range(len(columns)):
 			for i in ws:
@@ -225,24 +586,33 @@ def exportexcel(request, pk):
 
 
 		rows = []
-		for i in zawody_id_lista:
-			rows.append(Wyniki.objects.filter(zawody__id = i, oplata = 1).values_list('zawodnik__nazwisko','zawodnik__imie', 'zawodnik__klub', 'X', 'Xx', 'dziewiec', 'osiem', 'siedem', 'szesc', 'piec', 'cztery', 'trzy', 'dwa', 'jeden', 'kara_punktowa', 'wynik', 'kara').order_by('-wynik', '-X', '-Xx', '-dziewiec', '-osiem', '-siedem', '-szesc', '-piec', '-cztery', '-trzy', '-dwa', '-jeden'))
+		for count, i in enumerate(zawody_id_lista):
+			rows.append(Wyniki.objects.filter(zawody__id = i, oplata = 1).values_list('zawodnik__nazwisko','zawodnik__imie', 'zawodnik__klub', 'result','wynik', 'X', 'Xx', 'dziewiec', 'osiem', 'siedem', 'szesc', 'piec', 'cztery', 'trzy', 'dwa', 'jeden', 'kara').order_by('kara', '-wynik', '-X', '-Xx', '-dziewiec', '-osiem', '-siedem', '-szesc', '-piec', '-cztery', '-trzy', '-dwa', '-jeden'))
+			# queryset = Wyniki.objects.filter(zawody__id = i, oplata = 1).values_list('zawodnik__nazwisko','zawodnik__imie', 'zawodnik__klub', 'wynik').order_by('-wynik', '-X', '-Xx', '-dziewiec', '-osiem', '-siedem', '-szesc', '-piec', '-cztery', '-trzy', '-dwa', '-jeden')
+			# items = zip(range(1,queryset.count()+1), queryset)
+
+
+			# rows.append(items)
+
 		# rows.append(Wyniki.objects.filter(zawody__turniej = pk, oplata = 1).values_list('zawodnik__nazwisko','zawodnik__imie', 'zawodnik__klub', 'X', 'Xx', 'dziewiec', 'osiem', 'siedem', 'szesc', 'piec', 'cztery', 'trzy', 'dwa', 'jeden', 'wynik', 'kara').order_by('-wynik', '-X', '-Xx', '-dziewiec', '-osiem', '-siedem', '-szesc', '-piec', '-cztery', '-trzy', '-dwa', '-jeden'))	
-		generalka = Wyniki.objects.raw('select account_account.nazwisko, account_account.imie, account_account.klub, sum(X) as X, sum(Xx) as Xx,sum(dziewiec) as dziewiec, sum(osiem) as osiem,sum(siedem) as siedem , sum(szesc) as szesc, sum(piec) as piec, sum(cztery) as cztery, sum(trzy) as trzy, sum(dwa) as dwa, sum(jeden) as jeden, sum(wynik) as wynik, account_account.id from account_account inner join zawody_zawody on wyniki_wyniki.zawody_id = zawody_zawody.id inner join wyniki_wyniki on account_account.id=wyniki_wyniki.zawodnik_id where zawody_zawody.turniej_id = %s and oplata=1 and wyniki_wyniki.kara = %s group by account_account.id order by wynik desc, X desc, Xx desc, dziewiec desc, osiem desc, siedem DESC', [pk, 'BRAK'])
+		generalka = Wyniki.objects.raw('select account_account.nazwisko, account_account.imie, account_account.klub, sum(wynik) as wynik, sum(X) as X, sum(dziewiec) as dziewiec, sum(osiem) as osiem, sum(siedem) as siedem, sum(szesc) as szesc,  account_account.id from account_account inner join zawody_zawody on wyniki_wyniki.zawody_id = zawody_zawody.id inner join wyniki_wyniki on account_account.id=wyniki_wyniki.zawodnik_id where zawody_zawody.turniej_id = %s and oplata=1 and wyniki_wyniki.kara = %s group by account_account.id order by wynik desc, X desc, Xx desc, dziewiec desc, osiem desc, siedem DESC', [pk, 'BRAK'])
 		# generalka = Wyniki.objects.raw('select wyniki_wyniki.id, zawodnik_id, sum(X) as X, sum(Xx) as Xx,sum(dziewiec) as dziewiec, sum(osiem) as osiem,sum(siedem) as siedem , sum(szesc) as szesc, sum(piec) as piec, sum(cztery) as cztery, sum(trzy) as trzy, sum(dwa) as dwa, sum(jeden) as jeden, sum(wynik) as wynik from wyniki_wyniki inner join zawody_zawody on wyniki_wyniki.zawody_id = zawody_zawody.id where zawody_zawody.turniej_id = %s and oplata=1 and wyniki_wyniki.kara = %s group by zawodnik_id order by wynik desc, X desc, Xx desc, dziewiec desc, osiem desc, siedem DESC', [pk, 'BRAK'])
 		# rows.append(generalka)
 		for x,y in enumerate(ws):
 			row_num = 0
-			for row in rows[x]:
+			for index, row in enumerate(rows[x], start=1):
 				row_num +=1
-				for col_num in range(len(row)):
-					y.write(row_num, col_num, str(row[col_num]), font_style)
+				for col_num in range(len(columns)):
+					if col_num==0:
+						y.write(row_num, col_num, index, font_style)
+					else:
+						y.write(row_num, col_num, str(row[col_num-1]), font_style)
 
 		klasyfikacja_generalna_display = Turniej.objects.filter(id=pk).values_list('klasyfikacja_generalna', flat=True)
 		if klasyfikacja_generalna_display[0] == 1:
 
 			ws.append(wb.add_sheet("Klasyfikacja generalna"))
-			columns = ['Nazwisko','Imię', 'Klub', 'X', '10', '9', '8', '7','6','5','4','3','2','1', 'Suma']
+			columns = ['Pozycja','Nazwisko','Imię', 'Klub', 'Suma']
 			row_num = 0
 			font_style = xlwt.XFStyle()
 			font_style.font.bold=True
@@ -252,21 +622,123 @@ def exportexcel(request, pk):
 			font_style = xlwt.XFStyle()
 			tab_generalka = len(ws)-1
 			for i,y in enumerate(generalka):
-				ws[tab_generalka].write(i+1, 0, y.nazwisko, font_style)
-				ws[tab_generalka].write(i+1, 1, y.imie, font_style)
-				ws[tab_generalka].write(i+1, 2, y.klub, font_style)
-				ws[tab_generalka].write(i+1, 3, y.X, font_style)
-				ws[tab_generalka].write(i+1, 4, y.Xx, font_style)
-				ws[tab_generalka].write(i+1, 5, y.dziewiec, font_style)
-				ws[tab_generalka].write(i+1, 6, y.osiem, font_style)
-				ws[tab_generalka].write(i+1, 7, y.siedem, font_style)
-				ws[tab_generalka].write(i+1, 8, y.szesc, font_style)
-				ws[tab_generalka].write(i+1, 9, y.piec, font_style)
-				ws[tab_generalka].write(i+1, 10, y.cztery, font_style)
-				ws[tab_generalka].write(i+1, 11, y.trzy, font_style)
-				ws[tab_generalka].write(i+1, 12, y.dwa, font_style)
-				ws[tab_generalka].write(i+1, 13, y.jeden, font_style)
-				ws[tab_generalka].write(i+1, 14, y.wynik, font_style)
+				ws[tab_generalka].write(i+1,   0, i+1, font_style)
+				ws[tab_generalka].write(i+1, 1, y.nazwisko, font_style)
+				ws[tab_generalka].write(i+1, 2, y.imie, font_style)
+				ws[tab_generalka].write(i+1, 3, y.klub, font_style)
+				ws[tab_generalka].write(i+1, 4, y.wynik, font_style)
+
+
+		ws.append(wb.add_sheet("Sędziowie"))
+		columns = ['Klasa', 'Nazwisko', 'Imię']
+		row_num=0
+		font_style = xlwt.XFStyle()
+		font_style.font.bold=True
+		tab_sedziowie = len(ws)-1
+
+		for col_num in range(len(columns)):
+			ws[tab_sedziowie].write(row_num, col_num, columns[col_num], font_style)
+
+
+
+		font_style = xlwt.XFStyle()
+		sedziowie = Sedzia.objects.filter(zawody__id__in = zawody_id_lista).values_list('sedzia__klasa_sedziego', 'sedzia__nazwisko', 'sedzia__imie').distinct()
+		# print(sedziowie)
+		for sedzia in sedziowie:
+			row_num +=1
+			for col_num in range(len(sedzia)):
+				ws[tab_sedziowie].write(row_num, col_num, str(sedzia[col_num]), font_style)
+
+
+
+
+		wb.save(response)
+
+		return(response)
+
+	else:
+		return redirect('home')
+
+
+
+
+@login_required(login_url="/start/")
+def exportexceldynamic(request, pk):
+	if request.user.is_admin:
+		response=HttpResponse(content_type='application/ms-excel')
+		response['Content-Disposition'] = 'attachment; filename=Wyniki_' + str(datetime.datetime.now())+'.xls'
+		wb = xlwt.Workbook(encoding='utf-8')
+
+		zawody = ZawodyDynamic.objects.filter(turniej__id=pk).values_list('nazwa', flat=True).order_by('id')
+		ws = []
+		for i in zawody:
+			ws.append(wb.add_sheet(i))
+
+		row_num = 0
+		font_style = xlwt.XFStyle()
+		font_style.font.bold=True
+
+		columns = ['Pozycja','Nazwisko','Imię', 'Klub', 'Wynik']
+
+		for col_num in range(len(columns)):
+			for i in ws:
+				i.write(row_num, col_num, columns[col_num], font_style)
+
+
+		font_style = xlwt.XFStyle()
+		zawody_id = ZawodyDynamic.objects.filter(turniej__id=pk).values_list('id', flat=True).order_by('id')
+		zawody_id_lista = []
+		for i in zawody_id:
+			zawody_id_lista.append(i)
+
+
+		rows = []
+		for count, i in enumerate(zawody_id_lista):
+			rows.append(WynikiDynamic.objects.filter(zawody__id = i, oplata = 1).values_list('zawodnik__nazwisko','zawodnik__imie', 'zawodnik__klub', 'wynik').order_by('kara', 'wynik', 'czas'))
+			# queryset = Wyniki.objects.filter(zawody__id = i, oplata = 1).values_list('zawodnik__nazwisko','zawodnik__imie', 'zawodnik__klub', 'wynik').order_by('-wynik', '-X', '-Xx', '-dziewiec', '-osiem', '-siedem', '-szesc', '-piec', '-cztery', '-trzy', '-dwa', '-jeden')
+			# items = zip(range(1,queryset.count()+1), queryset)
+
+
+			# rows.append(items)
+
+		# rows.append(Wyniki.objects.filter(zawody__turniej = pk, oplata = 1).values_list('zawodnik__nazwisko','zawodnik__imie', 'zawodnik__klub', 'X', 'Xx', 'dziewiec', 'osiem', 'siedem', 'szesc', 'piec', 'cztery', 'trzy', 'dwa', 'jeden', 'wynik', 'kara').order_by('-wynik', '-X', '-Xx', '-dziewiec', '-osiem', '-siedem', '-szesc', '-piec', '-cztery', '-trzy', '-dwa', '-jeden'))	
+		# generalka = Wyniki.objects.raw('select account_account.nazwisko, account_account.imie, account_account.klub, sum(wynik) as wynik, account_account.id from account_account inner join zawody_zawody on wyniki_wyniki.zawody_id = zawody_zawody.id inner join wyniki_wyniki on account_account.id=wyniki_wyniki.zawodnik_id where zawody_zawody.turniej_id = %s and oplata=1 and wyniki_wyniki.kara = %s group by account_account.id order by wynik desc, X desc, Xx desc, dziewiec desc, osiem desc, siedem DESC', [pk, 'BRAK'])
+		# generalka = Wyniki.objects.raw('select wyniki_wyniki.id, zawodnik_id, sum(X) as X, sum(Xx) as Xx,sum(dziewiec) as dziewiec, sum(osiem) as osiem,sum(siedem) as siedem , sum(szesc) as szesc, sum(piec) as piec, sum(cztery) as cztery, sum(trzy) as trzy, sum(dwa) as dwa, sum(jeden) as jeden, sum(wynik) as wynik from wyniki_wyniki inner join zawody_zawody on wyniki_wyniki.zawody_id = zawody_zawody.id where zawody_zawody.turniej_id = %s and oplata=1 and wyniki_wyniki.kara = %s group by zawodnik_id order by wynik desc, X desc, Xx desc, dziewiec desc, osiem desc, siedem DESC', [pk, 'BRAK'])
+		# rows.append(generalka)
+		for x,y in enumerate(ws):
+			row_num = 0
+			for index, row in enumerate(rows[x], start=1):
+				row_num +=1
+				for col_num in range(len(row)+1):
+					if col_num==0:
+						y.write(row_num, col_num, index, font_style)
+					else:
+						y.write(row_num, col_num, str(row[col_num-1]), font_style)
+
+
+
+
+		ws.append(wb.add_sheet("Sędziowie"))
+		columns = ['Klasa', 'Nazwisko', 'Imię']
+		row_num=0
+		font_style = xlwt.XFStyle()
+		font_style.font.bold=True
+		tab_sedziowie = len(ws)-1
+
+		for col_num in range(len(columns)):
+			ws[tab_sedziowie].write(row_num, col_num, columns[col_num], font_style)
+
+
+
+		font_style = xlwt.XFStyle()
+		sedziowie = SedziaDynamic.objects.filter(zawody__id__in = zawody_id_lista).values_list('sedzia__klasa_sedziego', 'sedzia__nazwisko', 'sedzia__imie').distinct()
+		print(sedziowie)
+		for sedzia in sedziowie:
+			row_num +=1
+			for col_num in range(len(sedzia)):
+				ws[tab_sedziowie].write(row_num, col_num, str(sedzia[col_num]), font_style)
+
+
 
 
 		wb.save(response)
@@ -296,8 +768,34 @@ class KonkurencjaDeleteView(LoginRequiredMixin, DeleteView):
 
 	def dispatch(self, request, *args, **kwargs):
 		try:
-			if request.user.is_admin:
+			if request.user.rts:
 				return super(KonkurencjaDeleteView, self).dispatch(request, *args, **kwargs)
+			else:
+				return redirect('not_authorized')
+		except:
+			return redirect('not_authorized')
+
+class KonkurencjaDynamicDeleteView(LoginRequiredMixin, DeleteView):
+	login_url = 'start'
+	template_name = "wyniki/konkurencja_delete.html"
+	context_object_name = 'zawodnik'
+
+	def get_context_data(self, **kwargs):
+		context = super().get_context_data(**kwargs)
+		context['pk'] = self.kwargs['pk_turniej']
+		context['nazwa_turnieju'] = nazwa_turnieju(self.kwargs['pk_turniej'])
+		return context
+
+	def get_queryset(self):
+		return WynikiDynamic.objects.all()
+
+	def get_success_url(self):
+		return reverse("wyniki", kwargs={'pk': self.kwargs['pk_turniej']})
+
+	def dispatch(self, request, *args, **kwargs):
+		try:
+			if request.user.rts:
+				return super(KonkurencjaDynamicDeleteView, self).dispatch(request, *args, **kwargs)
 			else:
 				return redirect('not_authorized')
 		except:
@@ -425,12 +923,46 @@ class OplataListView(LoginRequiredMixin, ListView):
 		for i in turniej_zawodnicy:
 			turniej_zawodnicy_id.append(i[0])
 		turniej_zawodnicy_id_set = set(turniej_zawodnicy_id)
-		return Account.objects.filter(id__in = turniej_zawodnicy_id_set).order_by('nazwisko')
+		o1 =  Account.objects.filter(id__in = turniej_zawodnicy_id_set).order_by('nazwisko')
+		o2 =  Wyniki.objects.filter(zawodnik__id__in = turniej_zawodnicy_id_set, zawody__turniej__id = self.kwargs['pk']).values_list('zawodnik__id','zawodnik__email','zawody__nazwa').order_by('zawodnik__nazwisko')
+		return [o1, o2]
+		# return Account.objects.filter(id__in = turniej_zawodnicy_id_set).order_by('nazwisko')
 
 	def dispatch(self, request, *args, **kwargs):
 		try:
-			if request.user.rts:
+			if request.user.rts or request.user.is_superuser:
 				return super(OplataListView, self).dispatch(request, *args, **kwargs)
+			else:
+				return redirect('not_authorized')
+		except:
+			return redirect('not_authorized')
+			# pass
+
+class OplataDynamicListView(LoginRequiredMixin, ListView):
+	login_url = 'start'
+	template_name = "wyniki/oplata_dynamic_list.html"
+
+	def get_context_data(self, **kwargs):
+		context = super().get_context_data(**kwargs)
+		context['pk'] = self.kwargs['pk']
+		context['nazwa_turnieju'] = nazwa_turnieju(self.kwargs['pk'])
+		return context
+
+	def get_queryset(self):
+		turniej_zawodnicy = WynikiDynamic.objects.filter(zawody__turniej__id = self.kwargs['pk']).values_list('zawodnik__id')
+		turniej_zawodnicy_id = []
+		for i in turniej_zawodnicy:
+			turniej_zawodnicy_id.append(i[0])
+		turniej_zawodnicy_id_set = set(turniej_zawodnicy_id)
+		o1 =  Account.objects.filter(id__in = turniej_zawodnicy_id_set).order_by('nazwisko')
+		o2 =  WynikiDynamic.objects.filter(zawodnik__id__in = turniej_zawodnicy_id_set, zawody__turniej__id = self.kwargs['pk']).values_list('zawodnik__id','zawodnik__email','zawody__nazwa').order_by('zawodnik__nazwisko')
+		return [o1, o2]
+		# return Account.objects.filter(id__in = turniej_zawodnicy_id_set).order_by('nazwisko')
+
+	def dispatch(self, request, *args, **kwargs):
+		try:
+			if request.user.rts or request.user.is_superuser:
+				return super(OplataDynamicListView, self).dispatch(request, *args, **kwargs)
 			else:
 				return redirect('not_authorized')
 		except:
@@ -452,7 +984,7 @@ class OplataUpdateView(LoginRequiredMixin, TemplateResponseMixin, View):
     def dispatch(self, request, pk, pk_turniej):
     	try:
 
-    		if request.user.rts:
+    		if request.user.rts or request.user.is_superuser:
     			self.account = get_object_or_404(Account,
 		                                        id=pk)
     			return super().dispatch(request, pk)
@@ -474,6 +1006,50 @@ class OplataUpdateView(LoginRequiredMixin, TemplateResponseMixin, View):
         if formset.is_valid():
             formset.save()
             return redirect(reverse("oplata_list", kwargs={'pk': self.kwargs['pk_turniej']}))
+        return self.render_to_response({'account': self.account,
+                                        'formset': formset,
+                                        'pk': self.kwargs['pk_turniej'],
+                                        'nazwa_turnieju': nazwa_turnieju(self.kwargs['pk_turniej'])})
+
+
+
+
+
+
+class OplataDynamicUpdateView(LoginRequiredMixin, TemplateResponseMixin, View):
+    login_url='start'
+    template_name = 'wyniki/oplata_update.html'
+    account = None
+
+    def get_formset(self, data=None, turniej=1):
+        return ModuleFormSetDynamic(instance=self.account,queryset=WynikiDynamic.objects.filter(zawody__turniej__id=turniej),
+                             data=data)
+
+    def dispatch(self, request, pk, pk_turniej):
+    	try:
+
+    		if request.user.rts or request.user.is_superuser:
+    			self.account = get_object_or_404(Account,
+		                                        id=pk)
+    			return super().dispatch(request, pk)
+    		else:
+    			return reverse('not_authorized')
+    	except:
+    		return redirect(reverse('not_authorized'))
+
+
+    def get(self, request, *args, **kwargs):
+        formset = self.get_formset(turniej=self.kwargs['pk_turniej'])
+        return self.render_to_response({'account': self.account,
+                                        'formset': formset,
+                                        'pk': self.kwargs['pk_turniej'],
+                                        'nazwa_turnieju': nazwa_turnieju(self.kwargs['pk_turniej'])})
+
+    def post(self, request, *args, **kwargs):
+        formset = self.get_formset(data=request.POST, turniej=self.kwargs['pk_turniej'])
+        if formset.is_valid():
+            formset.save()
+            return redirect(reverse("oplata_dynamic_list", kwargs={'pk': self.kwargs['pk_turniej']}))
         return self.render_to_response({'account': self.account,
                                         'formset': formset,
                                         'pk': self.kwargs['pk_turniej'],
@@ -527,10 +1103,183 @@ class BronAmunicjaListView(LoginRequiredMixin, ListView):
 
 	def dispatch(self, request, *args, **kwargs):
 		try:
-			if request.user.rts:
+			if request.user.rts or request.user.is_sedzia:
 				return super(BronAmunicjaListView, self).dispatch(request, *args, **kwargs)
 			else:
 				return redirect('not_authorized')
 		except:
 			return redirect('not_authorized')
 			# pass
+
+
+@login_required(login_url="/start/")
+def exportexcelgeneralka(request, pk):
+	if request.user.is_admin:
+		response=HttpResponse(content_type='application/ms-excel')
+		response['Content-Disposition'] = 'attachment; filename=Wyniki_' + str(datetime.datetime.now())+'.xls'
+		wb = xlwt.Workbook(encoding='utf-8')
+
+
+		grupy_zawodow_w_tym_turnieju = Zawody.objects.filter(turniej__id=pk, zawody_grupa__isnull=False).values_list('zawody_grupa__nazwa', flat=True).order_by('id')
+
+		zawody_grup = {}
+		for i in grupy_zawodow_w_tym_turnieju:
+			zawody_grup[i] = Zawody.objects.filter(zawody_grupa__nazwa=i).values_list('id', flat=True)
+
+		
+		wszystkie_id_zawodow = []
+		
+		for j in zawody_grup:
+			konkurencja_id = []
+			for i in zawody_grup[j]:
+				konkurencja_id.append(i)
+				wszystkie_id_zawodow.append(i)
+			zawody_grup[j] = konkurencja_id
+
+
+		converted_list = [str(element) for element in wszystkie_id_zawodow]
+		joined_wszystkie_id_zawodow = ','.join(converted_list)
+
+		rows = []
+		for i in zawody_grup:
+			converted_list = [str(element) for element in zawody_grup[i]]
+			joined_string = ",".join(converted_list)
+
+			wynik_grupowy = Wyniki.objects.raw(f'select wyniki_wyniki.id, account_account.nazwisko, account_account.imie, account_account.klub, sum(wyniki_wyniki.X) as X, sum(wyniki_wyniki.Xx) as dziesiec, sum(wyniki_wyniki.dziewiec) as dziewiec, sum(wyniki_wyniki.osiem) as osiem, sum(wyniki_wyniki.siedem) as siedem, sum(wyniki_wyniki.szesc) as szesc, sum(wyniki_wyniki.piec) as piec, sum(wyniki_wyniki.cztery) as cztery, sum(wyniki_wyniki.trzy) as trzy, sum(wyniki_wyniki.dwa) as dwa, sum(wyniki_wyniki.jeden) as jeden, sum(wyniki_wyniki.X*10 + wyniki_wyniki.Xx*10 + wyniki_wyniki.dziewiec*9 + wyniki_wyniki.osiem*8 + wyniki_wyniki.siedem*7 + wyniki_wyniki.szesc*6 + wyniki_wyniki.piec*5 + wyniki_wyniki.cztery*4 + wyniki_wyniki.trzy*3 + wyniki_wyniki.dwa*2 + wyniki_wyniki.jeden*1) as Wynik from account_account left join wyniki_wyniki on account_account.id = wyniki_wyniki.zawodnik_id left join zawody_zawody on zawody_zawody.id = wyniki_wyniki.zawody_id where zawody_zawody.id in ({joined_string}) group by account_account.id order by Wynik desc, X desc, Xx desc, dziewiec desc, osiem desc, siedem DESC, szesc desc, piec desc, cztery desc, trzy desc, dwa desc, jeden desc')
+			rows.append(wynik_grupowy)
+			zawody_grup[i] = wynik_grupowy
+
+		wynik_general = Wyniki.objects.raw(f'select wyniki_wyniki.id, account_account.nazwisko, account_account.imie, account_account.klub, sum(wyniki_wyniki.X*10 + wyniki_wyniki.Xx*10 + wyniki_wyniki.dziewiec*9 + wyniki_wyniki.osiem*8 + wyniki_wyniki.siedem*7 + wyniki_wyniki.szesc*6 + wyniki_wyniki.piec*5 + wyniki_wyniki.cztery*4 + wyniki_wyniki.trzy*3 + wyniki_wyniki.dwa*2 + wyniki_wyniki.jeden*1) as Wynik, sum(wyniki_wyniki.dziewiec) as dziewiec, sum(wyniki_wyniki.osiem) as osiem, sum(wyniki_wyniki.siedem) as siedem, sum(wyniki_wyniki.szesc) as szesc, sum(wyniki_wyniki.piec) as piec, sum(wyniki_wyniki.cztery) as cztery, sum(wyniki_wyniki.trzy) as trzy, sum(wyniki_wyniki.dwa) as dwa, sum(wyniki_wyniki.jeden) as jeden from account_account left join wyniki_wyniki on account_account.id = wyniki_wyniki.zawodnik_id left join zawody_zawody on zawody_zawody.id = wyniki_wyniki.zawody_id where zawody_zawody.id in ({joined_wszystkie_id_zawodow}) group by account_account.id order by Wynik desc, X desc, Xx desc, dziewiec desc, osiem desc, siedem DESC, szesc desc, piec desc, cztery desc, trzy desc, dwa desc, jeden desc')
+		# print(f'rows: {rows}')
+
+
+		ws = []
+		for i in grupy_zawodow_w_tym_turnieju:
+			ws.append(wb.add_sheet(i))
+
+		row_num = 0
+		font_style = xlwt.XFStyle()
+		font_style.font.bold=True
+
+		columns = ['Pozycja','Nazwisko','Imię', 'Klub', 'Suma']
+
+		for col_num in range(len(columns)):
+			for i in ws:
+				i.write(row_num, col_num, columns[col_num], font_style)
+
+
+		font_style = xlwt.XFStyle()
+		zawody_id = Zawody.objects.filter(turniej__id=pk).values_list('id', flat=True).order_by('id')
+		zawody_id_lista = []
+		for i in zawody_id:
+			zawody_id_lista.append(i)
+
+
+		# rows = []
+		# for count, i in enumerate(zawody_id_lista):
+		# 	rows.append(Wyniki.objects.filter(zawody__id = i, oplata = 1).values_list('zawodnik__nazwisko','zawodnik__imie', 'zawodnik__klub', 'wynik').order_by('-wynik', '-X', '-Xx', '-dziewiec', '-osiem', '-siedem', '-szesc', '-piec', '-cztery', '-trzy', '-dwa', '-jeden'))
+			# queryset = Wyniki.objects.filter(zawody__id = i, oplata = 1).values_list('zawodnik__nazwisko','zawodnik__imie', 'zawodnik__klub', 'wynik').order_by('-wynik', '-X', '-Xx', '-dziewiec', '-osiem', '-siedem', '-szesc', '-piec', '-cztery', '-trzy', '-dwa', '-jeden')
+			# items = zip(range(1,queryset.count()+1), queryset)
+
+
+			# rows.append(items)
+
+		# rows.append(Wyniki.objects.filter(zawody__turniej = pk, oplata = 1).values_list('zawodnik__nazwisko','zawodnik__imie', 'zawodnik__klub', 'X', 'Xx', 'dziewiec', 'osiem', 'siedem', 'szesc', 'piec', 'cztery', 'trzy', 'dwa', 'jeden', 'wynik', 'kara').order_by('-wynik', '-X', '-Xx', '-dziewiec', '-osiem', '-siedem', '-szesc', '-piec', '-cztery', '-trzy', '-dwa', '-jeden'))	
+		# generalka = Wyniki.objects.raw('select account_account.nazwisko, account_account.imie, account_account.klub, sum(wynik) as wynik, account_account.id from account_account inner join zawody_zawody on wyniki_wyniki.zawody_id = zawody_zawody.id inner join wyniki_wyniki on account_account.id=wyniki_wyniki.zawodnik_id where zawody_zawody.turniej_id = %s and oplata=1 and wyniki_wyniki.kara = %s group by account_account.id order by wynik desc, X desc, Xx desc, dziewiec desc, osiem desc, siedem DESC', [pk, 'BRAK'])
+		# generalka = Wyniki.objects.raw('select wyniki_wyniki.id, zawodnik_id, sum(X) as X, sum(Xx) as Xx,sum(dziewiec) as dziewiec, sum(osiem) as osiem,sum(siedem) as siedem , sum(szesc) as szesc, sum(piec) as piec, sum(cztery) as cztery, sum(trzy) as trzy, sum(dwa) as dwa, sum(jeden) as jeden, sum(wynik) as wynik from wyniki_wyniki inner join zawody_zawody on wyniki_wyniki.zawody_id = zawody_zawody.id where zawody_zawody.turniej_id = %s and oplata=1 and wyniki_wyniki.kara = %s group by zawodnik_id order by wynik desc, X desc, Xx desc, dziewiec desc, osiem desc, siedem DESC', [pk, 'BRAK'])
+		# rows.append(generalka)
+		# for x,y in enumerate(ws):
+		# 	row_num = 0
+		# 	for index, row in enumerate(rows[x], start=1):
+		# 		row_num +=1
+		# 		for col_num in range(len(row)+1):
+		# 			if col_num==0:
+		# 				y.write(row_num, col_num, index, font_style)
+		# 			else:
+		# 				y.write(row_num, col_num, str(row[col_num-1]), font_style)
+
+		# print(f'rows[1]: {type(rows[1])}')
+		# print(f'wynik_general: {type(wynik_general)}')
+
+		for x,y in enumerate(ws):
+			row_num = 0
+
+			for index, row in enumerate(rows[x], start=1):
+				# pass
+
+				y.write(index,   0, index, font_style)
+				y.write(index, 1, row.nazwisko, font_style)
+				y.write(index, 2, row.imie, font_style)
+				y.write(index, 3, row.klub, font_style)
+				y.write(index, 4, row.Wynik, font_style)
+
+
+
+
+		# klasyfikacja_generalna_display = Turniej.objects.filter(id=pk).values_list('klasyfikacja_generalna', flat=True)
+		if 1 == 1:
+
+			ws.append(wb.add_sheet("Klasyfikacja generalna"))
+			columns = ['Pozycja','Nazwisko','Imię', 'Klub', 'Suma']
+			row_num = 0
+			font_style = xlwt.XFStyle()
+			font_style.font.bold=True
+			for col_num in range(len(columns)):
+					ws[len(ws)-1].write(row_num, col_num, columns[col_num], font_style)
+
+			font_style = xlwt.XFStyle()
+			tab_generalka = len(ws)-1
+			for i,y in enumerate(wynik_general):
+				ws[tab_generalka].write(i+1,   0, i+1, font_style)
+				ws[tab_generalka].write(i+1, 1, y.nazwisko, font_style)
+				ws[tab_generalka].write(i+1, 2, y.imie, font_style)
+				ws[tab_generalka].write(i+1, 3, y.klub, font_style)
+				ws[tab_generalka].write(i+1, 4, y.Wynik, font_style)
+
+
+		# ws.append(wb.add_sheet("Sędziowie"))
+		# columns = ['Klasa', 'Nazwisko', 'Imię']
+		# row_num=0
+		# font_style = xlwt.XFStyle()
+		# font_style.font.bold=True
+		# tab_sedziowie = len(ws)-1
+
+		# for col_num in range(len(columns)):
+		# 	ws[tab_sedziowie].write(row_num, col_num, columns[col_num], font_style)
+
+
+
+		# font_style = xlwt.XFStyle()
+		# sedziowie = Sedzia.objects.filter(zawody__id__in = zawody_id_lista).values_list('sedzia__klasa_sedziego', 'sedzia__nazwisko', 'sedzia__imie').distinct()
+		# print(sedziowie)
+		# for sedzia in sedziowie:
+		# 	row_num +=1
+		# 	for col_num in range(len(sedzia)):
+		# 		ws[tab_sedziowie].write(row_num, col_num, str(sedzia[col_num]), font_style)
+
+
+
+
+		wb.save(response)
+
+		return(response)
+
+	else:
+		return redirect('home')
+
+
+
+class paymentComplete(View):
+
+	template_name='url_accpt.php'
+
+	def post(self, request):
+		body = json.loads(request.body)
+		print('BODY:', body)
+		print('dupa')
+		# product = Product.objects.get(id=body['productId'])
+		# Order.objects.create(
+		# 	product=product
+		# 	)
+
+		return JsonResponse('Payment completed!', safe=False)

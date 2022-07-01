@@ -51,6 +51,7 @@ class Account(AbstractBaseUser):
 	is_sedzia				= models.BooleanField(default=False)
 	# paid					= models.BooleanField(default=False)
 	rts						= models.BooleanField(default=False)
+	rodo_accepted			= models.BooleanField(default=False)
 	# first_name
 
 	USERNAME_FIELD = 'email'

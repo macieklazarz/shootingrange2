@@ -3,7 +3,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import render, redirect, reverse
 from django.contrib.auth import login, authenticate, logout
-from account.forms import RegistrationForm, RegistrationFormSedzia, AccountAuthenticationForm, AccountModelForm, SedziaModelForm, AccountModelFormPersonal
+from account.forms import RegistrationForm, RegistrationFormSedzia, AccountAuthenticationForm, AccountModelForm, SedziaModelForm, AccountModelFormPersonal, RodoModelForm
 from django.views.generic import ListView, UpdateView, DeleteView
 from .models import Account
 from zawody.models import Turniej
@@ -15,13 +15,15 @@ import urllib.request
 
 
 def nazwa_turnieju(arg):
-	nazwa = Turniej.objects.filter(id=arg).values_list('nazwa')
-	nazwa_flat = []
-	for i in nazwa:
-		nazwa_flat.append(i)
-	nazwa_str = ''.join(nazwa_flat[0])
+	nazwa = Turniej.objects.filter(id=arg)
+	# print(f'nazwa {nazwa[0].wyniki_widoczne}')
+	# nazwa = Turniej.objects.filter(id=arg).values_list('nazwa')
+	# nazwa_flat = []
+	# for i in nazwa:
+	# 	nazwa_flat.append(i)
+	# nazwa_str = ''.join(nazwa_flat[0])
 
-	return nazwa_str
+	return nazwa
 
 
 def registration_form(request, pk):
@@ -130,7 +132,10 @@ def login_view(request, pk):
 
 			if user:
 				login(request, user)
-				return redirect("home", pk)
+				if user.rodo_accepted:
+					return redirect("home", pk)
+				else:
+					return redirect("rodo_edit", user.id, pk)
 	else:
 		form = AccountAuthenticationForm()
 
@@ -169,6 +174,37 @@ class AccountUpdateView(LoginRequiredMixin, UpdateView):
 				return redirect('not_authorized')
 		except:
 			return redirect('not_authorized')
+
+class RodoUpdateView(LoginRequiredMixin, UpdateView):
+	login_url = 'start'
+	template_name = "account/rodo_update.html"
+	form_class = RodoModelForm
+	def get_context_data(self, **kwargs):
+		context = super().get_context_data(**kwargs)
+		context['pk'] = self.kwargs['pk_turniej']
+		context['nazwa_turnieju'] = nazwa_turnieju(self.kwargs['pk_turniej'])
+		return context
+
+	def get_queryset(self):
+		return Account.objects.all()
+
+	def get_success_url(self):
+		return reverse("home", kwargs={'pk': self.kwargs['pk_turniej']})
+		
+	def form_valid(self, form):
+		return super(RodoUpdateView,self).form_valid(form)
+
+	def dispatch(self, request, *args, **kwargs):
+		try:
+			if request.user.id == self.kwargs['pk']:
+				return super(RodoUpdateView, self).dispatch(request, *args, **kwargs)
+			else:
+				return redirect('not_authorized')
+		except:
+			return redirect('not_authorized')
+			# pass
+
+
 			
 class AccountUpdateViewPersonal(LoginRequiredMixin, UpdateView):
 	login_url = 'start'
@@ -191,6 +227,8 @@ class AccountUpdateViewPersonal(LoginRequiredMixin, UpdateView):
 		return super(AccountUpdateViewPersonal,self).form_valid(form)
 
 	def dispatch(self, request, *args, **kwargs):
+	   # if request.user.is_sedzia or request.user.is_admin:
+	   #     form_class = SedziaModelForm
 		try:
 			if request.user.id == self.kwargs['pk']:
 				return super(AccountUpdateViewPersonal, self).dispatch(request, *args, **kwargs)
@@ -213,14 +251,14 @@ class SedziaUpdateView(LoginRequiredMixin, UpdateView):
 		return Account.objects.all()
 
 	def get_success_url(self):
-		return reverse("sedzia_lista", kwargs={'pk': self.kwargs['pk_turniej']})
+		return reverse("home", kwargs={'pk': self.kwargs['pk_turniej']})
 		
 	def form_valid(self, form):
 		return super(SedziaUpdateView,self).form_valid(form)
 
 	def dispatch(self, request, *args, **kwargs):
 		try:
-			if request.user.rts:
+			if request.user.rts or request.user.is_sedzia:
 				return super(SedziaUpdateView, self).dispatch(request, *args, **kwargs)
 			else:
 				return redirect('not_authorized')

@@ -9,10 +9,12 @@ def home_screen_view(request, pk):
 
 
 def nazwa_turnieju(arg):
-	nazwa = Turniej.objects.filter(id=arg).values_list('nazwa')
-	nazwa_flat = []
-	for i in nazwa:
-		nazwa_flat.append(i)
-	nazwa_str = ''.join(nazwa_flat[0])
+	nazwa = Turniej.objects.filter(id=arg)
+	# print(f'nazwa {nazwa[0].wyniki_widoczne}')
+	# nazwa = Turniej.objects.filter(id=arg).values_list('nazwa')
+	# nazwa_flat = []
+	# for i in nazwa:
+	# 	nazwa_flat.append(i)
+	# nazwa_str = ''.join(nazwa_flat[0])
 
-	return nazwa_str
+	return nazwa
